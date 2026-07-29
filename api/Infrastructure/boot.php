@@ -1,5 +1,7 @@
 <?php
 
+use Application\Env\EnvService;
+use Application\Env\EnvServiceInterface;
 use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
 use Application\User\UserMigrationServiceInterface;
@@ -61,6 +63,10 @@ $appServiceContainer->container()->set(ApiCredentialServiceInterface::class, fun
         $appServiceContainer->container()->get(Request::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class)
     );
+});
+
+$appServiceContainer->container()->set(EnvServiceInterface::class, function() use ($appServiceContainer){
+    return new EnvService();
 });
 
 // AccountMailNotificationService

@@ -3,9 +3,7 @@
 use R2Packages\Framework\Infrastructure\Framework\Framework;
 use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
 
-// require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/vendor/autoload.php';
-
+require_once __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 
@@ -26,8 +24,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
     });
 });
 
-include_once __DIR__ . '/src/Presentation/Http/Routes/web.php';
+include_once __DIR__ . '/Presentation/Http/Routes/web.php';
 
-include_once __DIR__ . '/src/Infrastructure/boot.php';
+include_once __DIR__ . '/Infrastructure/boot.php';
 
 $appServiceContainer->run($path, $method);
