@@ -4,19 +4,20 @@ namespace Presentation\ApiCredential;
 
 use Domain\User\UserRepositoryInterface;
 use Domain\User\UserEntity;
-use R2Packages\Framework\Request;
+use R2Packages\Framework\Infrastructure\Framework\Container\Request;
+use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
 
 class ApiCredentialService implements ApiCredentialServiceInterface
 {
     private Request $request;
     private static UserEntity $user;
     private UserRepositoryInterface $userRepository;
+    private EnvServiceInterface $envService;
 
-    private string $xToken = '12345';
-
-    public function __construct(Request $request, UserRepositoryInterface $userRepository){
+    public function __construct(Request $request, UserRepositoryInterface $userRepository, EnvServiceInterface $envService){
         $this->request = $request;
         $this->userRepository = $userRepository;
+        $this->envService = $envService;
     }
 
     public function getAuthUser(){
@@ -24,7 +25,7 @@ class ApiCredentialService implements ApiCredentialServiceInterface
     }
 
     public function validateToken(string $x_token){
-        if($x_token !== $this->xToken){
+        if($x_token !== $this->envService->get('X_TOKEN')){
             throw new \Exception('Invalid token');
         }
 

@@ -7,11 +7,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 
-define("DB_HOST", "127.0.0.1");
-define("DB_NAME", "kanejitech_ecommerce_db4");
-define("DB_USER", "root");
-define("DB_PASSWORD", "");
-
 $path = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 

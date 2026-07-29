@@ -3,8 +3,9 @@
 namespace Presentation\Http\Middlewares;
 
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Middlewares\MiddlewareServiceInterface;
-use R2Packages\Framework\Request;
+
 
 class GlobalApiMiddleware implements MiddlewareServiceInterface
 {
