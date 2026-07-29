@@ -65,9 +65,6 @@ $appServiceContainer->container()->set(ApiCredentialServiceInterface::class, fun
     );
 });
 
-$appServiceContainer->container()->set(EnvServiceInterface::class, function() use ($appServiceContainer){
-    return new EnvService();
-});
 
 // AccountMailNotificationService
 // $appServiceContainer->container()->set(AccountMailNotificationServiceInterface::class, function() use ($appServiceContainer){

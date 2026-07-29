@@ -18,6 +18,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $framework = new Framework(__DIR__);
 $appServiceContainer = $framework->boot();
 
+$framework->getEnvService()->loadEnv(__DIR__ . '/.env');
+
 $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
     $route->get('/', function () {
         echo  'Hello World...';
