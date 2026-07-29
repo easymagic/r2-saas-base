@@ -2,9 +2,10 @@
 
 namespace Domain\User;
 
-class UserEntity
+use Domain\AbstractBaseEntity;
+
+class UserEntity extends AbstractBaseEntity
 {
-    public int $id;
     public string $name;
     public string $email;
     public string $password;
@@ -21,13 +22,6 @@ class UserEntity
     public string $delivery_address;
     public string $email_verified_at;
 
-    function __construct($attributes = []){
-         setAttributes($this, $attributes);
-    }
-
-    function isEmpty(){
-      return empty($this->id);
-    }
 
     function isAdmin(){
         return strpos($this->role, 'admin') !== false;
