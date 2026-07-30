@@ -62,8 +62,10 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("wallet/my-approved-wallet-transactions", [WalletController::class, "myApprovedWalletTransactions"]);
                 $route->get("wallet/manual-pending-wallet-transactions", [WalletController::class, "manualPendingWalletTransactions"]);
                 $route->get("wallet/manual-approved-wallet-transactions", [WalletController::class, "manualApprovedWalletTransactions"]);
-                $route->get("wallet/migrate", [WalletController::class, "migrate"]);
             });
+
+            $route->get("wallet/migrate", [WalletController::class, "migrate"]);
+
         });
     });
 });

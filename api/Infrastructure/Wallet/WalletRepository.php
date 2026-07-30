@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Wallet;
 
-use App\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Domain\Wallet\WalletEntity;
 use Domain\Wallet\WalletRepositoryInterface;
 use Exception;

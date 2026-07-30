@@ -1,6 +1,6 @@
 <?php
 
-use App\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
 use Application\MailNotifications\Wallet\WalletNotificationService;

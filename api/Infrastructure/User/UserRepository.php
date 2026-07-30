@@ -2,9 +2,8 @@
 
 namespace Infrastructure\User;
 
-use App\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Domain\User\Exceptions\UserEmailNotFoundException;
-use Domain\User\Exceptions\UserIdNotFoundException;
 use Domain\User\UserEntity;
 use Domain\User\UserRepositoryInterface;
 use Exception;
