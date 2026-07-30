@@ -48,11 +48,16 @@ class WalletRepository implements WalletRepositoryInterface
         return true;
     }
 
+
     public function find(int $id) {
         $this->queryBuilder->setSql("SELECT * FROM `wallets` WHERE `id`=:id");
         $this->queryBuilder->setParams(["id"=>$id]);
         $row = $this->db->fetchOne($this->queryBuilder->getSql(), $this->queryBuilder->getParams());
-        return $this->hydrate($row);
+        $wallet = $this->hydrate($row);
+        if ($wallet->isEmpty()){
+           throw new Exception('Wallet not found');
+        }
+        return $wallet;
     }
 
     public function filter(array $filters = []) {
@@ -109,7 +114,7 @@ class WalletRepository implements WalletRepositoryInterface
      * @return self
      */
     public function approvedForUser(int $user_id) {
-        $this->filter(['user_id' => $user_id, 'status' => 'approved', 'approval_status' => 'approved']);
+        $this->filter(['user_id' => $user_id, 'status' => 'approved']);
         return $this;
     }
 
@@ -128,7 +133,16 @@ class WalletRepository implements WalletRepositoryInterface
      * @return self
      */
     public function manualApproved() {
-        $this->filter(['status' => 'approved', 'type' => 'manual', 'approval_status' => 'approved']);
+        $this->filter(['status' => 'approved', 'type' => 'manual']);
+        return $this;
+    }
+
+    /**
+     * Manual rejected
+     * @return self
+     */
+    public function manualRejected() {
+        $this->filter(['status' => 'rejected', 'type' => 'manual']);
         return $this;
     }
 

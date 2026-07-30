@@ -4,8 +4,19 @@ namespace Domain\Wallet;
 interface WalletRepositoryInterface {
 
     public function fetch();
+    /**
+     * Save a wallet
+     * @param int $id
+     * @param array $data
+     * @return WalletEntity
+     */
     public function save(int $id, array $data);
     public function delete(int $id);
+    /**
+     * Find a wallet by id
+     * @param int $id
+     * @return WalletEntity
+     */
     public function find(int $id);
     public function filter(array $filters = []);
     public function count();

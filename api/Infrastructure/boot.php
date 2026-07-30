@@ -3,6 +3,8 @@
 use App\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
+use Application\MailNotifications\Wallet\WalletNotificationService;
+use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
 use Application\User\UserMigrationServiceInterface;
 use Application\User\UserService;
 use Application\User\UserServiceInterface;
@@ -84,5 +86,13 @@ $appServiceContainer->container()->set(WalletRepositoryInterface::class, functio
     return new WalletRepository(
         $appServiceContainer->container()->get(QueryBuilderServiceInterface::class),
         $appServiceContainer->container()->get(DbServiceInterface::class)
+    );
+});
+
+$appServiceContainer->container()->set(WalletNotificationServiceInterface::class, function () use ($appServiceContainer) {
+    return new WalletNotificationService(
+        $appServiceContainer->container()->get(MailServiceInterface::class),
+        $appServiceContainer->container()->get(WalletRepositoryInterface::class),
+        $appServiceContainer->container()->get(UserRepositoryInterface::class)
     );
 });

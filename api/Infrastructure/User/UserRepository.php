@@ -67,7 +67,11 @@ class UserRepository implements UserRepositoryInterface
         $this->queryBuilder->setSql("SELECT * FROM users WHERE id = :id");
         $this->queryBuilder->setParams(['id' => $id]);
         $row = $this->db->fetchOne($this->queryBuilder->getSql(), $this->queryBuilder->getParams());
-        return $this->hydrate($row);
+        $user = $this->hydrate($row);
+        if ($user->isEmpty()){
+           throw new Exception('User not found');
+        }
+        return $user;
     }
 
     public function findByEmail(string $email){
