@@ -23,6 +23,7 @@ use Infrastructure\Wallet\WalletMigrationService;
 use Infrastructure\Wallet\WalletRepository;
 use Presentation\ApiCredential\ApiCredentialService;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
+use Presentation\Http\Controllers\WalletController;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
@@ -30,6 +31,7 @@ use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\Migration;
 use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 
 /**
@@ -117,5 +119,16 @@ $appServiceContainer->container()->set(WalletServiceInterface::class, function (
         $appServiceContainer->container()->get(PaymentServiceInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class),
         $appServiceContainer->container()->get(FileUploadServiceInterface::class)
+    );
+});
+
+
+$appServiceContainer->container()->set(WalletController::class, function () use ($appServiceContainer) {
+    return new WalletController(
+        $appServiceContainer->container()->get(WalletServiceInterface::class),
+        $appServiceContainer->container()->get(Request::class),
+        $appServiceContainer->container()->get(JsonResponseServiceInterface::class),
+        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class),
+        $appServiceContainer->container()->get(WalletRepositoryInterface::class)
     );
 });
