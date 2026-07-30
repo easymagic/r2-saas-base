@@ -2,75 +2,78 @@
 
 namespace Infrastructure\User;
 
+use App\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Domain\User\Exceptions\UserEmailNotFoundException;
 use Domain\User\Exceptions\UserIdNotFoundException;
 use Domain\User\UserEntity;
 use Domain\User\UserRepositoryInterface;
+use Exception;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
 
    private DbServiceInterface $db;
+   private QueryBuilderServiceInterface $queryBuilder;
 
-   private $sql = "SELECT * FROM users WHERE 1=1 ";
-   private $params = [];
-   private $limit = 10;
-
-   public function __construct(DbServiceInterface $db)
+   public function __construct(DbServiceInterface $db, QueryBuilderServiceInterface $queryBuilder)
    {
       $this->db = $db;
+      $this->queryBuilder = $queryBuilder;
+      $this->queryBuilder->setSql("SELECT * FROM users WHERE 1=1 ");
+      $this->queryBuilder->setSize(10);
    }
 
    private function hydrate(array $data){
-     return new UserEntity($data);
+     $record = new UserEntity($data);
+     return $record;
    }
 
     public function fetchAll(){
-        $rows = $this->db->fetchAll($this->sql, $this->params);
+        $sql = $this->queryBuilder->getSql();
+        $params = $this->queryBuilder->getParams();
+        $rows = $this->db->fetchAll($sql, $params);
         return array_map([$this, 'hydrate'], $rows);
     }
 
 
     public function filter(array $filters){
       if (isset($filters['search'])){
-        $this->sql .= " AND (name LIKE :search OR email LIKE :search OR phone LIKE :search OR role LIKE :search)";
-        $this->params['search'] = "%".$filters['search']."%";
+        $this->queryBuilder->appendSql(" AND (name LIKE :search OR email LIKE :search OR phone LIKE :search OR role LIKE :search)");
+        $this->queryBuilder->appendParams(['search' => "%".$filters['search']."%"]);
       }
       // email
       if (isset($filters['email'])){
-        $this->sql .= " AND email = :email";
-        $this->params['email'] = $filters['email'];
+        $this->queryBuilder->appendSql(" AND email = :email");
+        $this->queryBuilder->appendParams(['email' => $filters['email']]);
       }
       return $this;
     }
 
     public function count(){
-        return $this->db->count($this->sql, $this->params);
+        $sql = $this->queryBuilder->getSql();
+        $params = $this->queryBuilder->getParams();
+        return $this->db->count($sql, $params);
     }
 
     public function fetch(){
-        return $this->db->paginate($this->sql,$this->limit, $this->params);
+        $sql = $this->queryBuilder->getSql();
+        $params = $this->queryBuilder->getParams();
+        $limit = $this->queryBuilder->getSize();
+        return $this->db->paginate($sql, $limit, $params);
     }
 
     public function find(int $id){
-        $sql = "SELECT * FROM users WHERE id = :id";
-        $params = [
-            'id' => $id
-        ];
-        $row = $this->db->fetchOne($sql, $params);
-        if ($row->isEmpty()){
-           throw UserIdNotFoundException::forId($id);
-        }
+        $this->queryBuilder->setSql("SELECT * FROM users WHERE id = :id");
+        $this->queryBuilder->setParams(['id' => $id]);
+        $row = $this->db->fetchOne($this->queryBuilder->getSql(), $this->queryBuilder->getParams());
         return $this->hydrate($row);
     }
 
     public function findByEmail(string $email){
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $params = [
-            'email' => $email
-        ];
-        $row = $this->db->fetchOne($sql, $params);
+        $this->queryBuilder->setSql("SELECT * FROM users WHERE email = :email");
+        $this->queryBuilder->setParams(['email' => $email]);
+        $row = $this->db->fetchOne($this->queryBuilder->getSql(), $this->queryBuilder->getParams());
         if ($row->isEmpty()){
            throw UserEmailNotFoundException::forEmail($email);
         }
