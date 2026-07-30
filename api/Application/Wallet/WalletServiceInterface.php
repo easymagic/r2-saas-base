@@ -49,4 +49,6 @@ interface WalletServiceInterface
         string $status,
         string $reason
     );
+
+    public function migrate();
 }

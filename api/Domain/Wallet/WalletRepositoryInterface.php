@@ -55,4 +55,6 @@ interface WalletRepositoryInterface {
      */
     public function forUser(int $user_id);
 
+    
+
 }

@@ -157,4 +157,13 @@ class WalletController
             'message' => 'Manual approved wallet transactions fetched successfully'
         ]);
     }
+
+    public function migrate()
+    {
+        $migration = $this->walletService->migrate();
+        return $this->response->success([
+            'migration' => $migration,
+            'message' => 'Wallet migration successful'
+        ]);
+    }
 }

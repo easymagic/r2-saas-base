@@ -118,7 +118,8 @@ $appServiceContainer->container()->set(WalletServiceInterface::class, function (
         $appServiceContainer->container()->get(EnvServiceInterface::class),
         $appServiceContainer->container()->get(PaymentServiceInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(FileUploadServiceInterface::class)
+        $appServiceContainer->container()->get(FileUploadServiceInterface::class),
+        $appServiceContainer->container()->get(WalletMigrationServiceInterface::class)
     );
 });
 

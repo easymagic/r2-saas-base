@@ -23,6 +23,16 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
 include_once __DIR__ . '/Presentation/Http/Routes/web.php';
 
-include_once __DIR__ . '/Infrastructure/boot.php';
+/**
+ * Boots
+ */
+$boots = [
+    'boot' => __DIR__ . '/Infrastructure/boot.php',
+    'boot_extend' => __DIR__ . '/Infrastructure/boot_extend.php',
+];
+
+foreach ($boots as $boot) {
+    include_once $boot;
+}
 
 $appServiceContainer->run($path, $method);

@@ -20,6 +20,7 @@ class WalletService implements WalletServiceInterface
     private PaymentServiceInterface $paymentService;
     private UserRepositoryInterface $userRepository;
     private FileUploadServiceInterface $fileUploadService;
+    private WalletMigrationServiceInterface $walletMigrationService;
 
     public function __construct(
         WalletValidationServiceInterface $walletValidationService,
@@ -28,7 +29,8 @@ class WalletService implements WalletServiceInterface
         EnvServiceInterface $envService,
         PaymentServiceInterface $paymentService,
         UserRepositoryInterface $userRepository,
-        FileUploadServiceInterface $fileUploadService
+        FileUploadServiceInterface $fileUploadService,
+        WalletMigrationServiceInterface $walletMigrationService
     ) {
         $this->walletValidationService = $walletValidationService;
         $this->walletRepository = $walletRepository;
@@ -37,6 +39,7 @@ class WalletService implements WalletServiceInterface
         $this->paymentService = $paymentService;
         $this->userRepository = $userRepository;
         $this->fileUploadService = $fileUploadService;
+        $this->walletMigrationService = $walletMigrationService;
     }
 
 
@@ -202,5 +205,10 @@ class WalletService implements WalletServiceInterface
         $this->walletNotificationService->sendRejectManualTopUpNotificationToUser($wallet->id);
 
         return $wallet;
+    }
+
+    public function migrate()
+    {
+        return $this->walletMigrationService->migrate();
     }
 }
