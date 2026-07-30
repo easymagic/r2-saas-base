@@ -55,6 +55,18 @@ interface WalletRepositoryInterface {
      */
     public function forUser(int $user_id);
 
+    /**
+     * Online
+     * @return self
+     */
+    public function online();
+
+    /**
+     * Manual
+     * @return self
+     */
+    public function manual();
+
     
 
 }

@@ -153,4 +153,14 @@ class WalletRepository implements WalletRepositoryInterface
         $this->filter(['user_id' => $user_id]);
         return $this;
     }
+
+    public function online() {
+        $this->filter(['type' => 'online']);
+        return $this;
+    }
+
+    public function manual() {
+        $this->filter(['type' => 'manual']);
+        return $this;
+    }
 }

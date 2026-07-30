@@ -211,4 +211,9 @@ class WalletService implements WalletServiceInterface
     {
         return $this->walletMigrationService->migrate();
     }
+
+    public function onlineForUser(int $user_id)
+    {
+        return $this->walletRepository->online()->forUser($user_id)->fetch();
+    }
 }

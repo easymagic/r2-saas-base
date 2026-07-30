@@ -51,4 +51,6 @@ interface WalletServiceInterface
     );
 
     public function migrate();
+
+    public function onlineForUser(int $user_id);
 }
