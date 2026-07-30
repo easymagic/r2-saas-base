@@ -95,7 +95,7 @@ class WalletValidationService implements WalletValidationServiceInterface
         if (empty($status)){
             throw new Exception('Status is required!');
         }
-        if (!in_array($status, ['approved', 'rejected'])){
+        if (!in_array($status, ['approved'])){
             throw new Exception('Status is invalid!');
         }
     }
@@ -111,7 +111,7 @@ class WalletValidationService implements WalletValidationServiceInterface
         if (empty($status)){
             throw new Exception('Status is required!');
         }
-        if (!in_array($status, ['approved', 'rejected'])){
+        if (!in_array($status, ['rejected', 'failed'])){
             throw new Exception('Status is invalid!');
         }
         if (empty($reason)){

@@ -24,6 +24,7 @@ use Infrastructure\Wallet\WalletRepository;
 use Presentation\ApiCredential\ApiCredentialService;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use Presentation\Http\Controllers\WalletController;
+use Presentation\Http\Middlewares\WalletFeedbackMiddleware;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
@@ -119,7 +120,8 @@ $appServiceContainer->container()->set(WalletServiceInterface::class, function (
         $appServiceContainer->container()->get(PaymentServiceInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class),
         $appServiceContainer->container()->get(FileUploadServiceInterface::class),
-        $appServiceContainer->container()->get(WalletMigrationServiceInterface::class)
+        $appServiceContainer->container()->get(WalletMigrationServiceInterface::class),
+        $appServiceContainer->container()->get(UserServiceInterface::class)
     );
 });
 
@@ -133,3 +135,12 @@ $appServiceContainer->container()->set(WalletController::class, function () use 
         $appServiceContainer->container()->get(WalletRepositoryInterface::class)
     );
 });
+
+$appServiceContainer->container()->set(WalletFeedbackMiddleware::class, function () use ($appServiceContainer) {
+    return new WalletFeedbackMiddleware(
+        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class),
+        $appServiceContainer->container()->get(PaymentServiceInterface::class),
+        $appServiceContainer->container()->get(WalletServiceInterface::class)
+    );
+});
+

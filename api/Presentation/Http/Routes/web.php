@@ -5,6 +5,7 @@ use Presentation\Http\Controllers\User\UserController;
 use Presentation\Http\Controllers\WalletController;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
+use Presentation\Http\Middlewares\WalletFeedbackMiddleware;
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
 
@@ -35,7 +36,10 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
 
 
-                $route->middleware([GlobalApiAuthMiddleware::class], function (RouteServiceInterface $route) {
+                $route->middleware([
+                    GlobalApiAuthMiddleware::class,
+                    WalletFeedbackMiddleware::class
+                ], function (RouteServiceInterface $route) {
 
                     $route->post("create", [UserController::class, "create"]);
 
@@ -52,7 +56,10 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             });
 
 
-            $route->middleware([GlobalApiAuthMiddleware::class], function (RouteServiceInterface $route) {
+            $route->middleware([
+                GlobalApiAuthMiddleware::class,
+                WalletFeedbackMiddleware::class
+            ], function (RouteServiceInterface $route) {
                 // Wallet routes
                 $route->post("wallet/top-up-online", [WalletController::class, "topUpOnline"]);
                 $route->post("wallet/top-up-manual", [WalletController::class, "topUpManual"]);
@@ -65,7 +72,6 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);
-
         });
     });
 });

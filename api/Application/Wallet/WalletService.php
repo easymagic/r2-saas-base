@@ -3,6 +3,7 @@
 namespace Application\Wallet;
 
 use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
+use Application\User\UserServiceInterface;
 use Domain\User\UserRepositoryInterface;
 use Domain\Wallet\WalletRepositoryInterface;
 use Exception;
@@ -22,6 +23,8 @@ class WalletService implements WalletServiceInterface
     private FileUploadServiceInterface $fileUploadService;
     private WalletMigrationServiceInterface $walletMigrationService;
 
+    private UserServiceInterface $userService;
+
     public function __construct(
         WalletValidationServiceInterface $walletValidationService,
         WalletRepositoryInterface $walletRepository,
@@ -30,7 +33,8 @@ class WalletService implements WalletServiceInterface
         PaymentServiceInterface $paymentService,
         UserRepositoryInterface $userRepository,
         FileUploadServiceInterface $fileUploadService,
-        WalletMigrationServiceInterface $walletMigrationService
+        WalletMigrationServiceInterface $walletMigrationService,
+        UserServiceInterface $userService
     ) {
         $this->walletValidationService = $walletValidationService;
         $this->walletRepository = $walletRepository;
@@ -40,6 +44,7 @@ class WalletService implements WalletServiceInterface
         $this->userRepository = $userRepository;
         $this->fileUploadService = $fileUploadService;
         $this->walletMigrationService = $walletMigrationService;
+        $this->userService = $userService;
     }
 
 
@@ -179,6 +184,9 @@ class WalletService implements WalletServiceInterface
             "status" => $status,
         ]);
 
+        // top up wallet
+        $this->userService->topUpWallet($wallet->user_id, $wallet->amount);
+
         $this->walletNotificationService->sendApproveManualTopUpNotificationToUser($wallet->id);
 
         return $wallet;
@@ -212,8 +220,8 @@ class WalletService implements WalletServiceInterface
         return $this->walletMigrationService->migrate();
     }
 
-    public function onlineForUser(int $user_id)
+    public function onlinePendingForUser(int $user_id)
     {
-        return $this->walletRepository->online()->forUser($user_id)->fetch();
+        return $this->walletRepository->online()->pendingForUser($user_id)->fetchAll();
     }
 }

@@ -66,12 +66,12 @@ class WalletNotificationService implements WalletNotificationServiceInterface
         $wallet = $this->walletRepository->find($wallet_id);
         $user = $this->userRepository->find($wallet->user_id);
         $to = $user->email;
-        $subject = 'Manual Top Up Notification';
+        $subject = 'Top Up Wallet Notification';
         $from = 'noreply@example.com';
         $body  = '
         Hello ' . $user->name . ',
         <br><br>
-        Your manual top up request has been approved with amount =N= ' . $wallet->amount . '.
+        Your top up wallet request has been approved with amount =N= ' . $wallet->amount . '.
         <br><br>
         Thank you for your attention.
         <br><br>';
@@ -83,12 +83,12 @@ class WalletNotificationService implements WalletNotificationServiceInterface
         $wallet = $this->walletRepository->find($wallet_id);
         $user = $this->userRepository->find($wallet->user_id);
         $to = $user->email;
-        $subject = 'Manual Top Up Notification';
+        $subject = 'Top Up Wallet Notification';
         $from = 'noreply@example.com';
         $body  = '
         Hello ' . $user->name . ',
         <br><br>
-        Your manual top up request has been rejected with amount =N= ' . $wallet->amount . '.
+        Your top up wallet request has been rejected with amount =N= ' . $wallet->amount . '.
         <br><br>
         Reason: ' . $wallet->reason . '.
         <br><br>
