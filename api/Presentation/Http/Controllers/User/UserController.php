@@ -44,8 +44,8 @@ class UserController
         $phone = $this->request->get('phone');
         $delivery_address = $this->request->get('delivery_address');
         $social_security_number = $this->request->get('social_security_number');
-        $role = $this->request->get('role');
-        $status = $this->request->get('status');
+        $role = "customer"; 
+        $status = "inactive";
         $country_code = $this->request->get('country_code');
         $user = $this->userService->register(
             $email,

@@ -34,6 +34,9 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 // $route->post("refresh-token",[UserController::class,"refreshToken"]);
                 // $route->post("refresh-otp",[UserController::class,"refreshOtp"]);
 
+                $route->post("user/forgot-password", [UserController::class, "requestForgotPassword"]);
+                $route->post("user/reset-password", [UserController::class, "resetPassword"]);
+                $route->post("user/verify-email", [UserController::class, "verifyEmail"]);
 
 
                 $route->middleware([
@@ -47,9 +50,6 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->delete("user/{user_id}", [UserController::class, "delete"]);
                     $route->post("me/{user_id}", [UserController::class, "updateProfile"]);
                     $route->post("me/change-password", [UserController::class, "changePassword"]);
-                    $route->post("user/forgot-password", [UserController::class, "requestForgotPassword"]);
-                    $route->post("user/reset-password", [UserController::class, "resetPassword"]);
-                    $route->post("user/verify-email", [UserController::class, "verifyEmail"]);
                     $route->delete("login", [UserController::class, "logout"]);
                     $route->post("user/{user_id}/wallet-balance", [UserController::class, "getWalletBalance"]);
                 });

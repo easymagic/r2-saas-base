@@ -8,7 +8,10 @@ abstract class AbstractBaseEntity {
     function __construct($attributes = []){
         foreach($attributes as $key => $value){
             if(property_exists($this, $key)){
-                $this->$key = $value;
+                 if (!is_null($value)){
+                    $this->$key = $value;
+                 }
+                
             }
         }
     }
