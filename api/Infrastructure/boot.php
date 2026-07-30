@@ -11,6 +11,10 @@ use Application\User\UserServiceInterface;
 use Application\User\UserValidationService;
 use Application\User\UserValidationServiceInterface;
 use Application\Wallet\WalletMigrationServiceInterface;
+use Application\Wallet\WalletService;
+use Application\Wallet\WalletServiceInterface;
+use Application\Wallet\WalletValidationService;
+use Application\Wallet\WalletValidationServiceInterface;
 use Domain\User\UserRepositoryInterface;
 use Domain\Wallet\WalletRepositoryInterface;
 use Infrastructure\User\UserMigrationService;
@@ -25,6 +29,8 @@ use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\Migration;
 use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 
 /**
  * @var AppServiceContainer $appServiceContainer
@@ -94,5 +100,22 @@ $appServiceContainer->container()->set(WalletNotificationServiceInterface::class
         $appServiceContainer->container()->get(MailServiceInterface::class),
         $appServiceContainer->container()->get(WalletRepositoryInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class)
+    );
+});
+
+
+$appServiceContainer->container()->set(WalletValidationServiceInterface::class, function () use ($appServiceContainer) {
+    return new WalletValidationService();
+});
+
+$appServiceContainer->container()->set(WalletServiceInterface::class, function () use ($appServiceContainer) {
+    return new WalletService(
+        $appServiceContainer->container()->get(WalletValidationServiceInterface::class),
+        $appServiceContainer->container()->get(WalletRepositoryInterface::class),
+        $appServiceContainer->container()->get(WalletNotificationServiceInterface::class),
+        $appServiceContainer->container()->get(EnvServiceInterface::class),
+        $appServiceContainer->container()->get(PaymentServiceInterface::class),
+        $appServiceContainer->container()->get(UserRepositoryInterface::class),
+        $appServiceContainer->container()->get(FileUploadServiceInterface::class)
     );
 });
