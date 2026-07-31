@@ -50,7 +50,8 @@ $appServiceContainer->container()->set(UserServiceInterface::class, function () 
         $appServiceContainer->container()->get(UserMigrationServiceInterface::class),
         $appServiceContainer->container()->get(UserValidationServiceInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(AccountMailNotificationServiceInterface::class)
+        $appServiceContainer->container()->get(AccountMailNotificationServiceInterface::class),
+        $appServiceContainer->container()->get(NotificationServiceInterface::class)
     );
 });
 

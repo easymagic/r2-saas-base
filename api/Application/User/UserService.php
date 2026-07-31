@@ -3,6 +3,7 @@
 namespace Application\User;
 
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
+use Application\Notifications\NotificationServiceInterface;
 use Application\User\UserMigrationServiceInterface as UserUserMigrationServiceInterface;
 use Application\User\UserServiceInterface;
 use Domain\User\UserRepositoryInterface;
@@ -16,18 +17,21 @@ class UserService implements UserServiceInterface
     private UserValidationServiceInterface $userValidationService;
     private UserRepositoryInterface $userRepository;
     private AccountMailNotificationServiceInterface $accountMailNotificationService;
+    private NotificationServiceInterface $notificationService;
 
 
     public function __construct(
         UserUserMigrationServiceInterface $userMigrationService,
         UserValidationServiceInterface $userValidationService,
         UserRepositoryInterface $userRepository,
-        AccountMailNotificationServiceInterface $accountMailNotificationService
+        AccountMailNotificationServiceInterface $accountMailNotificationService,
+        NotificationServiceInterface $notificationService
     ) {
         $this->userMigrationService = $userMigrationService;
         $this->userValidationService = $userValidationService;
         $this->userRepository = $userRepository;
         $this->accountMailNotificationService = $accountMailNotificationService;
+        $this->notificationService = $notificationService;
     }
 
     public function login(string $email, string $password)
@@ -37,6 +41,11 @@ class UserService implements UserServiceInterface
         if (password_verify($password, $user->password)) {
             $this->refreshToken($user->id);
             $user = $this->refreshOtp($user->id);
+            $this->notificationService->create(
+                $user->id,
+                'Login successful',
+                'You have successfully logged in to your account.'
+            );
             return $user;
         }
         throw new Exception('Invalid credentials!');
