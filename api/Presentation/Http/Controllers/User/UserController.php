@@ -3,6 +3,8 @@
 namespace Presentation\Http\Controllers\User;
 
 use Application\User\UserServiceInterface;
+use Domain\User\UserRepositoryInterface;
+use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
@@ -14,15 +16,21 @@ class UserController
 
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
+    private ApiCredentialServiceInterface $apiCredentialService;
+    private UserRepositoryInterface $userRepository;
 
     public function __construct(
         UserServiceInterface $userService,
         Request $request,
-        JsonResponseServiceInterface $jsonResponseService
+        JsonResponseServiceInterface $jsonResponseService,
+        ApiCredentialServiceInterface $apiCredentialService,
+        UserRepositoryInterface $userRepository
     ) {
         $this->userService = $userService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
+        $this->apiCredentialService = $apiCredentialService;
+        $this->userRepository = $userRepository;
     }
 
     public function login()
@@ -132,7 +140,8 @@ class UserController
 
     function updateProfile()
     {
-        $id = $this->request->get('user_id');
+        $user = $this->apiCredentialService->getAuthUser();
+        $id = $user->id;
         $name = $this->request->get('name');
         $phone = $this->request->get('phone');
         $delivery_address = $this->request->get('delivery_address');
@@ -152,7 +161,8 @@ class UserController
 
     function changePassword()
     {
-        $id = $this->request->get('user_id');
+        $user = $this->apiCredentialService->getAuthUser();
+        $id = $user->id;
         $old_password = $this->request->get('old_password');
         $new_password = $this->request->get('new_password');
         $confirm_password = $this->request->get('confirm_password');
@@ -182,7 +192,8 @@ class UserController
 
     function getWalletBalance()
     {
-        $id = $this->request->get('user_id');
+        $user = $this->apiCredentialService->getAuthUser();
+        $id = $user->id;
         $balance = $this->userService->getWalletBalance($id);
         $this->jsonResponseService->success([
             'balance' => $balance,
@@ -192,7 +203,8 @@ class UserController
 
     function logout()
     {
-        $id = $this->request->get('user_id');
+        $user = $this->apiCredentialService->getAuthUser();
+        $id = $user->id;
         $this->userService->logout($id);
         $this->jsonResponseService->success([
             'message' => 'Logged out successfully',
@@ -260,6 +272,16 @@ class UserController
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
+        ]);
+    }
+
+    function me(){
+        $user = $this->apiCredentialService->getAuthUser();
+        $id = $user->id;
+        $user = $this->userRepository->find($id);
+        $this->jsonResponseService->success([
+            'user' => $user,
+            "message" => "User fetched successfully",
         ]);
     }
 }
