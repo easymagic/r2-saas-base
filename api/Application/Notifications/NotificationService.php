@@ -9,11 +9,13 @@ class NotificationService implements NotificationServiceInterface
 {
 
     private NotificationRepositoryInterface $notificationRepository;
-    
 
-    public function __construct(NotificationRepositoryInterface $notificationRepository)
+    private NotificationMigrationInterface $notificationMigration;
+
+    public function __construct(NotificationRepositoryInterface $notificationRepository, NotificationMigrationInterface $notificationMigration)
     {
         $this->notificationRepository = $notificationRepository;
+        $this->notificationMigration = $notificationMigration;
     }
 
     public function create(int $userId, string $title, string $message) {
@@ -75,5 +77,9 @@ class NotificationService implements NotificationServiceInterface
 
     public function count(int $userId) {
         return $this->notificationRepository->filterByUserId($userId)->count();
+    }
+
+    public function migrate() {
+        return $this->notificationMigration->migrate();
     }
 }

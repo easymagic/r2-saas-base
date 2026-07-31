@@ -1,5 +1,6 @@
 <?php
 
+use Presentation\Http\Controllers\NotificationController;
 use Presentation\Http\Controllers\TestController;
 use Presentation\Http\Controllers\User\UserController;
 use Presentation\Http\Controllers\WalletController;
@@ -73,6 +74,14 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("wallet/my-approved-wallet-transactions", [WalletController::class, "myApprovedWalletTransactions"]);
                 $route->get("wallet/manual-pending-wallet-transactions", [WalletController::class, "manualPendingWalletTransactions"]);
                 $route->get("wallet/manual-approved-wallet-transactions", [WalletController::class, "manualApprovedWalletTransactions"]);
+
+
+                // Notifications routes
+                $route->get("notifications/my-notifications", [NotificationController::class, "myNotifications"]);
+                $route->post("notifications/{notification_id}/mark-as-read", [NotificationController::class, "markAsRead"]);
+                $route->post("notifications/{notification_id}/mark-as-unread", [NotificationController::class, "markAsUnread"]);
+                $route->delete("notifications/{notification_id}/delete", [NotificationController::class, "delete"]);
+                $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

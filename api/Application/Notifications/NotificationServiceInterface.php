@@ -9,4 +9,5 @@ interface NotificationServiceInterface
     public function markAsUnread(int $notificationId, int $userId);
     public function delete(int $notificationId, int $userId);
     public function count(int $userId);
+    public function migrate();
 }

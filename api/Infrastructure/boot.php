@@ -5,6 +5,9 @@ use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
 use Application\MailNotifications\Wallet\WalletNotificationService;
 use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
+use Application\Notifications\NotificationMigrationInterface;
+use Application\Notifications\NotificationService;
+use Application\Notifications\NotificationServiceInterface;
 use Application\User\UserMigrationServiceInterface;
 use Application\User\UserService;
 use Application\User\UserServiceInterface;
@@ -15,8 +18,11 @@ use Application\Wallet\WalletService;
 use Application\Wallet\WalletServiceInterface;
 use Application\Wallet\WalletValidationService;
 use Application\Wallet\WalletValidationServiceInterface;
+use Domain\Notifications\NotificationRepositoryInterface;
 use Domain\User\UserRepositoryInterface;
 use Domain\Wallet\WalletRepositoryInterface;
+use Infrastructure\Notification\NotificationRepository;
+use Infrastructure\Notification\NotificationMigration;
 use Infrastructure\User\UserMigrationService;
 use Infrastructure\User\UserRepository;
 use Infrastructure\Wallet\WalletMigrationService;
@@ -144,3 +150,24 @@ $appServiceContainer->container()->set(WalletFeedbackMiddleware::class, function
     );
 });
 
+
+$appServiceContainer->container()->set(NotificationMigrationInterface::class, function () use ($appServiceContainer) {
+    return new NotificationMigration(
+        $appServiceContainer->container()->get(Migration::class)
+    );
+});
+
+$appServiceContainer->container()->set(NotificationRepositoryInterface::class, function () use ($appServiceContainer) {
+    return new NotificationRepository(
+        $appServiceContainer->container()->get(DbServiceInterface::class),
+        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
+    );
+});
+
+// NotificationServiceInterface
+$appServiceContainer->container()->set(NotificationServiceInterface::class, function () use ($appServiceContainer) {
+    return new NotificationService(
+        $appServiceContainer->container()->get(NotificationRepositoryInterface::class),
+        $appServiceContainer->container()->get(NotificationMigrationInterface::class)
+    );
+});

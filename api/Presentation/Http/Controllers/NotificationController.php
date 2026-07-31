@@ -74,4 +74,13 @@ class NotificationController
         ]);
     }
 
+    public function migrate()
+    {
+        $result = $this->notificationService->migrate();
+        return $this->jsonResponseService->success([
+            "result" => $result,
+            "message" => "Notifications migrated successfully"
+        ]);
+    }
+
 }
