@@ -48,12 +48,14 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
                     $route->post("user/{user_id}", [UserController::class, "updateUser"]);
                     $route->delete("user/{user_id}", [UserController::class, "delete"]);
+                    $route->get("user/{user_id}", [UserController::class, "find"]);
+
                     $route->post("me", [UserController::class, "updateProfile"]);
                     $route->post("me/change-password", [UserController::class, "changePassword"]);
                     $route->delete("login", [UserController::class, "logout"]);
                     $route->post("me/wallet-balance", [UserController::class, "getWalletBalance"]);
                     $route->get("me", [UserController::class, "me"]);
-                    
+
                 });
             });
 
