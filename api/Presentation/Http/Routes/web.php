@@ -1,6 +1,7 @@
 <?php
 
 use Presentation\Http\Controllers\NotificationController;
+use Presentation\Http\Controllers\PlatformConfigController;
 use Presentation\Http\Controllers\TestController;
 use Presentation\Http\Controllers\User\UserController;
 use Presentation\Http\Controllers\WalletController;
@@ -82,6 +83,13 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("notifications/{notification_id}/mark-as-unread", [NotificationController::class, "markAsUnread"]);
                 $route->delete("notifications/{notification_id}/delete", [NotificationController::class, "delete"]);
                 $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
+
+
+                // Platform config routes
+                $route->get("platform-configs", [PlatformConfigController::class, "all"]);
+                $route->post("platform-configs/update", [PlatformConfigController::class, "update"]);
+                $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
+                $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

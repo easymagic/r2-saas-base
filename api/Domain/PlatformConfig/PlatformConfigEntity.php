@@ -1,11 +1,13 @@
 <?php 
 namespace Domain\PlatformConfig;
 
-class PlatformConfigEntity
+use Domain\AbstractBaseEntity;
+
+class PlatformConfigEntity extends AbstractBaseEntity
 {
     public int $id;
-    public string $key;
-    public string $value;
+    public string $setting_key;
+    public string $setting_value;
     public string $created_at;
     public string $updated_at;
 }

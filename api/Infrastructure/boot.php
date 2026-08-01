@@ -8,6 +8,9 @@ use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
 use Application\Notifications\NotificationMigrationInterface;
 use Application\Notifications\NotificationService;
 use Application\Notifications\NotificationServiceInterface;
+use Application\PlatformConfig\PlatformConfigMigrationServiceInterface;
+use Application\PlatformConfig\PlatformConfigService;
+use Application\PlatformConfig\PlatformConfigServiceInterface;
 use Application\User\UserMigrationServiceInterface;
 use Application\User\UserService;
 use Application\User\UserServiceInterface;
@@ -19,10 +22,13 @@ use Application\Wallet\WalletServiceInterface;
 use Application\Wallet\WalletValidationService;
 use Application\Wallet\WalletValidationServiceInterface;
 use Domain\Notifications\NotificationRepositoryInterface;
+use Domain\PlatformConfig\PlatformConfigRepositoryInterface;
 use Domain\User\UserRepositoryInterface;
 use Domain\Wallet\WalletRepositoryInterface;
 use Infrastructure\Notification\NotificationRepository;
 use Infrastructure\Notification\NotificationMigration;
+use Infrastructure\PlatformConfig\PlatformConfigMigrationService;
+use Infrastructure\PlatformConfig\PlatformConfigRepository;
 use Infrastructure\User\UserMigrationService;
 use Infrastructure\User\UserRepository;
 use Infrastructure\Wallet\WalletMigrationService;
@@ -172,3 +178,24 @@ $appServiceContainer->container()->set(NotificationServiceInterface::class, func
         $appServiceContainer->container()->get(NotificationMigrationInterface::class)
     );
 });
+
+$appServiceContainer->container()->set(PlatformConfigRepositoryInterface::class, function () use ($appServiceContainer) {
+    return new PlatformConfigRepository(
+        $appServiceContainer->container()->get(DbServiceInterface::class),
+        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
+    );
+});
+
+$appServiceContainer->container()->set(PlatformConfigServiceInterface::class, function () use ($appServiceContainer) {
+    return new PlatformConfigService(
+        $appServiceContainer->container()->get(PlatformConfigRepositoryInterface::class),
+        $appServiceContainer->container()->get(PlatformConfigMigrationServiceInterface::class)
+    );
+});
+
+$appServiceContainer->container()->set(PlatformConfigMigrationServiceInterface::class, function () use ($appServiceContainer) {
+    return new PlatformConfigMigrationService(
+        $appServiceContainer->container()->get(Migration::class)
+    );
+});
+
