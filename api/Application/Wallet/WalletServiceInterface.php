@@ -35,8 +35,8 @@ interface WalletServiceInterface
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
-        array $proof_of_payment_screenshot2 = [],
-        array $proof_of_payment_screenshot3 = []
+        mixed $proof_of_payment_screenshot2 = [],
+        mixed $proof_of_payment_screenshot3 = []
     );
 
     public function approveManualTopUp(

@@ -109,8 +109,8 @@ class WalletService implements WalletServiceInterface
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
-        array $proof_of_payment_screenshot2 = [],
-        array $proof_of_payment_screenshot3 = []
+        mixed $proof_of_payment_screenshot2 = [],
+        mixed $proof_of_payment_screenshot3 = []
     ) {
         $this->walletValidationService->validateTopUpManual(
             $user_id,
@@ -134,19 +134,22 @@ class WalletService implements WalletServiceInterface
             $reference
         );
 
-        $proof_of_payment_screenshot1 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot1, 'proof_of_payment_screenshot1');
-        $proof_of_payment_screenshot2 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot2, 'proof_of_payment_screenshot2');
-        $proof_of_payment_screenshot3 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot3, 'proof_of_payment_screenshot3');
+        $path = '/uploads/proof_of_payment_screenshot';
+        $full_path = __DIR__ . '/../../';
 
-        if (!$proof_of_payment_screenshot1){
+        $proof_of_payment_screenshot1 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot1, $path, $full_path);
+        $proof_of_payment_screenshot2 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot2, $path, $full_path);
+        $proof_of_payment_screenshot3 = $this->fileUploadService->uploadFile($proof_of_payment_screenshot3, $path, $full_path);
+
+        if (!$proof_of_payment_screenshot1) {
             throw new Exception('Failed to upload proof of payment screenshot 1!');
         }
 
-        if (!$proof_of_payment_screenshot2){
+        if (!$proof_of_payment_screenshot2) {
             $proof_of_payment_screenshot2 = '';
         }
 
-        if (!$proof_of_payment_screenshot3){
+        if (!$proof_of_payment_screenshot3) {
             $proof_of_payment_screenshot3 = '';
         }
 
