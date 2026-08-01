@@ -53,6 +53,12 @@ interface WalletRepositoryInterface {
      * Manual rejected
      * @return self
      */
+    public function manualRejected();
+
+    /**
+     * Manual rejected
+     * @return self
+     */
     public function forUser(int $user_id);
 
     /**

@@ -10,6 +10,8 @@ abstract class AbstractBaseEntity {
             if(property_exists($this, $key)){
                  if (!is_null($value)){
                     $this->$key = $value;
+                 }else{
+                    
                  }
                 
             }

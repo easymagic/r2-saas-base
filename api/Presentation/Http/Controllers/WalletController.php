@@ -158,6 +158,15 @@ class WalletController
         ]);
     }
 
+    public function manualRejectedWalletTransactions()
+    {
+        $wallets = $this->walletRepository->manualRejected()->fetch();
+        return $this->response->success([
+            'wallets' => $wallets,
+            'message' => 'Manual rejected wallet transactions fetched successfully'
+        ]);
+    }
+
     public function migrate()
     {
         $migration = $this->walletService->migrate();
