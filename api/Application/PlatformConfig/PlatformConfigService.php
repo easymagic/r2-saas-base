@@ -3,19 +3,24 @@
 namespace Application\PlatformConfig;
 
 use Domain\PlatformConfig\PlatformConfigRepositoryInterface;
+use Exception;
+use Presentation\ApiCredential\ApiCredentialServiceInterface;
 
 class PlatformConfigService implements PlatformConfigServiceInterface
 {
 
     private PlatformConfigRepositoryInterface $platformConfigRepository;
     private PlatformConfigMigrationServiceInterface $platformConfigMigrationService;
+    private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
         PlatformConfigRepositoryInterface $platformConfigRepository,
-        PlatformConfigMigrationServiceInterface $platformConfigMigrationService
+        PlatformConfigMigrationServiceInterface $platformConfigMigrationService,
+        ApiCredentialServiceInterface $apiCredentialService
     ) {
         $this->platformConfigRepository = $platformConfigRepository;
         $this->platformConfigMigrationService = $platformConfigMigrationService;
+        $this->apiCredentialService = $apiCredentialService;
     }
 
     /**
@@ -84,6 +89,10 @@ class PlatformConfigService implements PlatformConfigServiceInterface
      */
     function delete(int $id)
     {
+        $user = $this->apiCredentialService->getAuthUser();
+        if (!$user->isAdmin()){
+            throw new Exception('You are not authorized to delete this platform config');
+        }
         return $this->platformConfigRepository->delete($id);
     }
 }

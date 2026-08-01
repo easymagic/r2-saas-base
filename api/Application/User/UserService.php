@@ -4,6 +4,8 @@ namespace Application\User;
 
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
 use Application\Notifications\NotificationServiceInterface;
+use Application\PlatformConfig\PlatformConfigMigrationServiceInterface;
+use Application\PlatformConfig\PlatformConfigServiceInterface;
 use Application\User\UserMigrationServiceInterface as UserUserMigrationServiceInterface;
 use Application\User\UserServiceInterface;
 use Domain\User\UserRepositoryInterface;
@@ -18,6 +20,7 @@ class UserService implements UserServiceInterface
     private UserRepositoryInterface $userRepository;
     private AccountMailNotificationServiceInterface $accountMailNotificationService;
     private NotificationServiceInterface $notificationService;
+    private PlatformConfigServiceInterface $platformConfigService;
 
 
     public function __construct(
@@ -25,13 +28,15 @@ class UserService implements UserServiceInterface
         UserValidationServiceInterface $userValidationService,
         UserRepositoryInterface $userRepository,
         AccountMailNotificationServiceInterface $accountMailNotificationService,
-        NotificationServiceInterface $notificationService
+        NotificationServiceInterface $notificationService,
+        PlatformConfigServiceInterface $platformConfigService
     ) {
         $this->userMigrationService = $userMigrationService;
         $this->userValidationService = $userValidationService;
         $this->userRepository = $userRepository;
         $this->accountMailNotificationService = $accountMailNotificationService;
         $this->notificationService = $notificationService;
+        $this->platformConfigService = $platformConfigService;
     }
 
     public function login(string $email, string $password)
@@ -46,6 +51,7 @@ class UserService implements UserServiceInterface
                 'Login successful',
                 'You have successfully logged in to your account.'
             );
+            $this->platformConfigService->set('app_version', '1.0.0');
             return $user;
         }
         throw new Exception('Invalid credentials!');

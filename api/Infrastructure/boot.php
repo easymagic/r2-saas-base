@@ -57,7 +57,8 @@ $appServiceContainer->container()->set(UserServiceInterface::class, function () 
         $appServiceContainer->container()->get(UserValidationServiceInterface::class),
         $appServiceContainer->container()->get(UserRepositoryInterface::class),
         $appServiceContainer->container()->get(AccountMailNotificationServiceInterface::class),
-        $appServiceContainer->container()->get(NotificationServiceInterface::class)
+        $appServiceContainer->container()->get(NotificationServiceInterface::class),
+        $appServiceContainer->container()->get(PlatformConfigServiceInterface::class)
     );
 });
 
@@ -189,7 +190,8 @@ $appServiceContainer->container()->set(PlatformConfigRepositoryInterface::class,
 $appServiceContainer->container()->set(PlatformConfigServiceInterface::class, function () use ($appServiceContainer) {
     return new PlatformConfigService(
         $appServiceContainer->container()->get(PlatformConfigRepositoryInterface::class),
-        $appServiceContainer->container()->get(PlatformConfigMigrationServiceInterface::class)
+        $appServiceContainer->container()->get(PlatformConfigMigrationServiceInterface::class),
+        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class)
     );
 });
 
