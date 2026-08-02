@@ -75,5 +75,5 @@ interface ProxyOrderServiceInterface
      * Publish the settings to the platform config
      * @return void
      */
-    function pusblishSettings();
+    function publishSettings();
 }

@@ -218,7 +218,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         if ($order->status != 'pending'){
             throw new \Exception('Order is not pending');
         }
-        
+
         $this->proxyOrderRepository->save($order->id, [
             'total_amount_usd' => $price,
             'service_charge_usd' => $this->getServiceCharge(),
@@ -299,7 +299,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
      * Publish the settings to the platform config
      * @return void
      */
-    function pusblishSettings()
+    function publishSettings()
     {
         $this->platformConfigService->set('SERVICE_CHARGE', $this->getServiceCharge());
         $this->platformConfigService->set('SHIPPING_COST', $this->getShippingCost());

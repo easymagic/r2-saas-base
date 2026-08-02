@@ -75,5 +75,66 @@ class ProxyOrderController
         ]);
     }
 
-    // To do create remaining methods for the controller
+    function show(){
+        $order = $this->proxyOrderService->find($this->request->get('id'));
+        return $this->jsonResponseService->success([
+            'order' => $order
+        ]);
+    }
+
+    function destroy(){
+        $result = $this->proxyOrderService->delete($this->request->get('id'));
+        return $this->jsonResponseService->success([
+            'message' => 'Order deleted successfully',
+            'result' => $result
+        ]);
+    }
+
+    function adjustPrice(){
+        $id = $this->request->get('id');
+        $price = $this->request->get('price');
+        $order = $this->proxyOrderService->adjustPrice($id, $price);
+        return $this->jsonResponseService->success([    
+            'order' => $order,
+            "message" => "Price adjusted successfully"
+        ]);
+    }
+
+    function assignToBatch(){
+        $id = $this->request->get('id');
+        $batchId = $this->request->get('batch_id');
+        $order = $this->proxyOrderService->assignToBatch($id, $batchId);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Order assigned to batch successfully"
+        ]);
+    }
+
+    function assignToAgent(){
+        $id = $this->request->get('id');
+        $agentId = $this->request->get('agent_id');
+        $order = $this->proxyOrderService->assignToAgent($id, $agentId);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Order assigned to agent successfully"
+        ]);
+    }
+
+    function publishSettings(){
+        $this->proxyOrderService->publishSettings();
+        return $this->jsonResponseService->success([
+            "message" => "Settings published successfully"
+        ]);
+    }
+
+    function updateStatus(){
+        $id = $this->request->get('id');
+        $status = $this->request->get('status');
+        $order = $this->proxyOrderService->updateStatus($id, $status);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Order status updated successfully"
+        ]);
+    }
+
 }

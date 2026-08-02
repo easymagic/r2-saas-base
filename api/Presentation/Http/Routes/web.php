@@ -2,6 +2,7 @@
 
 use Presentation\Http\Controllers\NotificationController;
 use Presentation\Http\Controllers\PlatformConfigController;
+use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
 use Presentation\Http\Controllers\User\UserController;
 use Presentation\Http\Controllers\WalletController;
@@ -90,6 +91,17 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("platform-configs/update", [PlatformConfigController::class, "update"]);
                 $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
                 $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
+
+
+                // Proxy order routes
+                $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
+                $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
+                $route->post("proxy-orders/create", [ProxyOrderController::class, "createOrder"]);
+                $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);
+                $route->delete("proxy-orders/{order_id}", [ProxyOrderController::class, "destroy"]);
+                $route->post("proxy-orders/{order_id}/adjust-price", [ProxyOrderController::class, "adjustPrice"]);
+                $route->post("proxy-orders/{order_id}/assign-to-batch", [ProxyOrderController::class, "assignToBatch"]);
+                $route->post("proxy-orders/{order_id}/assign-to-agent", [ProxyOrderController::class, "assignToAgent"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);
