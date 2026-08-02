@@ -59,4 +59,5 @@ interface ProxyOrderRepositoryInterface
     * @return self
     */
    function filterByPaid();
+
 }

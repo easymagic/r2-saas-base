@@ -60,6 +60,10 @@ class ProxyOrderRepository implements ProxyOrderRepositoryInterface
         if ($filters["search"]){
             $this->filterBySearch($filters["search"]);
         }
+        // user_id
+        if ($filters["user_id"]){
+            $this->filterByUserId($filters["user_id"]);
+        }
         $this->aggregateQuery->appendSql(" ORDER BY created_at DESC ");
         return $this;
     }
