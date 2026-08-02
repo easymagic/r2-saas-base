@@ -23,6 +23,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
 
     private PlatformConfigServiceInterface $platformConfigService;
 
+    private ProxyOrderMigrationServiceInterface $proxyOrderMigrationService;
+
     const ALLOWED_STATUSES = [
         'pending',
         'paid',
@@ -54,13 +56,15 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         ProxyOrderMailNotificationInterface $proxyOrderMailNotification,
         FileUploadServiceInterface $fileUploadService,
         UserRepositoryInterface $userRepository,
-        PlatformConfigServiceInterface $platformConfigService
+        PlatformConfigServiceInterface $platformConfigService,
+        ProxyOrderMigrationServiceInterface $proxyOrderMigrationService
     ) {
         $this->proxyOrderRepository = $proxyOrderRepository;
         $this->proxyOrderMailNotification = $proxyOrderMailNotification;
         $this->fileUploadService = $fileUploadService;
         $this->userRepository = $userRepository;
         $this->platformConfigService = $platformConfigService;
+        $this->proxyOrderMigrationService = $proxyOrderMigrationService;
     }
 
     public function create(
@@ -304,5 +308,33 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         $this->platformConfigService->set('SERVICE_CHARGE', $this->getServiceCharge());
         $this->platformConfigService->set('SHIPPING_COST', $this->getShippingCost());
         $this->platformConfigService->set('DOLLAR_TO_NAIRA_RATE', $this->getDollarToNairaRate());
+    }
+
+    /**
+     * Get the dashboard stats
+     * @return array
+     */
+    function dashboardStats()
+    {
+        $pendingOrdersCount = $this->proxyOrderRepository->filterByPending()->count();
+        $paidOrdersCount = $this->proxyOrderRepository->filterByPaid()->count();
+        $placedOrdersCount = $this->proxyOrderRepository->filter(['status' => 'placed'])->count();
+        $paidOrdersSum = $this->proxyOrderRepository->filterByPaid()->sum('total_amount_naira');
+
+        return [
+            'pending_orders_count' => $pendingOrdersCount,
+            'paid_orders_count' => $paidOrdersCount,
+            'placed_orders_count' => $placedOrdersCount,
+            'paid_orders_sum' => $paidOrdersSum
+        ];
+    }
+
+    /**
+     * Migrate the proxy order data
+     * @return void
+     */
+    function migrate()
+    {
+        $this->proxyOrderMigrationService->migrate();
     }
 }

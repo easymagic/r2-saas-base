@@ -3,6 +3,8 @@
 use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
+use Application\MailNotifications\ProxyOrderMailNotification;
+use Application\MailNotifications\ProxyOrderMailNotificationInterface;
 use Application\MailNotifications\Wallet\WalletNotificationService;
 use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
 use Application\Notifications\NotificationMigrationInterface;
@@ -11,6 +13,9 @@ use Application\Notifications\NotificationServiceInterface;
 use Application\PlatformConfig\PlatformConfigMigrationServiceInterface;
 use Application\PlatformConfig\PlatformConfigService;
 use Application\PlatformConfig\PlatformConfigServiceInterface;
+use Application\ProxyOrder\ProxyOrderMigrationServiceInterface;
+use Application\ProxyOrder\ProxyOrderService;
+use Application\ProxyOrder\ProxyOrderServiceInterface;
 use Application\User\UserMigrationServiceInterface;
 use Application\User\UserService;
 use Application\User\UserServiceInterface;
@@ -23,12 +28,15 @@ use Application\Wallet\WalletValidationService;
 use Application\Wallet\WalletValidationServiceInterface;
 use Domain\Notifications\NotificationRepositoryInterface;
 use Domain\PlatformConfig\PlatformConfigRepositoryInterface;
+use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
 use Domain\User\UserRepositoryInterface;
 use Domain\Wallet\WalletRepositoryInterface;
 use Infrastructure\Notification\NotificationRepository;
 use Infrastructure\Notification\NotificationMigration;
 use Infrastructure\PlatformConfig\PlatformConfigMigrationService;
 use Infrastructure\PlatformConfig\PlatformConfigRepository;
+use Infrastructure\ProxyOrder\ProxyOrderMigrationService;
+use Infrastructure\ProxyOrder\ProxyOrderRepository;
 use Infrastructure\User\UserMigrationService;
 use Infrastructure\User\UserRepository;
 use Infrastructure\Wallet\WalletMigrationService;
@@ -197,6 +205,45 @@ $appServiceContainer->container()->set(PlatformConfigServiceInterface::class, fu
 
 $appServiceContainer->container()->set(PlatformConfigMigrationServiceInterface::class, function () use ($appServiceContainer) {
     return new PlatformConfigMigrationService(
+        $appServiceContainer->container()->get(Migration::class)
+    );
+});
+
+
+// ProxyOrderServiceInterface
+$appServiceContainer->container()->set(ProxyOrderServiceInterface::class, function () use ($appServiceContainer) {
+    return new ProxyOrderService(
+        $appServiceContainer->container()->get(ProxyOrderRepositoryInterface::class),
+        $appServiceContainer->container()->get(ProxyOrderMailNotificationInterface::class),
+        $appServiceContainer->container()->get(FileUploadServiceInterface::class),
+        $appServiceContainer->container()->get(UserRepositoryInterface::class),
+        $appServiceContainer->container()->get(PlatformConfigServiceInterface::class),
+        $appServiceContainer->container()->get(ProxyOrderMigrationServiceInterface::class)
+    );
+});
+
+// ProxyOrderRepositoryInterface
+$appServiceContainer->container()->set(ProxyOrderRepositoryInterface::class, function () use ($appServiceContainer) {
+    return new ProxyOrderRepository(
+        $appServiceContainer->container()->get(DbServiceInterface::class),
+        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class),
+        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class)
+    );
+});
+
+// ProxyOrderMailNotificationInterface
+$appServiceContainer->container()->set(ProxyOrderMailNotificationInterface::class, function () use ($appServiceContainer) {
+    return new ProxyOrderMailNotification(
+        $appServiceContainer->container()->get(MailServiceInterface::class),
+        $appServiceContainer->container()->get(ProxyOrderRepositoryInterface::class),
+        $appServiceContainer->container()->get(EnvServiceInterface::class),
+        $appServiceContainer->container()->get(UserRepositoryInterface::class)
+    );
+});
+
+// ProxyOrderMigrationServiceInterface
+$appServiceContainer->container()->set(ProxyOrderMigrationServiceInterface::class, function () use ($appServiceContainer) {
+    return new ProxyOrderMigrationService(
         $appServiceContainer->container()->get(Migration::class)
     );
 });

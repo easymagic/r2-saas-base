@@ -137,4 +137,11 @@ class ProxyOrderController
         ]);
     }
 
+    function migrate(){
+        $this->proxyOrderService->migrate();
+        return $this->jsonResponseService->success([
+            "message" => "Proxy order data migrated successfully"
+        ]);
+    }
+
 }

@@ -6,8 +6,19 @@ use Domain\ProxyOrder\ProxyOrderEntity;
 interface ProxyOrderRepositoryInterface
 {
 
+   /**
+    * @return array
+    */
    function fetch();
+   /**
+    * @return int
+    */
    function count();
+   /**
+    * @param string $column
+    * @return float
+    */
+   function sum(string $column);
    /**
     * @param array $filters
     * @return self
@@ -59,5 +70,10 @@ interface ProxyOrderRepositoryInterface
     * @return self
     */
    function filterByPaid();
+
+   /**
+    * @return self
+    */
+   function filterByPending();
 
 }

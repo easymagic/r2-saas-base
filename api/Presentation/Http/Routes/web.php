@@ -6,6 +6,7 @@ use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
 use Presentation\Http\Controllers\User\UserController;
 use Presentation\Http\Controllers\WalletController;
+use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
 use Presentation\Http\Middlewares\WalletFeedbackMiddleware;
@@ -95,13 +96,21 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
                 // Proxy order routes
                 $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
-                $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
                 $route->post("proxy-orders/create", [ProxyOrderController::class, "createOrder"]);
                 $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);
-                $route->delete("proxy-orders/{order_id}", [ProxyOrderController::class, "destroy"]);
-                $route->post("proxy-orders/{order_id}/adjust-price", [ProxyOrderController::class, "adjustPrice"]);
-                $route->post("proxy-orders/{order_id}/assign-to-batch", [ProxyOrderController::class, "assignToBatch"]);
-                $route->post("proxy-orders/{order_id}/assign-to-agent", [ProxyOrderController::class, "assignToAgent"]);
+                $route->get("proxy-orders/migrate", [ProxyOrderController::class, "migrate"]);
+
+
+                $route->middleware([
+                    GlobalApiAuthAdminMiddleware::class
+                ], function (RouteServiceInterface $route) {
+                    $route->delete("proxy-orders/{order_id}", [ProxyOrderController::class, "destroy"]);
+                    $route->post("proxy-orders/{order_id}/adjust-price", [ProxyOrderController::class, "adjustPrice"]);
+                    $route->post("proxy-orders/{order_id}/assign-to-batch", [ProxyOrderController::class, "assignToBatch"]);
+                    $route->post("proxy-orders/{order_id}/assign-to-agent", [ProxyOrderController::class, "assignToAgent"]);
+                    $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
+                    // $route->post("proxy-orders/{order_id}/update-status", [ProxyOrderController::class, "updateStatus"]);
+                });
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

@@ -76,4 +76,16 @@ interface ProxyOrderServiceInterface
      * @return void
      */
     function publishSettings();
+
+    /**
+     * Get the dashboard stats
+     * @return array
+     */
+    function dashboardStats();
+
+    /**
+     * Migrate the proxy order data
+     * @return void
+     */
+    function migrate();
 }

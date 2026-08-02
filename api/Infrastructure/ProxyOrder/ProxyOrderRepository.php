@@ -169,4 +169,22 @@ class ProxyOrderRepository implements ProxyOrderRepositoryInterface
         $this->aggregateQuery->appendSql(" AND status IN ($paidStatuses) ");
         return $this;
     }
+
+    /**
+     * @return self
+     */
+    function filterByPending() {
+        $this->aggregateQuery->appendSql(" AND status = 'pending' ");
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @return float
+     */
+    function sum(string $column) {
+        return $this->dbService->sum($this->aggregateQuery->getSql(), $column, $this->aggregateQuery->getParams());
+    }
+
+
 }
