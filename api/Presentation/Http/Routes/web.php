@@ -98,7 +98,6 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
                 $route->post("proxy-orders/create", [ProxyOrderController::class, "createOrder"]);
                 $route->get("proxy-orders/migrate", [ProxyOrderController::class, "migrate"]);
-                $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);
 
 
                 $route->middleware([
@@ -111,6 +110,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
                     // $route->post("proxy-orders/{order_id}/update-status", [ProxyOrderController::class, "updateStatus"]);
                 });
+
+                $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

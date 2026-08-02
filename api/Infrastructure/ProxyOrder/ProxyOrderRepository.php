@@ -47,21 +47,21 @@ class ProxyOrderRepository implements ProxyOrderRepositoryInterface
      * @return self
      */
     function filter(array $filters) {
-        if ($filters["type"]){
+        if (isset($filters["type"])){
             $this->filterByType($filters["type"]);
         }
-        if ($filters["status"]){
+        if (isset($filters["status"])){
             $this->filterByStatus($filters["status"]);
         }
-        if ($filters["agent_id"]){
+        if (isset($filters["agent_id"])){
             $this->filterByAgent($filters["agent_id"]);
         }
         // search 
-        if ($filters["search"]){
+        if (isset($filters["search"])){
             $this->filterBySearch($filters["search"]);
         }
         // user_id
-        if ($filters["user_id"]){
+        if (isset($filters["user_id"])){
             $this->filterByUserId($filters["user_id"]);
         }
         $this->aggregateQuery->appendSql(" ORDER BY created_at DESC ");
