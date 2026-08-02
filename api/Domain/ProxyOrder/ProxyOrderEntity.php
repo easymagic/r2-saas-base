@@ -1,11 +1,14 @@
 <?php 
 namespace Domain\ProxyOrder;
 
-class ProxyOrderEntity
+use Domain\AbstractBaseEntity;
+
+class ProxyOrderEntity extends AbstractBaseEntity
 {
     public int $id;
     public int $user_id;
     public int $batch_id;
+    public int $agent_id;
 
     public string $type;
     public string $reference;
@@ -25,5 +28,7 @@ class ProxyOrderEntity
 
     public string $created_at;
     public string $updated_at;
+
+    public int $pickup_otp_code;
     
 }

@@ -1,14 +1,10 @@
 <?php 
 namespace Domain\ProxyOrder\Interfaces;
 
-interface ProxyOrderChangeLogRepositoryInterface
+interface BatchRepositoryInterface
 {
     function fetch();
     function count();
-    /**
-     * @param array $filters
-     * @return self
-     */
     function filter(array $filters);
     function find(int $id);
     function save(int $id, array $data);

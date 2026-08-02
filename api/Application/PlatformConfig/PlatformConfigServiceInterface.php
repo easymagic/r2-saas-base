@@ -10,7 +10,7 @@ interface PlatformConfigServiceInterface {
      * @param string $setting
      * @return string
      */
-    function get(string $setting);
+    function get(string $setting, mixed $default = null);
 
     /**
      * Set a platform config setting

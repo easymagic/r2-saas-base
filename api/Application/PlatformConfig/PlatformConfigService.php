@@ -28,13 +28,14 @@ class PlatformConfigService implements PlatformConfigServiceInterface
      * @param string $setting
      * @return string
      */
-    function get(string $setting)
+    function get(string $setting, mixed $default = null)
     {
+        $setting = strtoupper($setting);
 
         $platformConfig = $this->platformConfigRepository->findBySetting($setting);
 
         if ($platformConfig->isEmpty()) {
-            return null;
+            return $default;
         }
 
         return $platformConfig->setting_value;
