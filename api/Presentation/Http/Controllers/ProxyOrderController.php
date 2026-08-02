@@ -91,7 +91,7 @@ class ProxyOrderController
     }
 
     function adjustPrice(){
-        $id = $this->request->get('id');
+        $id = $this->request->get('order_id',0);
         $price = $this->request->get('price');
         $order = $this->proxyOrderService->adjustPrice($id, $price);
         return $this->jsonResponseService->success([    
