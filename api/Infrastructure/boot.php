@@ -227,7 +227,7 @@ $appServiceContainer->container()->set(ProxyOrderRepositoryInterface::class, fun
     return new ProxyOrderRepository(
         $appServiceContainer->container()->get(DbServiceInterface::class),
         $appServiceContainer->container()->get(QueryBuilderServiceInterface::class),
-        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class)
+        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
     );
 });
 
