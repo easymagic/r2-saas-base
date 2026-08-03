@@ -110,4 +110,11 @@ interface ProxyOrderServiceInterface
      * @return ProxyOrderEntity
      */
     function approvePayment(int $proxyOrderId);
+
+    /**
+     * Cancel payment
+     * @param int $proxyOrderId
+     * @return ProxyOrderEntity
+     */
+    function cancelPayment(int $proxyOrderId);
 }

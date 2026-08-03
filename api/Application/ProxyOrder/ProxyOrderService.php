@@ -385,6 +385,9 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         if ($order->user_id !== $userId){
             throw new \Exception('You are not authorized to pay for this order');
         }
+        if ($order->approve_payment !== 1){
+            throw new \Exception('Payment not approved');
+        }
         $amount = $order->grand_total_naira;
         $this->userService->withdrawWallet($userId, $amount);
         $this->walletService->log(
@@ -418,6 +421,23 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             'approve_payment' => 1
         ]);
         $this->proxyOrderMailNotification->sendCustomerOrderPaymentApprovedNotification($order->id);
+        return $order;
+    }
+
+    /**
+     * Cancel payment
+     * @param int $proxyOrderId
+     * @return ProxyOrderEntity
+     */
+    function cancelPayment(int $proxyOrderId)
+    {
+        $order = $this->proxyOrderRepository->find($proxyOrderId);
+        if ((int) $order->approve_payment !== 1){
+            throw new \Exception('Payment not approved');
+        }
+        $order = $this->proxyOrderRepository->save($order->id, [
+            'approve_payment' => 0
+        ]);
         return $order;
     }
 }

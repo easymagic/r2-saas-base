@@ -172,4 +172,13 @@ class ProxyOrderController
         ]);
     }
 
+    function cancelPayment(){
+        $proxyOrderId = $this->request->get('order_id');
+        $order = $this->proxyOrderService->cancelPayment($proxyOrderId);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Payment cancelled successfully"
+        ]);
+    }
+
 }
