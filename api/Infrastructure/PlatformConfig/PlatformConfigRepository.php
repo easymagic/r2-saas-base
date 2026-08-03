@@ -50,12 +50,10 @@ class PlatformConfigRepository implements PlatformConfigRepositoryInterface
      */
     public function findBySetting(string $setting)
     {
-        $this->queryBuilderService->appendSql("AND setting_key = :setting");
-        $this->queryBuilderService->appendParams(['setting' => $setting]);
-        $result = $this->dbService->fetchOne(
-            $this->queryBuilderService->getSql(),
-            $this->queryBuilderService->getParams()
-        );
+        // $this->queryBuilderService->("AND setting_key = :setting");
+        $sql = "SELECT * FROM platform_configs WHERE setting_key = :setting";
+        $params = ['setting' => $setting];
+        $result = $this->dbService->fetchOne($sql, $params);
         return $this->hydrate($result);
     }
 

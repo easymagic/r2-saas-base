@@ -140,8 +140,10 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             'service_charge_usd' => $this->getServiceCharge(),
             'shipping_cost_usd' => $this->getShippingCost(),
             'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
-            'total_amount_naira' => $this->getTotalAmountNaira($total_amount_usd)
+            'grand_total_naira' => $this->getTotalAmountNaira($total_amount_usd)
         ]);
+
+        // die(json_encode($order));
 
         $this->proxyOrderMailNotification->sendCustomerOrderCreatedNotification($order->id);
         $this->proxyOrderMailNotification->sendAdminOrderCreatedNotification($order->id);
@@ -238,7 +240,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             'service_charge_usd' => $this->getServiceCharge(),
             'shipping_cost_usd' => $this->getShippingCost(),
             'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
-            'total_amount_naira' => $this->getTotalAmountNaira($price),
+            'grand_total_naira' => $this->getTotalAmountNaira($price),
             'price_adjustment_sent' => 1
         ]);
         $this->proxyOrderMailNotification->sendCustomerPriceAdjustedNotification($id);
