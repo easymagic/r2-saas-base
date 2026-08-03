@@ -5,6 +5,7 @@ namespace Application\ProxyOrder;
 use Application\MailNotifications\ProxyOrderMailNotificationInterface;
 use Application\PlatformConfig\PlatformConfigServiceInterface;
 use Application\ProxyOrder\ProxyOrderServiceInterface;
+use Application\User\UserServiceInterface;
 use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
 use Domain\ProxyOrder\ProxyOrderEntity;
 use Domain\User\UserRepositoryInterface;
@@ -24,6 +25,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
     private PlatformConfigServiceInterface $platformConfigService;
 
     private ProxyOrderMigrationServiceInterface $proxyOrderMigrationService;
+
+    private UserServiceInterface $userService;
 
     const ALLOWED_STATUSES = [
         'pending',
@@ -57,7 +60,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         FileUploadServiceInterface $fileUploadService,
         UserRepositoryInterface $userRepository,
         PlatformConfigServiceInterface $platformConfigService,
-        ProxyOrderMigrationServiceInterface $proxyOrderMigrationService
+        ProxyOrderMigrationServiceInterface $proxyOrderMigrationService,
+        UserServiceInterface $userService
     ) {
         $this->proxyOrderRepository = $proxyOrderRepository;
         $this->proxyOrderMailNotification = $proxyOrderMailNotification;
@@ -65,6 +69,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         $this->userRepository = $userRepository;
         $this->platformConfigService = $platformConfigService;
         $this->proxyOrderMigrationService = $proxyOrderMigrationService;
+        $this->userService = $userService;
     }
 
     public function create(
@@ -228,7 +233,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             'service_charge_usd' => $this->getServiceCharge(),
             'shipping_cost_usd' => $this->getShippingCost(),
             'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
-            'total_amount_naira' => $this->getTotalAmountNaira($price)
+            'total_amount_naira' => $this->getTotalAmountNaira($price),
+            'price_adjustment_sent' => 1
         ]);
         $this->proxyOrderMailNotification->sendCustomerPriceAdjustedNotification($id);
         return $this->proxyOrderRepository->find($id);
@@ -357,5 +363,47 @@ class ProxyOrderService implements ProxyOrderServiceInterface
     function migrate()
     {
         $this->proxyOrderMigrationService->migrate();
+    }
+
+    /**
+     * Pay from wallet
+     * @param int $proxyOrderId
+     * @param int $userId
+     * @return ProxyOrderEntity
+     */
+    function payFromWallet(int $proxyOrderId, int $userId)
+    {
+        $order =$this->proxyOrderRepository->find($proxyOrderId);
+        if ((int) $order->price_adjustment_sent !== 1){
+            throw new \Exception('Price adjustment not sent');
+        }
+        if ($order->user_id !== $userId){
+            throw new \Exception('You are not authorized to pay for this order');
+        }
+        $amount = $order->grand_total_naira;
+        $this->userService->withdrawWallet($userId, $amount);
+        $order = $this->proxyOrderRepository->save($order->id, [
+            'status' => 'paid'
+        ]);
+        $this->proxyOrderMailNotification->sendCustomerOrderPaidNotification($order->id);
+        return $order;
+    }
+
+    /**
+     * Approve payment
+     * @param int $proxyOrderId
+     * @return ProxyOrderEntity
+     */
+    function approvePayment(int $proxyOrderId)
+    {
+        $order = $this->proxyOrderRepository->find($proxyOrderId);
+        if ((int) $order->approve_payment !== 0){
+            throw new \Exception('Payment already approved');
+        }
+        $order = $this->proxyOrderRepository->save($order->id, [
+            'approve_payment' => 1
+        ]);
+        $this->proxyOrderMailNotification->sendCustomerOrderPaymentApprovedNotification($order->id);
+        return $order;
     }
 }

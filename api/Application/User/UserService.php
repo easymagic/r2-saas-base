@@ -8,6 +8,7 @@ use Application\PlatformConfig\PlatformConfigMigrationServiceInterface;
 use Application\PlatformConfig\PlatformConfigServiceInterface;
 use Application\User\UserMigrationServiceInterface as UserUserMigrationServiceInterface;
 use Application\User\UserServiceInterface;
+use Application\Wallet\WalletServiceInterface;
 use Domain\User\UserRepositoryInterface;
 use Exception;
 use Domain\User\UserEntity;
@@ -21,6 +22,7 @@ class UserService implements UserServiceInterface
     private AccountMailNotificationServiceInterface $accountMailNotificationService;
     private NotificationServiceInterface $notificationService;
     private PlatformConfigServiceInterface $platformConfigService;
+    private WalletServiceInterface $walletService;
 
 
     public function __construct(
@@ -29,7 +31,8 @@ class UserService implements UserServiceInterface
         UserRepositoryInterface $userRepository,
         AccountMailNotificationServiceInterface $accountMailNotificationService,
         NotificationServiceInterface $notificationService,
-        PlatformConfigServiceInterface $platformConfigService
+        PlatformConfigServiceInterface $platformConfigService,
+        WalletServiceInterface $walletService
     ) {
         $this->userMigrationService = $userMigrationService;
         $this->userValidationService = $userValidationService;
@@ -37,6 +40,7 @@ class UserService implements UserServiceInterface
         $this->accountMailNotificationService = $accountMailNotificationService;
         $this->notificationService = $notificationService;
         $this->platformConfigService = $platformConfigService;
+        $this->walletService = $walletService;
     }
 
     public function login(string $email, string $password)
@@ -344,6 +348,14 @@ class UserService implements UserServiceInterface
             'wallet_balance' => $user->wallet_balance - $amount,
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
+        $this->walletService->log(
+            $user->id,
+            $amount,
+            uniqid("WALLET_WITHDRAWAL_"),
+            'withdrawal',
+            'Withdrawal from wallet',
+            'approved'
+        );
         $this->accountMailNotificationService->sendAccountWithdrawWalletToUser($user->id, $amount);
         return $user;
     }

@@ -27,6 +27,15 @@ interface WalletServiceInterface
         string $payment_url
     );
 
+    public function log(
+        int $user_id,
+        float $amount,
+        string $reference,
+        string $type,
+        string $description,
+        string $status
+    );
+
     public function topUpManual(
         int $user_id,
         float $amount,

@@ -98,6 +98,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
                 $route->post("proxy-orders/create", [ProxyOrderController::class, "createOrder"]);
                 $route->get("proxy-orders/migrate", [ProxyOrderController::class, "migrate"]);
+                $route->post("proxy-orders/{order_id}/pay-from-wallet", [ProxyOrderController::class, "payFromWallet"]);
 
 
                 $route->middleware([
@@ -108,7 +109,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->post("proxy-orders/{order_id}/assign-to-batch", [ProxyOrderController::class, "assignToBatch"]);
                     $route->post("proxy-orders/{order_id}/assign-to-agent", [ProxyOrderController::class, "assignToAgent"]);
                     $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
-                    // $route->post("proxy-orders/{order_id}/update-status", [ProxyOrderController::class, "updateStatus"]);
+                    $route->post("proxy-orders/{order_id}/approve-payment", [ProxyOrderController::class, "approvePayment"]);
+                    $route->post("proxy-orders/{order_id}/update-status", [ProxyOrderController::class, "updateStatus"]);    
                 });
 
                 $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);

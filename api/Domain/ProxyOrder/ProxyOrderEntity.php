@@ -30,5 +30,9 @@ class ProxyOrderEntity extends AbstractBaseEntity
     public string $updated_at;
 
     public int $pickup_otp_code;
+
+    public int $price_adjustment_sent;
+
+    public int $approve_payment;
     
 }

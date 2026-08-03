@@ -95,4 +95,19 @@ interface ProxyOrderServiceInterface
      * @return void
      */
     function migrate();
+
+    /**
+     * Pay from wallet
+     * @param int $proxyOrderId
+     * @param int $userId
+     * @return ProxyOrderEntity
+     */
+    function payFromWallet(int $proxyOrderId, int $userId);
+
+    /**
+     * Approve payment
+     * @param int $proxyOrderId
+     * @return ProxyOrderEntity
+     */
+    function approvePayment(int $proxyOrderId);
 }

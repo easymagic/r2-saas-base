@@ -11,4 +11,6 @@ interface ProxyOrderMailNotificationInterface
     public function sendAgentOrderAssignedNotification(int $proxyOrderId);
     public function notifyAgentOfNewOrder(int $proxyOrderId);
     public function sendCustomerPriceAdjustedNotification(int $proxyOrderId);
+    public function sendCustomerOrderPaidNotification(int $proxyOrderId);
+    public function sendCustomerOrderPaymentApprovedNotification(int $proxyOrderId);
 }

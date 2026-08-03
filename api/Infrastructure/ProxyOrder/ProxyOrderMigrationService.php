@@ -58,7 +58,9 @@ class ProxyOrderMigrationService implements ProxyOrderMigrationServiceInterface
             ->field('service_charge_usd')->definition('FLOAT NOT NULL')->run()
             ->field('created_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP')->run()
             ->field('updated_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')->run()
-            ->field('pickup_otp_code')->definition('INT NOT NULL')->run();
+            ->field('pickup_otp_code')->definition('INT NOT NULL')->run()
+            ->field('approve_payment')->definition('INT NOT NULL DEFAULT 0')->run()
+            ->field('price_adjustment_sent')->definition('INT NOT NULL DEFAULT 0')->run();
 
 
         // ProxyOrder Thread Entity

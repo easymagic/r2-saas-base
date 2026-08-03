@@ -227,4 +227,22 @@ class WalletService implements WalletServiceInterface
     {
         return $this->walletRepository->online()->pendingForUser($user_id)->fetchAll();
     }
+
+    public function log(
+        int $user_id,
+        float $amount,
+        string $reference,
+        string $type,
+        string $description,
+        string $status
+    ) {
+        return $this->walletRepository->save(0,[
+            'user_id' => $user_id,
+            'amount' => $amount,
+            'reference' => $reference,
+            'type' => $type,
+            'description' => $description,
+            'status' => $status,
+        ]);
+    }
 }

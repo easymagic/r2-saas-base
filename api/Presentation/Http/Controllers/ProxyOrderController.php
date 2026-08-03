@@ -153,4 +153,23 @@ class ProxyOrderController
         ]);
     }
 
+    function approvePayment(){
+        $proxyOrderId = $this->request->get('order_id');
+        $order = $this->proxyOrderService->approvePayment($proxyOrderId);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Payment approved successfully"
+        ]);
+    }
+
+    function payFromWallet(){
+        $proxyOrderId = $this->request->get('order_id');
+        $userId = $this->apiCredentialService->getAuthUser()->id;
+        $order = $this->proxyOrderService->payFromWallet($proxyOrderId, $userId);
+        return $this->jsonResponseService->success([
+            'order' => $order,
+            "message" => "Payment from wallet successful"
+        ]);
+    }
+
 }

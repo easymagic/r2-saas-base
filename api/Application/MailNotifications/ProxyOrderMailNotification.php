@@ -177,7 +177,8 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $name = $user->name;
         $body = '
         Hello ' . $name . ',
-        <br><br>Your order price has been adjusted.<br>
+        <br><br>Your order price has been adjusted. Please note that you will be charged the new price.
+        Login to your account to view the new price and make payment from your wallet.<br>
         <br>The new price is: ₦ ' . $proxyOrder->grand_total_naira . '<br>
         <br>Shipping Fee: $ ' . $proxyOrder->shipping_cost_usd . '<br>
         <br>Service Fee: $ ' . $proxyOrder->service_charge_usd . '<br>
@@ -196,4 +197,50 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $this->mailService->send($to, $subject, $from, $body);
     }
 
+    public function sendCustomerOrderPaidNotification(int $proxyOrderId){
+        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
+        $user = $this->userRepository->find($proxyOrder->user_id);
+        $to = $user->email;
+        $subject = 'Order Paid';
+        $from = $this->envService->get('NOREPLY_EMAIL');
+        $name = $user->name;
+        $body = '
+        Hello ' . $name . ',
+        <br><br>Your order has been paid successfully.<br>
+        <br>Order ID: ' . $proxyOrder->id . '<br>
+        <br>Order Type: ' . $proxyOrder->type . '<br>
+        <br>Order Reference: ' . $proxyOrder->reference . '<br>
+        <br>Order Link: ' . $proxyOrder->link . '<br>
+        <br>Order Description: ' . $proxyOrder->description . '<br>
+        <br>Order Amount: ' . $proxyOrder->total_amount_usd . '<br>
+        <br>Order Status: ' . $proxyOrder->status . '<br>
+        <br>Order Created At: ' . $proxyOrder->created_at . '<br>
+        <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        $this->mailService->send($to, $subject, $from, $body);
+    }
+
+    public function sendCustomerOrderPaymentApprovedNotification(int $proxyOrderId){
+        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
+        $user = $this->userRepository->find($proxyOrder->user_id);
+        $to = $user->email;
+        $subject = 'Payment Request Approved';
+        $from = $this->envService->get('NOREPLY_EMAIL');
+        $name = $user->name;
+        $body = '
+        Hello ' . $name . ',
+        <br><br>Your payment request has been approved. Please note that you will be charged the new price.
+        Login to your account to view the new price and make payment from your wallet.<br>
+        <br>Order ID: ' . $proxyOrder->id . '<br>
+        <br>Order Type: ' . $proxyOrder->type . '<br>
+        <br>Order Reference: ' . $proxyOrder->reference . '<br>
+        <br>Order Link: ' . $proxyOrder->link . '<br>
+        <br>Order Description: ' . $proxyOrder->description . '<br>
+        <br>Order Amount: ' . $proxyOrder->total_amount_usd . '<br>
+        <br>Order Status: ' . $proxyOrder->status . '<br>
+        <br>Order Created At: ' . $proxyOrder->created_at . '<br>
+        <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        $this->mailService->send($to, $subject, $from, $body);
+    }
 }
