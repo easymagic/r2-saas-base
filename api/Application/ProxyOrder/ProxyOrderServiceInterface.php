@@ -84,6 +84,13 @@ interface ProxyOrderServiceInterface
     function dashboardStats();
 
     /**
+     * Get the dashboard stats for a specific user
+     * @param int $userId
+     * @return array
+     */
+    function myDashboardStats(int $userId);
+
+    /**
      * Migrate the proxy order data
      * @return void
      */

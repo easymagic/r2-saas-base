@@ -219,7 +219,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             throw new \Exception('Price is required');
         }
         $order = $this->proxyOrderRepository->find($id);
-        if ($order->status != 'pending'){
+        if ($order->status != 'pending') {
             throw new \Exception('Order is not pending');
         }
 
@@ -326,6 +326,27 @@ class ProxyOrderService implements ProxyOrderServiceInterface
             'paid_orders_count' => $paidOrdersCount,
             'placed_orders_count' => $placedOrdersCount,
             'paid_orders_sum' => $paidOrdersSum
+        ];
+    }
+
+    /**
+     * Get the dashboard stats for a specific user
+     * @param int $userId
+     * @return array
+     */
+    function myDashboardStats(int $userId)
+    {
+        $pendingOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filterByPending()->count();
+        $deliveredOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filter([
+            "status" => "delivered"
+        ])->count();
+        $cancelledOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filter([
+            "status" => "cancelled"
+        ])->count();
+        return [
+            "pending_orders_count" => $pendingOrdersCount,
+            "delivered_orders_count" => $deliveredOrdersCount,
+            "cancelled_orders_count" => $cancelledOrdersCount
         ];
     }
 

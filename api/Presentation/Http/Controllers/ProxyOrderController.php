@@ -144,4 +144,13 @@ class ProxyOrderController
         ]);
     }
 
+    function myDashboardStats(){
+        $user = $this->apiCredentialService->getAuthUser();
+        $userId = $user->id;
+        $stats = $this->proxyOrderService->myDashboardStats($userId);
+        return $this->jsonResponseService->success([
+            'stats' => $stats
+        ]);
+    }
+
 }

@@ -59,192 +59,45 @@ use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterfac
  * @var AppServiceContainer $appServiceContainer
  */
 
-$appServiceContainer->container()->set(UserServiceInterface::class, function () use ($appServiceContainer) {
-    return new UserService(
-        $appServiceContainer->container()->get(UserMigrationServiceInterface::class),
-        $appServiceContainer->container()->get(UserValidationServiceInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(AccountMailNotificationServiceInterface::class),
-        $appServiceContainer->container()->get(NotificationServiceInterface::class),
-        $appServiceContainer->container()->get(PlatformConfigServiceInterface::class)
-    );
-});
 
+$appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
-$appServiceContainer->container()->set(UserMigrationServiceInterface::class, function () use ($appServiceContainer) {
-    return new UserMigrationService(
-        $appServiceContainer->container()->get(Migration::class)
-    );
-});
+$appServiceContainer->container()->map(UserMigrationServiceInterface::class, UserMigrationService::class);
 
-$appServiceContainer->container()->set(UserValidationServiceInterface::class, function () use ($appServiceContainer) {
-    return new UserValidationService(
-        $appServiceContainer->container()->get(UserRepositoryInterface::class)
-    );
-});
+$appServiceContainer->container()->map(UserValidationServiceInterface::class, UserValidationService::class);
 
-$appServiceContainer->container()->set(UserRepositoryInterface::class, function () use ($appServiceContainer) {
-    return new UserRepository(
-        $appServiceContainer->container()->get(DbServiceInterface::class),
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(UserRepositoryInterface::class, UserRepository::class);
 
-$appServiceContainer->container()->set(AccountMailNotificationServiceInterface::class, function () use ($appServiceContainer) {
-    return new AccountMailNotificationService(
-        $appServiceContainer->container()->get(MailServiceInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class)
-    );
-});
+$appServiceContainer->container()->map(AccountMailNotificationServiceInterface::class, AccountMailNotificationService::class);
 
+$appServiceContainer->container()->singleton(ApiCredentialServiceInterface::class, ApiCredentialService::class);
 
-$appServiceContainer->container()->set(ApiCredentialServiceInterface::class, function () use ($appServiceContainer) {
-    return new ApiCredentialService(
-        $appServiceContainer->container()->get(Request::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(EnvServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(WalletMigrationServiceInterface::class, WalletMigrationService::class);
 
+$appServiceContainer->container()->map(WalletRepositoryInterface::class, WalletRepository::class);
 
-$appServiceContainer->container()->set(WalletMigrationServiceInterface::class, function () use ($appServiceContainer) {
-    return new WalletMigrationService(
-        $appServiceContainer->container()->get(Migration::class)
-    );
-});
+$appServiceContainer->container()->map(WalletNotificationServiceInterface::class, WalletNotificationService::class);
 
-$appServiceContainer->container()->set(WalletRepositoryInterface::class, function () use ($appServiceContainer) {
-    return new WalletRepository(
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class),
-        $appServiceContainer->container()->get(DbServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(WalletValidationServiceInterface::class, WalletValidationService::class);
 
-$appServiceContainer->container()->set(WalletNotificationServiceInterface::class, function () use ($appServiceContainer) {
-    return new WalletNotificationService(
-        $appServiceContainer->container()->get(MailServiceInterface::class),
-        $appServiceContainer->container()->get(WalletRepositoryInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class)
-    );
-});
+$appServiceContainer->container()->map(WalletServiceInterface::class, WalletService::class);
 
+$appServiceContainer->container()->map(NotificationMigrationInterface::class, NotificationMigration::class);
 
-$appServiceContainer->container()->set(WalletValidationServiceInterface::class, function () use ($appServiceContainer) {
-    return new WalletValidationService();
-});
+$appServiceContainer->container()->map(NotificationRepositoryInterface::class, NotificationRepository::class);
 
-$appServiceContainer->container()->set(WalletServiceInterface::class, function () use ($appServiceContainer) {
-    return new WalletService(
-        $appServiceContainer->container()->get(WalletValidationServiceInterface::class),
-        $appServiceContainer->container()->get(WalletRepositoryInterface::class),
-        $appServiceContainer->container()->get(WalletNotificationServiceInterface::class),
-        $appServiceContainer->container()->get(EnvServiceInterface::class),
-        $appServiceContainer->container()->get(PaymentServiceInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(FileUploadServiceInterface::class),
-        $appServiceContainer->container()->get(WalletMigrationServiceInterface::class),
-        $appServiceContainer->container()->get(UserServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(NotificationServiceInterface::class, NotificationService::class);
 
+$appServiceContainer->container()->map(PlatformConfigRepositoryInterface::class, PlatformConfigRepository::class);
 
-$appServiceContainer->container()->set(WalletController::class, function () use ($appServiceContainer) {
-    return new WalletController(
-        $appServiceContainer->container()->get(WalletServiceInterface::class),
-        $appServiceContainer->container()->get(Request::class),
-        $appServiceContainer->container()->get(JsonResponseServiceInterface::class),
-        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class),
-        $appServiceContainer->container()->get(WalletRepositoryInterface::class)
-    );
-});
+$appServiceContainer->container()->map(PlatformConfigServiceInterface::class, PlatformConfigService::class);
 
-$appServiceContainer->container()->set(WalletFeedbackMiddleware::class, function () use ($appServiceContainer) {
-    return new WalletFeedbackMiddleware(
-        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class),
-        $appServiceContainer->container()->get(PaymentServiceInterface::class),
-        $appServiceContainer->container()->get(WalletServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(PlatformConfigMigrationServiceInterface::class, PlatformConfigMigrationService::class);
 
+$appServiceContainer->container()->map(ProxyOrderServiceInterface::class, ProxyOrderService::class);
 
-$appServiceContainer->container()->set(NotificationMigrationInterface::class, function () use ($appServiceContainer) {
-    return new NotificationMigration(
-        $appServiceContainer->container()->get(Migration::class)
-    );
-});
+$appServiceContainer->container()->map(ProxyOrderRepositoryInterface::class, ProxyOrderRepository::class);
 
-$appServiceContainer->container()->set(NotificationRepositoryInterface::class, function () use ($appServiceContainer) {
-    return new NotificationRepository(
-        $appServiceContainer->container()->get(DbServiceInterface::class),
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
-    );
-});
+$appServiceContainer->container()->map(ProxyOrderMailNotificationInterface::class, ProxyOrderMailNotification::class);
 
-// NotificationServiceInterface
-$appServiceContainer->container()->set(NotificationServiceInterface::class, function () use ($appServiceContainer) {
-    return new NotificationService(
-        $appServiceContainer->container()->get(NotificationRepositoryInterface::class),
-        $appServiceContainer->container()->get(NotificationMigrationInterface::class)
-    );
-});
-
-$appServiceContainer->container()->set(PlatformConfigRepositoryInterface::class, function () use ($appServiceContainer) {
-    return new PlatformConfigRepository(
-        $appServiceContainer->container()->get(DbServiceInterface::class),
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
-    );
-});
-
-$appServiceContainer->container()->set(PlatformConfigServiceInterface::class, function () use ($appServiceContainer) {
-    return new PlatformConfigService(
-        $appServiceContainer->container()->get(PlatformConfigRepositoryInterface::class),
-        $appServiceContainer->container()->get(PlatformConfigMigrationServiceInterface::class),
-        $appServiceContainer->container()->get(ApiCredentialServiceInterface::class)
-    );
-});
-
-$appServiceContainer->container()->set(PlatformConfigMigrationServiceInterface::class, function () use ($appServiceContainer) {
-    return new PlatformConfigMigrationService(
-        $appServiceContainer->container()->get(Migration::class)
-    );
-});
-
-
-// ProxyOrderServiceInterface
-$appServiceContainer->container()->set(ProxyOrderServiceInterface::class, function () use ($appServiceContainer) {
-    return new ProxyOrderService(
-        $appServiceContainer->container()->get(ProxyOrderRepositoryInterface::class),
-        $appServiceContainer->container()->get(ProxyOrderMailNotificationInterface::class),
-        $appServiceContainer->container()->get(FileUploadServiceInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class),
-        $appServiceContainer->container()->get(PlatformConfigServiceInterface::class),
-        $appServiceContainer->container()->get(ProxyOrderMigrationServiceInterface::class)
-    );
-});
-
-// ProxyOrderRepositoryInterface
-$appServiceContainer->container()->set(ProxyOrderRepositoryInterface::class, function () use ($appServiceContainer) {
-    return new ProxyOrderRepository(
-        $appServiceContainer->container()->get(DbServiceInterface::class),
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class),
-        $appServiceContainer->container()->get(QueryBuilderServiceInterface::class)
-    );
-});
-
-// ProxyOrderMailNotificationInterface
-$appServiceContainer->container()->set(ProxyOrderMailNotificationInterface::class, function () use ($appServiceContainer) {
-    return new ProxyOrderMailNotification(
-        $appServiceContainer->container()->get(MailServiceInterface::class),
-        $appServiceContainer->container()->get(ProxyOrderRepositoryInterface::class),
-        $appServiceContainer->container()->get(EnvServiceInterface::class),
-        $appServiceContainer->container()->get(UserRepositoryInterface::class)
-    );
-});
-
-// ProxyOrderMigrationServiceInterface
-$appServiceContainer->container()->set(ProxyOrderMigrationServiceInterface::class, function () use ($appServiceContainer) {
-    return new ProxyOrderMigrationService(
-        $appServiceContainer->container()->get(Migration::class)
-    );
-});
-
+$appServiceContainer->container()->map(ProxyOrderMigrationServiceInterface::class, ProxyOrderMigrationService::class);
