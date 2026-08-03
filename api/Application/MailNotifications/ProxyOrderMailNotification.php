@@ -1,6 +1,7 @@
 <?php 
 namespace Application\MailNotifications;
 
+use Application\MailNotifications\Base\BaseMailThemeInterface;
 use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
 use Domain\User\UserRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
@@ -13,17 +14,20 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
     private ProxyOrderRepositoryInterface $proxyOrderRepository;
     private EnvServiceInterface $envService;
     private UserRepositoryInterface $userRepository;
+    private BaseMailThemeInterface $baseMailTheme;
 
     public function __construct(
         MailServiceInterface $mailService,
         ProxyOrderRepositoryInterface $proxyOrderRepository,
         EnvServiceInterface $envService,
-        UserRepositoryInterface $userRepository
+        UserRepositoryInterface $userRepository,
+        BaseMailThemeInterface $baseMailTheme
     ) {
         $this->mailService = $mailService;
         $this->proxyOrderRepository = $proxyOrderRepository;
         $this->envService = $envService;
         $this->userRepository = $userRepository;
+        $this->baseMailTheme = $baseMailTheme;
     }
 
     public function sendCustomerOrderCreatedNotification(int $proxyOrderId){
@@ -33,7 +37,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Created';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order has been created successfully.<br>
         <br>Order ID: ' . $proxyOrder->id . '<br>
@@ -45,7 +49,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -56,7 +60,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Created';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br> A new order/request has been created by ' . $user->name . ' successfully.<br>
         <br>Order ID: ' . $proxyOrder->id . '<br>
@@ -67,7 +71,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Amount: ' . $proxyOrder->total_amount_usd . '<br>
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -78,7 +82,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Status Changed';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order status has been changed to ' . $proxyOrder->status . '.<br>
         <br>Order ID: ' . $proxyOrder->id . '<br>
@@ -90,7 +94,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -101,7 +105,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Ready for Pickup';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order is ready for pickup.<br>
         <br>Your pickup OTP is: <b>' . $proxyOrder->pickup_otp_code . '</b><br>
@@ -114,7 +118,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -126,7 +130,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Assigned to You';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order/request has been assigned to an agent.<br>
         <br>The agent is: ' . $agent->name . '<br>
@@ -139,7 +143,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -151,7 +155,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'New Order/Request';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $agent->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>A new order/request has been created.<br>
         <br>The customer is: ' . $user->name . '<br>
@@ -164,7 +168,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -175,7 +179,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Price Adjusted';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order price has been adjusted. Please note that you will be charged the new price.
         Login to your account to view the new price and make payment from your wallet.<br>
@@ -193,7 +197,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -204,7 +208,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Order Paid';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your order has been paid successfully.<br>
         <br>Order ID: ' . $proxyOrder->id . '<br>
@@ -216,7 +220,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 
@@ -227,7 +231,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         $subject = 'Payment Request Approved';
         $from = $this->envService->get('NOREPLY_EMAIL');
         $name = $user->name;
-        $body = '
+        $body = $this->baseMailTheme->wrapTemplate('
         Hello ' . $name . ',
         <br><br>Your payment request has been approved. Please note that you will be charged the new price.
         Login to your account to view the new price and make payment from your wallet.<br>
@@ -240,7 +244,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
         <br>Order Status: ' . $proxyOrder->status . '<br>
         <br>Order Created At: ' . $proxyOrder->created_at . '<br>
         <br>Order Updated At: ' . $proxyOrder->updated_at . '<br>
-        <br>Thank you for using our service.<br><br>Best regards,<br>The Team';
+        <br>Thank you for using our service.<br><br>Best regards,<br>The Team');
         $this->mailService->send($to, $subject, $from, $body);
     }
 }

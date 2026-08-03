@@ -3,6 +3,8 @@
 use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Application\MailNotifications\AccountMailNotificationService;
 use Application\MailNotifications\AccountMailNotificationServiceInterface;
+use Application\MailNotifications\Base\BaseMailTheme;
+use Application\MailNotifications\Base\BaseMailThemeInterface;
 use Application\MailNotifications\ProxyOrderMailNotification;
 use Application\MailNotifications\ProxyOrderMailNotificationInterface;
 use Application\MailNotifications\Wallet\WalletNotificationService;
@@ -101,3 +103,5 @@ $appServiceContainer->container()->map(ProxyOrderRepositoryInterface::class, Pro
 $appServiceContainer->container()->map(ProxyOrderMailNotificationInterface::class, ProxyOrderMailNotification::class);
 
 $appServiceContainer->container()->map(ProxyOrderMigrationServiceInterface::class, ProxyOrderMigrationService::class);
+
+$appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
