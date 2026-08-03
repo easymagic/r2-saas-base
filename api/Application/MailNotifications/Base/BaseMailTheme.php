@@ -38,7 +38,7 @@ class BaseMailTheme implements BaseMailThemeInterface
                 </tr>
                 <tr>
                   <td style="padding-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;color:#ccfbf1;">
-                    Transactional notification
+                    
                   </td>
                 </tr>
               </table>

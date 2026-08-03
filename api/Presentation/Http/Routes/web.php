@@ -95,7 +95,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
                 // Proxy order routes
                 $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
-                $route->post("proxy-orders/create", [ProxyOrderController::class, "createOrder"]);
+                $route->post("proxy-orders", [ProxyOrderController::class, "createOrder"]);
                 $route->get("proxy-orders/migrate", [ProxyOrderController::class, "migrate"]);
                 $route->post("proxy-orders/{order_id}/pay-from-wallet", [ProxyOrderController::class, "payFromWallet"]);
 
