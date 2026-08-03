@@ -102,7 +102,7 @@ class AccountMailNotificationService implements AccountMailNotificationServiceIn
             . '</p>';
     }
 
-    private function otpBox($otp, string $label): string
+    private function otpBox(string $otp, string $label): string
     {
         return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px 0;">'
             . '<tr><td align="center" style="background-color:#0f766e;border-radius:10px;padding:20px 16px;">'
