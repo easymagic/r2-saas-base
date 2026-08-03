@@ -31,8 +31,8 @@ class UserService implements UserServiceInterface
         UserRepositoryInterface $userRepository,
         AccountMailNotificationServiceInterface $accountMailNotificationService,
         NotificationServiceInterface $notificationService,
-        PlatformConfigServiceInterface $platformConfigService,
-        WalletServiceInterface $walletService
+        PlatformConfigServiceInterface $platformConfigService
+        // WalletServiceInterface $walletService
     ) {
         $this->userMigrationService = $userMigrationService;
         $this->userValidationService = $userValidationService;
@@ -40,7 +40,7 @@ class UserService implements UserServiceInterface
         $this->accountMailNotificationService = $accountMailNotificationService;
         $this->notificationService = $notificationService;
         $this->platformConfigService = $platformConfigService;
-        $this->walletService = $walletService;
+        // $this->walletService = $walletService;
     }
 
     public function login(string $email, string $password)
@@ -348,14 +348,14 @@ class UserService implements UserServiceInterface
             'wallet_balance' => $user->wallet_balance - $amount,
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
-        $this->walletService->log(
-            $user->id,
-            $amount,
-            uniqid("WALLET_WITHDRAWAL_"),
-            'withdrawal',
-            'Withdrawal from wallet',
-            'approved'
-        );
+        // $this->walletService->log(
+        //     $user->id,
+        //     $amount,
+        //     uniqid("WALLET_WITHDRAWAL_"),
+        //     'withdrawal',
+        //     'Withdrawal from wallet',
+        //     'approved'
+        // );
         $this->accountMailNotificationService->sendAccountWithdrawWalletToUser($user->id, $amount);
         return $user;
     }

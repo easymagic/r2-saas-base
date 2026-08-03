@@ -6,6 +6,7 @@ use Application\MailNotifications\ProxyOrderMailNotificationInterface;
 use Application\PlatformConfig\PlatformConfigServiceInterface;
 use Application\ProxyOrder\ProxyOrderServiceInterface;
 use Application\User\UserServiceInterface;
+use Application\Wallet\WalletServiceInterface;
 use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
 use Domain\ProxyOrder\ProxyOrderEntity;
 use Domain\User\UserRepositoryInterface;
@@ -27,6 +28,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
     private ProxyOrderMigrationServiceInterface $proxyOrderMigrationService;
 
     private UserServiceInterface $userService;
+
+    private WalletServiceInterface $walletService;
 
     const ALLOWED_STATUSES = [
         'pending',
@@ -61,7 +64,8 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         UserRepositoryInterface $userRepository,
         PlatformConfigServiceInterface $platformConfigService,
         ProxyOrderMigrationServiceInterface $proxyOrderMigrationService,
-        UserServiceInterface $userService
+        UserServiceInterface $userService,
+        WalletServiceInterface $walletService
     ) {
         $this->proxyOrderRepository = $proxyOrderRepository;
         $this->proxyOrderMailNotification = $proxyOrderMailNotification;
@@ -70,6 +74,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         $this->platformConfigService = $platformConfigService;
         $this->proxyOrderMigrationService = $proxyOrderMigrationService;
         $this->userService = $userService;
+        $this->walletService = $walletService;
     }
 
     public function create(
@@ -382,6 +387,15 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         }
         $amount = $order->grand_total_naira;
         $this->userService->withdrawWallet($userId, $amount);
+        $this->walletService->log(
+            $userId,
+            $amount,
+            uniqid("WALLET_WITHDRAWAL_"),
+            'withdrawal',
+            'Withdrawal from wallet',
+            'approved'
+        );
+
         $order = $this->proxyOrderRepository->save($order->id, [
             'status' => 'paid'
         ]);
