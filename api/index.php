@@ -27,8 +27,8 @@ include_once __DIR__ . '/Presentation/Http/Routes/web.php';
  * Boots
  */
 $boots = [
-    'boot' => __DIR__ . '/Infrastructure/boot.php',
-    'boot_extend' => __DIR__ . '/Infrastructure/boot_extend.php',
+    'boot' => __DIR__ . '/Kernel/boot.php',
+    'boot_extend' => __DIR__ . '/Kernel/boot_extend.php',
 ];
 
 foreach ($boots as $boot) {
