@@ -2,6 +2,7 @@
 
 namespace Business\ProxyOrder\Order;
 
+use Business\AbstractBaseService;
 use Business\PlatformConfig\PlatformConfigServiceInterface;
 use Business\User\UserServiceInterface;
 use Business\Wallet\WalletServiceInterface;
@@ -12,7 +13,7 @@ use Data\ProxyOrder\Order\ProxyOrderRepository;
 use Data\User\UserRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
 
-class ProxyOrderService implements ProxyOrderServiceInterface
+class ProxyOrderService extends AbstractBaseService implements ProxyOrderServiceInterface
 {
 
     private ProxyOrderRepositoryInterface $proxyOrderRepository;
@@ -41,6 +42,7 @@ class ProxyOrderService implements ProxyOrderServiceInterface
         UserServiceInterface $userService,
         WalletServiceInterface $walletService
     ) {
+        parent::__construct($proxyOrderRepository);
         $this->proxyOrderRepository = $proxyOrderRepository;
         $this->proxyOrderMailNotification = $proxyOrderMailNotification;
         $this->fileUploadService = $fileUploadService;
@@ -153,10 +155,17 @@ class ProxyOrderService implements ProxyOrderServiceInterface
 
         $order = $this->proxyOrderRepository->find($id);
 
-        $positionIncomingStatus = array_search($status, ProxyOrderRepositoryInterface::ALLOWED_STATUSES);
-        $positionCurrentStatus = array_search($order->status, ProxyOrderRepositoryInterface::ALLOWED_STATUSES);
-        if ($positionIncomingStatus < $positionCurrentStatus) {
+        $positionIncomingStatus = array_search($status, ProxyOrderRepositoryInterface::STATUS_ORDER);
+        $positionCurrentStatus = array_search($order->status, ProxyOrderRepositoryInterface::STATUS_ORDER);
+        
+        if ($positionIncomingStatus < $positionCurrentStatus && $status !== 'cancelled') {
             throw new \Exception('Invalid status!');
+        }
+
+        if ($status == 'cancelled') {
+            if ($order->status !== 'pending'){
+                throw new \Exception('Can only cancel pending orders');
+            }
         }
 
         if ($status == 'ready-for-pickup') {
@@ -303,10 +312,10 @@ class ProxyOrderService implements ProxyOrderServiceInterface
      */
     function dashboardStats()
     {
-        $pendingOrdersCount = $this->proxyOrderRepository->filterByPending()->count();
-        $paidOrdersCount = $this->proxyOrderRepository->filterByPaid()->count();
+        $pendingOrdersCount = $this->proxyOrderRepository->filter(['pending' => true])->count();
+        $paidOrdersCount = $this->proxyOrderRepository->filter(['paid' => true])->count();
         $placedOrdersCount = $this->proxyOrderRepository->filter(['status' => 'placed'])->count();
-        $paidOrdersSum = $this->proxyOrderRepository->filterByPaid()->sum('total_amount_naira');
+        $paidOrdersSum = $this->proxyOrderRepository->filter(['paid' => true])->sum('total_amount_naira');
 
         return [
             'pending_orders_count' => $pendingOrdersCount,
@@ -323,13 +332,9 @@ class ProxyOrderService implements ProxyOrderServiceInterface
      */
     function myDashboardStats(int $userId)
     {
-        $pendingOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filterByPending()->count();
-        $deliveredOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filter([
-            "status" => "delivered"
-        ])->count();
-        $cancelledOrdersCount = $this->proxyOrderRepository->filterByUserId($userId)->filter([
-            "status" => "cancelled"
-        ])->count();
+        $pendingOrdersCount = $this->proxyOrderRepository->filter(['user_id' => $userId, 'pending' => true])->count();
+        $deliveredOrdersCount = $this->proxyOrderRepository->filter(['user_id' => $userId, 'status' => 'delivered'])->count();
+        $cancelledOrdersCount = $this->proxyOrderRepository->filter(['user_id' => $userId, 'status' => 'cancelled'])->count();
         return [
             "pending_orders_count" => $pendingOrdersCount,
             "delivered_orders_count" => $deliveredOrdersCount,

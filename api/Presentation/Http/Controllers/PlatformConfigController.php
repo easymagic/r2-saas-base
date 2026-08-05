@@ -1,8 +1,9 @@
 <?php
 namespace Presentation\Http\Controllers;
 
-use Application\PlatformConfig\PlatformConfigServiceInterface;
-use Domain\PlatformConfig\PlatformConfigRepositoryInterface;
+use Business\PlatformConfig\PlatformConfigServiceInterface;
+use Data\PlatformConfig\PlatformConfigRepositoryInterface;
+use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
@@ -12,17 +13,20 @@ class PlatformConfigController
     private JsonResponseServiceInterface $jsonResponseService;
     private PlatformConfigServiceInterface $platformConfigService;
     private Request $request;
+    private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
         PlatformConfigRepositoryInterface $platformConfigRepository,
         JsonResponseServiceInterface $jsonResponseService,
         Request $request,
-        PlatformConfigServiceInterface $platformConfigService
+        PlatformConfigServiceInterface $platformConfigService,
+        ApiCredentialServiceInterface $apiCredentialService
     ) {
         $this->platformConfigRepository = $platformConfigRepository;
         $this->jsonResponseService = $jsonResponseService;
         $this->request = $request;
         $this->platformConfigService = $platformConfigService;
+        $this->apiCredentialService = $apiCredentialService;
     }
 
     function all() {
@@ -43,8 +47,10 @@ class PlatformConfigController
     }
 
     function delete(){
+      $user = $this->apiCredentialService->getAuthUser();
+      $userId = $user->id;
       $id =  $this->request->get('platform_config_id');
-      $result = $this->platformConfigService->delete($id);
+      $result = $this->platformConfigService->delete($id, $userId);
       return $this->jsonResponseService->success([
         'message' => 'Platform config deleted successfully',
         'result' => $result

@@ -2,9 +2,10 @@
 
 namespace Business\ProxyOrder\Order;
 
+use Business\AbstractBaseServiceInterface;
 use Data\ProxyOrder\Order\ProxyOrderEntity;
 
-interface ProxyOrderServiceInterface
+interface ProxyOrderServiceInterface extends AbstractBaseServiceInterface
 {
     /**
      * @param int $userId

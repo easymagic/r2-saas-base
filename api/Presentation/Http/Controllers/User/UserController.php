@@ -2,8 +2,8 @@
 
 namespace Presentation\Http\Controllers\User;
 
-use Application\User\UserServiceInterface;
-use Domain\User\UserRepositoryInterface;
+use Business\User\UserServiceInterface;
+use Data\User\UserRepositoryInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;

@@ -2,8 +2,8 @@
 
 namespace Presentation\Http\Controllers;
 
-use Application\Wallet\WalletServiceInterface;
-use Domain\Wallet\WalletRepositoryInterface;
+use Business\Wallet\WalletServiceInterface;
+use Data\Wallet\WalletRepositoryInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
@@ -46,7 +46,6 @@ class WalletController
             $user_id,
             $amount,
             $reference,
-            $type,
             $description,
             $status,
             $payment_url
@@ -75,7 +74,6 @@ class WalletController
             $user_id,
             $amount,
             $reference,
-            $type,
             $description,
             $status,
             $proof_of_payment_screenshot1,
@@ -120,7 +118,11 @@ class WalletController
     {
         $user = $this->apiCredentialService->getAuthUser();
         $user_id = $user->id;
-        $wallets = $this->walletRepository->pendingForUser($user_id)->fetch();
+        $wallets = $this->walletService
+        ->filterBy('user_id', $user_id)
+        ->filterBy('status', 'pending')
+        ->filterBy('type', 'online')
+        ->filter($this->request->all())->fetch();
 
         return $this->response->success([
             'wallets' => $wallets,
@@ -132,7 +134,11 @@ class WalletController
     {
         $user = $this->apiCredentialService->getAuthUser();
         $user_id = $user->id;
-        $wallets = $this->walletRepository->approvedForUser($user_id)->fetch();
+        $wallets = $this->walletService
+        ->filterBy('user_id', $user_id)
+        ->filterBy('status', 'approved')
+        ->filterBy('type', 'online')
+        ->filter($this->request->all())->fetch();
 
         return $this->response->success([
             'wallets' => $wallets,
@@ -142,7 +148,10 @@ class WalletController
 
     public function manualPendingWalletTransactions()
     {
-        $wallets = $this->walletRepository->manualPending()->fetch();
+        $wallets = $this->walletService
+        ->filterBy('status', 'pending')
+        ->filterBy('type', 'manual')
+        ->filter($this->request->all())->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual pending wallet transactions fetched successfully'
@@ -151,7 +160,10 @@ class WalletController
 
     public function manualApprovedWalletTransactions()
     {
-        $wallets = $this->walletRepository->manualApproved()->fetch();
+        $wallets = $this->walletService
+        ->filterBy('status', 'approved')
+        ->filterBy('type', 'manual')
+        ->filter($this->request->all())->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual approved wallet transactions fetched successfully'
@@ -160,7 +172,10 @@ class WalletController
 
     public function manualRejectedWalletTransactions()
     {
-        $wallets = $this->walletRepository->manualRejected()->fetch();
+        $wallets = $this->walletService
+        ->filterBy('status', 'rejected')
+        ->filterBy('type', 'manual')
+        ->filter($this->request->all())->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual rejected wallet transactions fetched successfully'

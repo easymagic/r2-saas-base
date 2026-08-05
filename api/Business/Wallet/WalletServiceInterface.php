@@ -2,9 +2,10 @@
 
 namespace Business\Wallet;
 
+use Business\AbstractBaseServiceInterface;
 use Data\Wallet\WalletEntity;
 
-interface WalletServiceInterface
+interface WalletServiceInterface extends AbstractBaseServiceInterface
 {
 
     /**
@@ -12,7 +13,6 @@ interface WalletServiceInterface
      * @param int $user_id
      * @param float $amount
      * @param string $reference
-     * @param string $type
      * @param string $description
      * @param string $status
      * @return WalletEntity
@@ -21,7 +21,6 @@ interface WalletServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         string $payment_url
@@ -40,7 +39,6 @@ interface WalletServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,

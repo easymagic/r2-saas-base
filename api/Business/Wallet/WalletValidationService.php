@@ -11,7 +11,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status
     ) {
@@ -24,9 +23,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         if (empty($reference)){
             throw new Exception('Reference is required!');
         }
-        if (empty($type)){
-            throw new Exception('Type is required!');
-        }
         if (empty($description)){
             throw new Exception('Description is required!');
         }
@@ -35,9 +31,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         }
         if (!in_array($status, ['pending', 'approved', 'rejected'])){
             throw new Exception('Status is invalid!');
-        }
-        if (!in_array($type, ['online', 'manual'])){
-            throw new Exception('Type is invalid!');
         }
         if (!in_array($status, ['pending', 'approved', 'rejected'])){
             throw new Exception('Status is invalid!');
@@ -48,7 +41,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
@@ -64,9 +56,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         if (empty($reference)){
             throw new Exception('Reference is required!');
         }
-        if (empty($type)){
-            throw new Exception('Type is required!');
-        }
         if (empty($description)){
             throw new Exception('Description is required!');
         }
@@ -75,9 +64,6 @@ class WalletValidationService implements WalletValidationServiceInterface
         }
         if (!in_array($status, ['pending', 'approved', 'rejected'])){
             throw new Exception('Status is invalid!');
-        }
-        if (!in_array($type, ['online', 'manual'])){
-            throw new Exception('Type is invalid!');
         }
         if (empty($proof_of_payment_screenshot1)){
             throw new Exception('Proof of payment screenshot 1 is required!');

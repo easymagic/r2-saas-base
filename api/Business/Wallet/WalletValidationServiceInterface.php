@@ -9,7 +9,6 @@ interface WalletValidationServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status
     );
@@ -18,7 +17,6 @@ interface WalletValidationServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,

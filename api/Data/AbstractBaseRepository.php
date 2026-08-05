@@ -79,9 +79,9 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
         $this->params['id'] = $id;
         $result = $this->db->fetchOne($this->sql, $this->params);
         $entity = $this->hydrate($result);
-        if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
-            throw new Exception("Entity: {$this->table} not found");
-        }
+        // if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
+        //     throw new Exception("Entity: {$this->table} not found");
+        // }
         return $entity;
     }
 
@@ -101,9 +101,9 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
         $this->params['value'] = $value;
         $result = $this->db->fetchOne($this->sql, $this->params);
         $entity = $this->hydrate($result);
-        if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
-            throw new Exception("Entity: {$this->table} not found");
-        }
+        // if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
+        //     throw new Exception("Entity: {$this->table} not found");
+        // }
         return $entity;
     }
 
@@ -147,6 +147,16 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
             $this->db->update($this->table, $data, ["id" => $id]);
         }
         return $this->find($id);
+    }
+
+    /**
+     * Delete an entity
+     * @param int $id
+     * @return bool
+     */
+    function delete(int $id){
+        $this->db->delete($this->table, ["id" => $id]);
+        return true;
     }
 
 

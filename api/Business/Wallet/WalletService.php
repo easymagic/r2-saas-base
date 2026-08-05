@@ -2,6 +2,7 @@
 
 namespace Business\Wallet;
 
+use Business\AbstractBaseService;
 use Business\Wallet\WalletServiceInterface;
 use Business\Wallet\WalletNotificationServiceInterface;
 use Business\User\UserServiceInterface;
@@ -14,7 +15,7 @@ use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterfac
 use Data\Wallet\WalletEntity;
 use Data\Wallet\WalletMigrationRepositoryInterface;
 
-class WalletService implements WalletServiceInterface
+class WalletService extends AbstractBaseService implements WalletServiceInterface
 {
     private WalletRepositoryInterface $walletRepository;
     private WalletNotificationServiceInterface $walletNotificationService;
@@ -64,7 +65,6 @@ class WalletService implements WalletServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         string $payment_url
@@ -73,7 +73,6 @@ class WalletService implements WalletServiceInterface
             $user_id,
             $amount,
             $reference,
-            $type,
             $description,
             $status
         );
@@ -94,7 +93,7 @@ class WalletService implements WalletServiceInterface
             'user_id' => $user_id,
             'amount' => $amount,
             'reference' => $reference,
-            'type' => $type,
+            'type' => 'online',
             'description' => $description,
             'status' => "pending",
             'payment_url' => $payment_url
@@ -107,7 +106,6 @@ class WalletService implements WalletServiceInterface
         int $user_id,
         float $amount,
         string $reference,
-        string $type,
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
@@ -118,7 +116,6 @@ class WalletService implements WalletServiceInterface
             $user_id,
             $amount,
             $reference,
-            $type,
             $description,
             $status,
             $proof_of_payment_screenshot1,
@@ -159,7 +156,7 @@ class WalletService implements WalletServiceInterface
             'user_id' => $user_id,
             'amount' => $amount,
             'reference' => $reference,
-            'type' => $type,
+            'type' => 'manual',
             'description' => $description,
             'status' => $status,
             'proof_of_payment_screenshot1' => $proof_of_payment_screenshot1,
@@ -227,7 +224,11 @@ class WalletService implements WalletServiceInterface
 
     public function onlinePendingForUser(int $user_id)
     {
-        return $this->walletRepository->online()->pendingForUser($user_id)->fetchAll();
+        return $this->walletRepository->filter([
+            "online" => true,
+            "status" => "pending",
+            "user_id" => $user_id
+        ])->fetchAll();
     }
 
     public function log(

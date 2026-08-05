@@ -28,6 +28,19 @@ interface ProxyOrderRepositoryInterface extends AbstractBaseRepositoryInterface
       'ready-for-pickup',
       'delivered'
    ];
-   const ALLOWED_TYPES = ['online', 'physical'];
 
+   const STATUS_ORDER = [
+      'pending',
+      'paid',
+      'placed',
+      'shipped-to-facility',
+      'arrived-at-facility',
+      'shipped-to-destination-country',
+      'arrived-at-destination-country',
+      'arrived-at-destination-facility',
+      'ready-for-pickup',
+      'delivered',
+      'cancelled'
+   ];
+   const ALLOWED_TYPES = ['online', 'physical'];
 }

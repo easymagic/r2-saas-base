@@ -2,9 +2,10 @@
 
 namespace Business\User;
 
+use Business\AbstractBaseServiceInterface;
 use Data\User\UserEntity;
 
-interface UserServiceInterface
+interface UserServiceInterface extends AbstractBaseServiceInterface
 {
     public function login(string $email, string $password);
     public function register(
@@ -71,8 +72,6 @@ interface UserServiceInterface
      * @return mixed
      */
     public function verifyEmail(string $email, string $otp);
-    public function fetch(array $criteria);
-    public function count(array $criteria);
     public function migrate();
     public function topUpWallet(int $id, float $amount);
     public function withdrawWallet(int $id, float $amount);

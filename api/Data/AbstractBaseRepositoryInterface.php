@@ -90,5 +90,12 @@ interface AbstractBaseRepositoryInterface
      */
     function save(int $id, array $data);
 
+    /**
+     * Delete an entity
+     * @param int $id
+     * @return bool
+     */
+    function delete(int $id);
+
 
 }

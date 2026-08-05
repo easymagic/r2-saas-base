@@ -149,6 +149,8 @@ class UserValidationService implements UserValidationServiceInterface
         if (empty($id)) {
             throw new Exception('ID is required');
         }
+        throw new Exception('Delete not allowed');
+        return false;
         $user = $this->userRepository->find($id);
         return $user;
     }
@@ -227,7 +229,7 @@ class UserValidationService implements UserValidationServiceInterface
         if (empty($otp)) {
             throw new Exception('OTP is required');
         }
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         if ($user->otp != $otp) {
             throw new Exception('OTP is incorrect');
         }
@@ -255,7 +257,7 @@ class UserValidationService implements UserValidationServiceInterface
         if($password != $confirm_password){
             throw new Exception('Password and confirm password do not match');
         }
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         if ($user->otp != $otp) {
             throw new Exception('OTP is incorrect');
         }

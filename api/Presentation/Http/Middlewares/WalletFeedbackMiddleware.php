@@ -3,9 +3,8 @@
 namespace Presentation\Http\Middlewares;
 
 
-use Application\Wallet\WalletServiceInterface;
-use Domain\Wallet\WalletEntity;
-use Domain\Wallet\WalletRepositoryInterface;
+use Business\Wallet\WalletServiceInterface;
+use Data\Wallet\WalletEntity;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Middlewares\MiddlewareServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;

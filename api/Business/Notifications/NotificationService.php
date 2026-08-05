@@ -41,7 +41,7 @@ class NotificationService implements NotificationServiceInterface
     }
 
     public function myNotifications(int $userId) {
-      return $this->notificationRepository->filterByUserId($userId)->fetch();
+      return $this->notificationRepository->filterBy("user_id", $userId)->fetch();
     }
 
     public function markAsRead(int $notificationId, int $userId) {
@@ -77,7 +77,7 @@ class NotificationService implements NotificationServiceInterface
     }
 
     public function count(int $userId) {
-        return $this->notificationRepository->filterByUserId($userId)->count();
+        return $this->notificationRepository->filterBy('user_id',$userId)->count();
     }
 
     public function migrate() {

@@ -12,7 +12,8 @@ class ProxyOrderRepository extends AbstractBaseRepository implements ProxyOrderR
     protected string $table = 'proxy_orders';
     protected string $sql = "SELECT * FROM proxy_orders WHERE 1=1 ";
     protected int $size = 11;
-
+    protected string $hydrateClass = ProxyOrderEntity::class;
+    
     public function __construct(
         DbServiceInterface $dbService,
     ) {

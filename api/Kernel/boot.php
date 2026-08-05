@@ -1,70 +1,59 @@
 <?php
 
-use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
-use Application\MailNotifications\AccountMailNotificationService;
-use Application\MailNotifications\AccountMailNotificationServiceInterface;
-use Application\MailNotifications\Base\BaseMailTheme;
-use Application\MailNotifications\Base\BaseMailThemeInterface;
-use Application\MailNotifications\ProxyOrderMailNotification;
-use Application\MailNotifications\ProxyOrderMailNotificationInterface;
-use Application\MailNotifications\Wallet\WalletNotificationService;
-use Application\MailNotifications\Wallet\WalletNotificationServiceInterface;
-use Application\Notifications\NotificationMigrationInterface;
-use Application\Notifications\NotificationService;
-use Application\Notifications\NotificationServiceInterface;
-use Application\PlatformConfig\PlatformConfigMigrationServiceInterface;
-use Application\PlatformConfig\PlatformConfigService;
-use Application\PlatformConfig\PlatformConfigServiceInterface;
-use Application\ProxyOrder\ProxyOrderMigrationServiceInterface;
-use Application\ProxyOrder\ProxyOrderService;
-use Application\ProxyOrder\ProxyOrderServiceInterface;
-use Application\User\UserMigrationServiceInterface;
-use Application\User\UserService;
-use Application\User\UserServiceInterface;
-use Application\User\UserValidationService;
-use Application\User\UserValidationServiceInterface;
-use Application\Wallet\WalletMigrationServiceInterface;
-use Application\Wallet\WalletService;
-use Application\Wallet\WalletServiceInterface;
-use Application\Wallet\WalletValidationService;
-use Application\Wallet\WalletValidationServiceInterface;
-use Domain\Notifications\NotificationRepositoryInterface;
-use Domain\PlatformConfig\PlatformConfigRepositoryInterface;
-use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
-use Domain\User\UserRepositoryInterface;
-use Domain\Wallet\WalletRepositoryInterface;
-use Infrastructure\Notification\NotificationRepository;
-use Infrastructure\Notification\NotificationMigration;
-use Infrastructure\PlatformConfig\PlatformConfigMigrationService;
-use Infrastructure\PlatformConfig\PlatformConfigRepository;
-use Infrastructure\ProxyOrder\ProxyOrderMigrationService;
-use Infrastructure\ProxyOrder\ProxyOrderRepository;
-use Infrastructure\User\UserMigrationService;
-use Infrastructure\User\UserRepository;
-use Infrastructure\Wallet\WalletMigrationService;
-use Infrastructure\Wallet\WalletRepository;
-use Presentation\ApiCredential\ApiCredentialService;
-use Presentation\ApiCredential\ApiCredentialServiceInterface;
-use Presentation\Http\Controllers\WalletController;
-use Presentation\Http\Middlewares\WalletFeedbackMiddleware;
-use R2Packages\Framework\Application\Mail\MailServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
-use R2Packages\Framework\Infrastructure\Framework\Container\Request;
-use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Db\Migration;
-use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 
 /**
  * @var AppServiceContainer $appServiceContainer
  */
 
+use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
+use Business\User\UserService;
+use Business\User\UserServiceInterface;
+use Business\User\UserValidationServiceInterface;
+use Business\User\UserValidationService;
+use Business\User\AccountMailNotificationServiceInterface;
+use Business\User\AccountMailNotificationService;
+use Data\User\UserRepositoryInterface;
+use Data\User\UserRepository;
+use Data\User\UserMigrationRepositoryInterface;
+use Data\User\UserMigrationRepository;
+use Presentation\ApiCredential\ApiCredentialServiceInterface;
+use Presentation\ApiCredential\ApiCredentialService;
+use Business\Wallet\WalletServiceInterface;
+use Business\Wallet\WalletService;
+use Business\Wallet\WalletValidationServiceInterface;
+use Business\Wallet\WalletValidationService;
+use Business\Wallet\WalletNotificationServiceInterface;
+use Business\Wallet\WalletNotificationService;
+use Data\Wallet\WalletRepositoryInterface;
+use Data\Wallet\WalletRepository;
+use Data\Wallet\WalletMigrationRepositoryInterface;
+use Data\Wallet\WalletMigrationRepository;
+use Business\Notifications\NotificationServiceInterface;
+use Business\Notifications\NotificationService;
+use Data\Notifications\NotificationRepositoryInterface;
+use Data\Notifications\NotificationRepository;
+use Data\Notifications\NotificationMigrationRepositoryInterface;
+use Data\Notifications\NotificationMigrationRepository;
+use Business\PlatformConfig\PlatformConfigServiceInterface;
+use Business\PlatformConfig\PlatformConfigService;
+use Data\PlatformConfig\PlatformConfigRepositoryInterface;
+use Data\PlatformConfig\PlatformConfigRepository;
+use Data\PlatformConfig\PlatformConfigMigrationRepositoryInterface;
+use Data\PlatformConfig\PlatformConfigMigrationRepository;
+use Business\ProxyOrder\Order\ProxyOrderServiceInterface;
+use Business\ProxyOrder\Order\ProxyOrderService;
+use Business\ProxyOrder\Order\ProxyOrderMailNotificationInterface;
+use Business\ProxyOrder\Order\ProxyOrderMailNotification;
+use Data\ProxyOrder\Order\ProxyOrderRepositoryInterface;
+use Data\ProxyOrder\Order\ProxyOrderRepository;
+use Data\ProxyOrder\Order\ProxyOrderMigrationRepositoryInterface;
+use Data\ProxyOrder\Order\ProxyOrderMigrationRepository;
+use Business\MailTheme\BaseMailThemeInterface;
+use Business\MailTheme\BaseMailTheme;
 
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
-$appServiceContainer->container()->map(UserMigrationServiceInterface::class, UserMigrationService::class);
+$appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
 
 $appServiceContainer->container()->map(UserValidationServiceInterface::class, UserValidationService::class);
 
@@ -74,7 +63,7 @@ $appServiceContainer->container()->map(AccountMailNotificationServiceInterface::
 
 $appServiceContainer->container()->singleton(ApiCredentialServiceInterface::class, ApiCredentialService::class);
 
-$appServiceContainer->container()->map(WalletMigrationServiceInterface::class, WalletMigrationService::class);
+$appServiceContainer->container()->map(WalletMigrationRepositoryInterface::class, WalletMigrationRepository::class);
 
 $appServiceContainer->container()->map(WalletRepositoryInterface::class, WalletRepository::class);
 
@@ -84,7 +73,7 @@ $appServiceContainer->container()->map(WalletValidationServiceInterface::class, 
 
 $appServiceContainer->container()->map(WalletServiceInterface::class, WalletService::class);
 
-$appServiceContainer->container()->map(NotificationMigrationInterface::class, NotificationMigration::class);
+$appServiceContainer->container()->map(NotificationMigrationRepositoryInterface::class, NotificationMigrationRepository::class);
 
 $appServiceContainer->container()->map(NotificationRepositoryInterface::class, NotificationRepository::class);
 
@@ -94,7 +83,7 @@ $appServiceContainer->container()->map(PlatformConfigRepositoryInterface::class,
 
 $appServiceContainer->container()->map(PlatformConfigServiceInterface::class, PlatformConfigService::class);
 
-$appServiceContainer->container()->map(PlatformConfigMigrationServiceInterface::class, PlatformConfigMigrationService::class);
+$appServiceContainer->container()->map(PlatformConfigMigrationRepositoryInterface::class, PlatformConfigMigrationRepository::class);
 
 $appServiceContainer->container()->map(ProxyOrderServiceInterface::class, ProxyOrderService::class);
 
@@ -102,6 +91,6 @@ $appServiceContainer->container()->map(ProxyOrderRepositoryInterface::class, Pro
 
 $appServiceContainer->container()->map(ProxyOrderMailNotificationInterface::class, ProxyOrderMailNotification::class);
 
-$appServiceContainer->container()->map(ProxyOrderMigrationServiceInterface::class, ProxyOrderMigrationService::class);
+$appServiceContainer->container()->map(ProxyOrderMigrationRepositoryInterface::class, ProxyOrderMigrationRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);

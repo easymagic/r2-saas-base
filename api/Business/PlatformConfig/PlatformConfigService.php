@@ -13,7 +13,7 @@ class PlatformConfigService implements PlatformConfigServiceInterface
     private PlatformConfigRepositoryInterface $platformConfigRepository;
     private PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository;
     private UserRepositoryInterface $userRepository;
-    
+
     public function __construct(
         PlatformConfigRepositoryInterface $platformConfigRepository,
         PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository,
@@ -33,7 +33,7 @@ class PlatformConfigService implements PlatformConfigServiceInterface
     {
         $setting = strtoupper($setting);
 
-        $platformConfig = $this->platformConfigRepository->findBySetting($setting);
+        $platformConfig = $this->platformConfigRepository->findBy("setting_key", $setting);
 
         if ($platformConfig->isEmpty()) {
             return $default;
@@ -50,7 +50,7 @@ class PlatformConfigService implements PlatformConfigServiceInterface
      */
     function set(string $setting, string $value)
     {
-        $platformConfig = $this->platformConfigRepository->findBySetting($setting);
+        $platformConfig = $this->platformConfigRepository->findBy("setting_key", $setting);
 
         if ($platformConfig->isEmpty()) {
             $platformConfig = $this->platformConfigRepository->save(0, [
@@ -92,7 +92,7 @@ class PlatformConfigService implements PlatformConfigServiceInterface
     function delete(int $id, int $userId)
     {
         $user = $this->userRepository->find($userId);
-        if (!$user->isAdmin()){
+        if (!$user->isAdmin()) {
             throw new Exception('You are not authorized to delete this platform config');
         }
         return $this->platformConfigRepository->delete($id);

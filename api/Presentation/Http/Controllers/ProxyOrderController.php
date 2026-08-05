@@ -2,8 +2,7 @@
 
 namespace Presentation\Http\Controllers;
 
-use Application\ProxyOrder\ProxyOrderServiceInterface;
-use Domain\ProxyOrder\Interfaces\ProxyOrderRepositoryInterface;
+use Business\ProxyOrder\Order\ProxyOrderServiceInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
@@ -13,20 +12,17 @@ class ProxyOrderController
     private ProxyOrderServiceInterface $proxyOrderService;
     private Request $request;
     private JsonResponseServiceInterface $jsonResponseService;
-    private ProxyOrderRepositoryInterface $proxyOrderRepository;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
         ProxyOrderServiceInterface $proxyOrderService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
-        ProxyOrderRepositoryInterface $proxyOrderRepository,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
         $this->proxyOrderService = $proxyOrderService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
-        $this->proxyOrderRepository = $proxyOrderRepository;
         $this->apiCredentialService = $apiCredentialService;
     }
 
@@ -34,10 +30,8 @@ class ProxyOrderController
     {
         $user = $this->apiCredentialService->getAuthUser();
         $userId = $user->id;
-        $proxyOrders = $this->proxyOrderRepository
-            ->filterByUserId($userId)
-            ->filter($this->request->all())
-            ->fetch();
+        $proxyOrders = $this->proxyOrderService->filterBy('user_id', $userId)
+            ->filter($this->request->all())->fetch();
         return $this->jsonResponseService->success([
             'proxy_orders' => $proxyOrders
         ]);
@@ -45,9 +39,7 @@ class ProxyOrderController
 
     public function adminOrders()
     {
-        $proxyOrders = $this->proxyOrderRepository
-            ->filter($this->request->all())
-            ->fetch();
+        $proxyOrders = $this->proxyOrderService->filter($this->request->all())->fetch();
         return $this->jsonResponseService->success([
             'proxy_orders' => $proxyOrders
         ]);

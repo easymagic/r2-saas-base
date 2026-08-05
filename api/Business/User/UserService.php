@@ -2,6 +2,7 @@
 
 namespace Business\User;
 
+use Business\AbstractBaseService;
 use Business\User\AccountMailNotificationServiceInterface;
 use Business\Notifications\NotificationServiceInterface;
 
@@ -11,7 +12,7 @@ use Data\User\UserRepositoryInterface;
 use Exception;
 use Data\User\UserEntity;
 
-class UserService implements UserServiceInterface
+class UserService extends AbstractBaseService implements UserServiceInterface
 {
 
     private UserMigrationRepositoryInterface $userMigrationRepositoryInterface;
@@ -30,6 +31,7 @@ class UserService implements UserServiceInterface
         NotificationServiceInterface $notificationServiceInterface,
         PlatformConfigServiceInterface $platformConfigServiceInterface
     ) {
+        parent::__construct($userRepository);
         $this->userMigrationRepositoryInterface = $userMigrationRepositoryInterface;
         $this->userValidationService = $userValidationService;
         $this->userRepository = $userRepository;
@@ -41,7 +43,7 @@ class UserService implements UserServiceInterface
     public function login(string $email, string $password)
     {
         $this->userValidationService->validateLogin($email, $password);
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         if (password_verify($password, $user->password)) {
             $this->refreshToken($user->id);
             $user = $this->refreshOtp($user->id);
@@ -253,7 +255,7 @@ class UserService implements UserServiceInterface
      */
     public function requestForgotPassword(string $email)
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         $this->refreshOtp($user->id);
         $user = $this->refreshToken($user->id);
         $this->accountMailNotificationServiceInterface->sendAccountForgotPasswordOtpToUser($user->id);
@@ -273,7 +275,7 @@ class UserService implements UserServiceInterface
         string $password,
         string $confirm_password
     ) {
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         $this->userValidationService->validateResetPassword(
             $email,
             $otp,
@@ -296,26 +298,13 @@ class UserService implements UserServiceInterface
     public function verifyEmail(string $email, string $otp)
     {
         $this->userValidationService->validateVerifyEmail($email, $otp);
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findBy('email', $email);
         $user = $this->userRepository->save($user->id, [
             "status" => "active",
             'email_verified_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
         return $user;
-    }
-
-    public function fetch(array $criteria)
-    {
-        $this->userRepository->filter($criteria);
-        $users = $this->userRepository->fetch();
-        return $users;
-    }
-
-    public function count(array $criteria)
-    {
-        $this->userRepository->filter($criteria);
-        return $this->userRepository->count();
     }
 
     public function migrate()

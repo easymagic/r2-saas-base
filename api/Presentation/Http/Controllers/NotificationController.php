@@ -2,7 +2,7 @@
 
 namespace Presentation\Http\Controllers;
 
-use Application\Notifications\NotificationServiceInterface;
+use Business\Notifications\NotificationServiceInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
