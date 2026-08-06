@@ -31,6 +31,7 @@ class WalletFeedbackMiddleware implements MiddlewareServiceInterface
         $user = $this->apiCredentialService->getAuthUser();
         $user_id = $user->id;
         $wallets = $this->walletService->onlinePendingForUser($user_id);
+        // print_r($wallets);
         /** @var WalletEntity $wallet */
         foreach ($wallets as $wallet) {
             $this->paymentService->verify($wallet->reference);

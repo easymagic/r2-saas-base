@@ -22,7 +22,7 @@ class WalletRepository extends AbstractBaseRepository implements WalletRepositor
 
         $this->addFilter("user_id", function (string $value, string &$sql, array &$params) {
             $sql .= " AND user_id = :user_id";
-            $params['user_id'] = "%".$value."%";
+            $params['user_id'] = $value;
         });
         $this->addFilter("status", function (string $value, string &$sql, array &$params) {
             $sql .= " AND status = :status";

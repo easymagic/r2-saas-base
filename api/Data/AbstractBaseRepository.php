@@ -76,7 +76,9 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
      */
     function find(int $id){
         $this->sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        $this->params = [];
         $this->params['id'] = $id;
+        // print_r($this->params);
         $result = $this->db->fetchOne($this->sql, $this->params);
         $entity = $this->hydrate($result);
         // if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
@@ -97,8 +99,10 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
      * @return object
      */
     function findBy(string $field,string $value){
-        $this->sql = "SELECT * FROM {$this->table} WHERE {$field} = :value";
-        $this->params['value'] = $value;
+        $this->sql = "SELECT * FROM {$this->table} WHERE {$field} = :val";
+        $this->params = [];
+        $this->params['val'] = $value;
+        // echo ($this->sql." - ".json_encode($this->params));
         $result = $this->db->fetchOne($this->sql, $this->params);
         $entity = $this->hydrate($result);
         // if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
@@ -116,6 +120,7 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
     function filterBy(string $field,string $value, string $operator = "AND", string $comparison = "="){
         $this->sql .= " {$operator} {$field} {$comparison} :{$field}";
         $this->params[$field] = $value;
+        // die($this->sql);
         return $this;
     }
 

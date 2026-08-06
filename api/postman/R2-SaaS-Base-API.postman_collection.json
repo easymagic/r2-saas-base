@@ -1,0 +1,756 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "R2 SaaS Base API",
+    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:2020" },
+    { "key": "xToken", "value": "" },
+    { "key": "xUserToken", "value": "" },
+    { "key": "userId", "value": "1" },
+    { "key": "walletId", "value": "1" },
+    { "key": "notificationId", "value": "1" },
+    { "key": "orderId", "value": "1" },
+    { "key": "platformConfigId", "value": "1" }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "Health / Test",
+      "item": [
+        {
+          "name": "Test Env",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/test-env",
+            "description": "No auth. Returns env diagnostics."
+          }
+        },
+        {
+          "name": "V2 Test",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/test",
+            "description": "Requires x-token (GlobalApiMiddleware)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Public)",
+      "description": "Requires `x-token` only.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var user = json.data && json.data.user ? json.data.user : (json.user || null);",
+                  "  if (user && user.token) {",
+                  "    pm.collectionVariables.set('xUserToken', user.token);",
+                  "  }",
+                  "  if (user && user.id) {",
+                  "    pm.collectionVariables.set('userId', String(user.id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/login",
+            "description": "Saves `user.token` → `xUserToken` on success."
+          }
+        },
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var user = json.data && json.data.user ? json.data.user : (json.user || null);",
+                  "  if (user && user.token) {",
+                  "    pm.collectionVariables.set('xUserToken', user.token);",
+                  "  }",
+                  "  if (user && user.id) {",
+                  "    pm.collectionVariables.set('userId', String(user.id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\",\n  \"social_security_number\": \"\",\n  \"country_code\": \"NG\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/register"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/user/forgot-password"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword\",\n  \"confirm_password\": \"newpassword\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/user/reset-password"
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/user/verify-email"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Authenticated)",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"password\",\n  \"name\": \"Agent User\",\n  \"phone\": \"+2348000000001\",\n  \"delivery_address\": \"456 Side St\",\n  \"social_security_number\": \"\",\n  \"role\": \"agent\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/create"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+2348000000002\",\n  \"delivery_address\": \"789 New Ave\",\n  \"social_security_number\": \"\",\n  \"role\": \"customer\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
+          }
+        },
+        {
+          "name": "Find User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/auth/me"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/me"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"password\",\n  \"new_password\": \"newpassword\",\n  \"confirm_password\": \"newpassword\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/auth/me/change-password"
+          }
+        },
+        {
+          "name": "Wallet Balance",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/auth/me/wallet-balance"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "Top Up Online",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"payment_url\": \"https://pay.example.com/checkout\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/wallet/top-up-online"
+          }
+        },
+        {
+          "name": "Top Up Manual",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"proof_of_payment_screenshot1\": \"\",\n  \"proof_of_payment_screenshot2\": \"\",\n  \"proof_of_payment_screenshot3\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/wallet/top-up-manual"
+          }
+        },
+        {
+          "name": "Approve Manual Top Up",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/{{walletId}}/approve-manual-top-up"
+          }
+        },
+        {
+          "name": "Reject Manual Top Up",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Invalid proof of payment\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/wallet/{{walletId}}/reject-manual-top-up"
+          }
+        },
+        {
+          "name": "My Pending Wallet Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/my-pending-wallet-transactions"
+          }
+        },
+        {
+          "name": "My Approved Wallet Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/my-approved-wallet-transactions"
+          }
+        },
+        {
+          "name": "Manual Pending Wallet Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/manual-pending-wallet-transactions"
+          }
+        },
+        {
+          "name": "Manual Approved Wallet Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/manual-approved-wallet-transactions"
+          }
+        },
+        {
+          "name": "Manual Rejected Wallet Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/manual-rejected-wallet-transactions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/notifications/my-notifications"
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/mark-as-read"
+          }
+        },
+        {
+          "name": "Mark As Unread",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/mark-as-unread"
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/delete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Platform Config",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "List Platform Configs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/platform-configs"
+          }
+        },
+        {
+          "name": "Update Platform Config",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setting_name\": \"example_setting\",\n  \"setting_value\": \"example_value\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/platform-configs/update"
+          }
+        },
+        {
+          "name": "Delete Platform Config",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/platform-configs/{{platformConfigId}}/delete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proxy Orders",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/my-orders"
+          }
+        },
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var order = json.data && json.data.order ? json.data.order : (json.order || null);",
+                  "  if (order && order.id) {",
+                  "    pm.collectionVariables.set('orderId', String(order.id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"purchase\",\n  \"reference\": \"REF-001\",\n  \"link\": \"https://store.example.com/item/1\",\n  \"description\": \"Proxy purchase request\",\n  \"total_amount_usd\": 50,\n  \"screen_shot1\": \"\",\n  \"screen_shot2\": \"\",\n  \"screen_shot3\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/proxy-orders"
+          }
+        },
+        {
+          "name": "Show Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}"
+          }
+        },
+        {
+          "name": "Pay From Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/pay-from-wallet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proxy Orders (Admin)",
+      "description": "Requires `x-token` + `x-user-token` and an admin role.",
+      "item": [
+        {
+          "name": "Admin Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/admin-orders"
+          }
+        },
+        {
+          "name": "Adjust Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 75.5\n}"
+            },
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/adjust-price"
+          }
+        },
+        {
+          "name": "Assign To Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/assign-to-batch"
+          }
+        },
+        {
+          "name": "Assign To Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/assign-to-agent"
+          }
+        },
+        {
+          "name": "Approve Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/approve-payment"
+          }
+        },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/update-status"
+          }
+        },
+        {
+          "name": "Cancel Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/cancel-payment"
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Migrations",
+      "description": "Schema/data migrate endpoints.",
+      "item": [
+        {
+          "name": "Migrate Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/migrate",
+            "description": "x-token only (GlobalApiMiddleware)."
+          }
+        },
+        {
+          "name": "Migrate Wallet",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/wallet/migrate",
+            "description": "x-token only."
+          }
+        },
+        {
+          "name": "Migrate Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/notifications/migrate"
+          }
+        },
+        {
+          "name": "Migrate Platform Configs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/platform-configs/migrate"
+          }
+        },
+        {
+          "name": "Migrate Proxy Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/proxy-orders/migrate"
+          }
+        }
+      ]
+    }
+  ]
+}
