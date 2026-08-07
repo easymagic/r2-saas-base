@@ -1,37 +1,48 @@
 <?php
 
+use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 
 /**
  * @var AppServiceContainer $appServiceContainer
  */
 
-use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
-
-
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use Presentation\ApiCredential\ApiCredentialService;
-use Business\Wallet\WalletServiceInterface;
-use Business\Wallet\WalletService;
-use Business\Wallet\WalletValidationServiceInterface;
-use Business\Wallet\WalletValidationService;
-use Business\Wallet\WalletNotificationServiceInterface;
-use Business\Wallet\WalletNotificationService;
-use Data\Wallet\WalletRepositoryInterface;
-use Data\Wallet\WalletRepository;
-use Data\Wallet\WalletMigrationRepositoryInterface;
-use Data\Wallet\WalletMigrationRepository;
-use Business\Notifications\NotificationServiceInterface;
-use Business\Notifications\NotificationService;
-use Data\Notifications\NotificationRepositoryInterface;
-use Data\Notifications\NotificationRepository;
-use Data\Notifications\NotificationMigrationRepositoryInterface;
-use Data\Notifications\NotificationMigrationRepository;
-use Business\PlatformConfig\PlatformConfigServiceInterface;
-use Business\PlatformConfig\PlatformConfigService;
-use Data\PlatformConfig\PlatformConfigRepositoryInterface;
-use Data\PlatformConfig\PlatformConfigRepository;
-use Data\PlatformConfig\PlatformConfigMigrationRepositoryInterface;
-use Data\PlatformConfig\PlatformConfigMigrationRepository;
+
+/* 
+ * Wallet
+ */
+use Wallet\Business\WalletServiceInterface;
+use Wallet\Business\WalletService;
+use Wallet\Business\WalletValidationServiceInterface;
+use Wallet\Business\WalletValidationService;
+use Wallet\Business\WalletNotificationServiceInterface;
+use Wallet\Business\WalletNotificationService;
+use Wallet\Data\WalletRepositoryInterface;
+use Wallet\Data\WalletRepository;
+use Wallet\Data\WalletMigrationRepositoryInterface;
+use Wallet\Data\WalletMigrationRepository;
+
+/*
+ * Notification
+ */
+use Notification\Business\NotificationServiceInterface;
+use Notification\Business\NotificationService;
+use Notification\Data\NotificationRepositoryInterface;
+use Notification\Data\NotificationRepository;
+use Notification\Data\NotificationMigrationRepositoryInterface;
+use Notification\Data\NotificationMigrationRepository;
+
+/*
+ * Platform Config
+ */
+use PlatformConfig\Business\PlatformConfigServiceInterface;
+use PlatformConfig\Business\PlatformConfigService;
+use PlatformConfig\Data\PlatformConfigRepositoryInterface;
+use PlatformConfig\Data\PlatformConfigRepository;
+use PlatformConfig\Data\PlatformConfigMigrationRepositoryInterface;
+use PlatformConfig\Data\PlatformConfigMigrationRepository;
+
 use Business\ProxyOrder\Order\ProxyOrderServiceInterface;
 use Business\ProxyOrder\Order\ProxyOrderService;
 use Business\ProxyOrder\Order\ProxyOrderMailNotificationInterface;

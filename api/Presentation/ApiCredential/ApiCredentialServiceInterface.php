@@ -2,7 +2,7 @@
 
 namespace Presentation\ApiCredential;
 
-use Data\User\UserEntity;
+use User\Data\UserEntity;
 
 interface ApiCredentialServiceInterface
 {

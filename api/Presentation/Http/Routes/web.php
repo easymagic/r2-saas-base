@@ -1,11 +1,11 @@
 <?php
 
-use Presentation\Http\Controllers\NotificationController;
-use Presentation\Http\Controllers\PlatformConfigController;
+use Notification\Presentation\NotificationController;
+use PlatformConfig\Presentation\PlatformConfigController;
 use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
 use User\Presentation\UserController;
-use Presentation\Http\Controllers\WalletController;
+use Wallet\Presentation\WalletController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
@@ -26,6 +26,9 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
         $route->prefix("v2", function (RouteServiceInterface $route) {
 
             $route->get("migrate", [UserController::class, "migrate"]);
+            $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
+            $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
+
 
             $route->get('/test', function () {
                 echo 'Hello World test...';
@@ -83,14 +86,12 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("notifications/{notification_id}/mark-as-read", [NotificationController::class, "markAsRead"]);
                 $route->post("notifications/{notification_id}/mark-as-unread", [NotificationController::class, "markAsUnread"]);
                 $route->delete("notifications/{notification_id}/delete", [NotificationController::class, "delete"]);
-                $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
 
 
                 // Platform config routes
                 $route->get("platform-configs", [PlatformConfigController::class, "all"]);
                 $route->post("platform-configs/update", [PlatformConfigController::class, "update"]);
                 $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
-                $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
 
 
                 // Proxy order routes

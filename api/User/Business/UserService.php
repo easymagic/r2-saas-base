@@ -4,12 +4,13 @@ namespace User\Business;
 
 use Shared\AbstractBaseService;
 use User\Business\AccountMailNotificationServiceInterface;
-use Business\Notifications\NotificationServiceInterface;
 
 
-use Business\PlatformConfig\PlatformConfigServiceInterface;
+
+use PlatformConfig\Business\PlatformConfigServiceInterface;
 use User\Data\UserRepositoryInterface;
 use Exception;
+use Notification\Business\NotificationServiceInterface;
 use User\Data\UserEntity;
 use User\Data\UserMigrationRepositoryInterface;
 
