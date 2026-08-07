@@ -155,7 +155,7 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
      */
     function fetch(){
        $result = $this->db->paginate($this->sql, $this->size, $this->params);
-       return array_map([$this, 'hydrate'], $result->items);
+       return array_map([$this, 'hydrate'], $result);
     }
 
 

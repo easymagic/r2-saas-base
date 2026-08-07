@@ -46,8 +46,8 @@ interface WalletServiceInterface extends AbstractBaseServiceInterface
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
-        mixed $proof_of_payment_screenshot2 = [],
-        mixed $proof_of_payment_screenshot3 = []
+        mixed $proof_of_payment_screenshot2,
+        mixed $proof_of_payment_screenshot3
     );
 
     public function approveManualTopUp(

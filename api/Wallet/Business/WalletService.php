@@ -43,6 +43,7 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
         WalletMigrationRepositoryInterface $walletMigrationRepository,
         UserServiceInterface $userService
     ) {
+        parent::__construct($walletRepository);
         $this->walletValidationService = $walletValidationService;
         $this->walletRepository = $walletRepository;
         $this->walletNotificationService = $walletNotificationService;
@@ -118,8 +119,8 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
         string $description,
         string $status,
         array $proof_of_payment_screenshot1,
-        mixed $proof_of_payment_screenshot2 = [],
-        mixed $proof_of_payment_screenshot3 = []
+        mixed $proof_of_payment_screenshot2,
+        mixed $proof_of_payment_screenshot3
     ) {
         $this->walletValidationService->validateTopUpManual(
             $user_id,
@@ -136,11 +137,11 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
 
         $email = $user->email;
 
-        $this->paymentService->initiate(
-            $email,
-            $amount,
-            $reference
-        );
+        // $this->paymentService->initiate(
+        //     $email,
+        //     $amount,
+        //     $reference
+        // );
 
         $path = '/uploads/proof_of_payment_screenshot';
         $full_path = __DIR__ . '/../../';

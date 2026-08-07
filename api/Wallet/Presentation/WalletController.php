@@ -66,9 +66,9 @@ class WalletController
         $type = "manual";
         $description = "Top up manual";
         $status = "pending";
-        $proof_of_payment_screenshot1 = $this->request->get('proof_of_payment_screenshot1');
-        $proof_of_payment_screenshot2 = $this->request->get('proof_of_payment_screenshot2');
-        $proof_of_payment_screenshot3 = $this->request->get('proof_of_payment_screenshot3');
+        $proof_of_payment_screenshot1 = $this->request->get('proof_of_payment_screenshot1',[]);
+        $proof_of_payment_screenshot2 = $this->request->get('proof_of_payment_screenshot2',[]);
+        $proof_of_payment_screenshot3 = $this->request->get('proof_of_payment_screenshot3',[]);
 
         $wallet = $this->walletService->topUpManual(
             $user_id,
