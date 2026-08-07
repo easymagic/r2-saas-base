@@ -53,7 +53,6 @@ use Data\ProxyOrder\Order\ProxyOrderMigrationRepositoryInterface;
 use Data\ProxyOrder\Order\ProxyOrderMigrationRepository;
 use Business\MailTheme\BaseMailThemeInterface;
 use Business\MailTheme\BaseMailTheme;
-
 use User\Business\AccountMailNotificationService;
 use User\Business\AccountMailNotificationServiceInterface;
 use User\Business\UserService;
@@ -108,3 +107,4 @@ $appServiceContainer->container()->map(ProxyOrderMailNotificationInterface::clas
 $appServiceContainer->container()->map(ProxyOrderMigrationRepositoryInterface::class, ProxyOrderMigrationRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
+

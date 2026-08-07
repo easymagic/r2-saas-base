@@ -15,7 +15,7 @@ $appServiceContainer = $framework->boot();
 
 $framework->getEnvService()->loadEnv(__DIR__ . '/.env');
 
-include_once __DIR__ . '/Presentation/Http/Routes/terminal_commands.php';
+include_once __DIR__ . '/Presentation/Http/Routes/commands.php';
 
 /**
  * Boots
