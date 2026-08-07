@@ -1,7 +1,7 @@
 <?php 
 namespace Data\PlatformConfig;
 
-use Data\AbstractBaseRepositoryInterface;
+use Shared\AbstractBaseRepositoryInterface;
 
 interface PlatformConfigRepositoryInterface extends AbstractBaseRepositoryInterface
 {

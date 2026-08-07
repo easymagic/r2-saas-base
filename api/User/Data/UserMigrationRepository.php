@@ -1,8 +1,8 @@
 <?php 
 
-namespace Data\User;
+namespace User\Data;
 
-use Data\User\UserMigrationRepositoryInterface;
+use User\Data\UserMigrationRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\Migration;
 
 class UserMigrationRepository implements UserMigrationRepositoryInterface

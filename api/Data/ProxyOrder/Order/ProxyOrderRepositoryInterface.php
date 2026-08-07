@@ -2,7 +2,7 @@
 
 namespace Data\ProxyOrder\Order;
 
-use Data\AbstractBaseRepositoryInterface;
+use Shared\AbstractBaseRepositoryInterface;
 
 interface ProxyOrderRepositoryInterface extends AbstractBaseRepositoryInterface
 {

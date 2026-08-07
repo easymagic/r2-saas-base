@@ -1,17 +1,21 @@
 <?php
 
-namespace Business\User;
+namespace User\Business;
 
-use Business\AbstractBaseService;
-use Business\User\AccountMailNotificationServiceInterface;
+use Shared\AbstractBaseService;
+use User\Business\AccountMailNotificationServiceInterface;
 use Business\Notifications\NotificationServiceInterface;
 
-use Data\User\UserMigrationRepositoryInterface;
-use Business\PlatformConfig\PlatformConfigServiceInterface;
-use Data\User\UserRepositoryInterface;
-use Exception;
-use Data\User\UserEntity;
 
+use Business\PlatformConfig\PlatformConfigServiceInterface;
+use User\Data\UserRepositoryInterface;
+use Exception;
+use User\Data\UserEntity;
+use User\Data\UserMigrationRepositoryInterface;
+
+/**
+ * @extends AbstractBaseService<UserEntity, UserRepositoryInterface>
+ */
 class UserService extends AbstractBaseService implements UserServiceInterface
 {
 
@@ -227,12 +231,6 @@ class UserService extends AbstractBaseService implements UserServiceInterface
             'password' => password_hash($new_password, PASSWORD_DEFAULT),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
-        return $user;
-    }
-
-    public function find(int $id)
-    {
-        $user = $this->userRepository->find($id);
         return $user;
     }
 

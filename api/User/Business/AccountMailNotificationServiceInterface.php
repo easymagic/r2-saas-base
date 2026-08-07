@@ -1,6 +1,6 @@
 <?php
 
-namespace Business\User;
+namespace User\Business;
 
 interface AccountMailNotificationServiceInterface
 {

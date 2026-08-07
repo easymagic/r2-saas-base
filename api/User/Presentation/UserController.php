@@ -1,14 +1,14 @@
 <?php
 
-namespace Presentation\Http\Controllers\User;
+namespace User\Presentation;
 
-use Business\User\UserServiceInterface;
-use Data\User\UserRepositoryInterface;
+
+
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-
-
+use User\Business\UserServiceInterface;
+use User\Data\UserRepositoryInterface;
 
 class UserController
 {

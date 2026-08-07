@@ -4,7 +4,7 @@ use Presentation\Http\Controllers\NotificationController;
 use Presentation\Http\Controllers\PlatformConfigController;
 use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
-use Presentation\Http\Controllers\User\UserController;
+use User\Presentation\UserController;
 use Presentation\Http\Controllers\WalletController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;

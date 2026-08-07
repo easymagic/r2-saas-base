@@ -2,7 +2,7 @@
 
 namespace Data\ProxyOrder\Thread;
 
-use Data\AbstractBaseRepository;
+use Shared\AbstractBaseRepository;
 
 class ProxyOrderThreadRepository implements ProxyOrderThreadRepositoryInterface
 {

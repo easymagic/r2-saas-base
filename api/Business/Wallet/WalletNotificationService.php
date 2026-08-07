@@ -2,9 +2,10 @@
 
 namespace Business\Wallet;
 
-use Data\User\UserRepositoryInterface;
+
 use Data\Wallet\WalletRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
+use User\Data\UserRepositoryInterface;
 
 class WalletNotificationService implements WalletNotificationServiceInterface
 {

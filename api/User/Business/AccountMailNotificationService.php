@@ -1,9 +1,9 @@
 <?php
 
-namespace Business\User;
+namespace User\Business;
 
 use Business\MailTheme\BaseMailThemeInterface;
-use Data\User\UserRepositoryInterface;
+use User\Data\UserRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
 
 class AccountMailNotificationService implements AccountMailNotificationServiceInterface

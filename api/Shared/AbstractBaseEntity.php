@@ -1,5 +1,5 @@
 <?php 
-namespace Data;
+namespace Shared;
 
 abstract class AbstractBaseEntity {
     public int $id = 0;
@@ -18,6 +18,10 @@ abstract class AbstractBaseEntity {
         }
     }
 
+    /**
+     * Check if the entity is empty
+     * @return bool
+     */
     function isEmpty(){
         return empty($this->id);
     }

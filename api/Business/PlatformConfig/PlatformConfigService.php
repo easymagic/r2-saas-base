@@ -4,8 +4,9 @@ namespace Business\PlatformConfig;
 
 use Data\PlatformConfig\PlatformConfigMigrationRepositoryInterface;
 use Data\PlatformConfig\PlatformConfigRepositoryInterface;
-use Data\User\UserRepositoryInterface;
+
 use Exception;
+use User\Data\UserRepositoryInterface;
 
 class PlatformConfigService implements PlatformConfigServiceInterface
 {

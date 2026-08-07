@@ -1,12 +1,15 @@
 <?php 
 
-namespace Data\User;
+namespace User\Data;
 
-use Data\AbstractBaseRepository;
-use Data\User\UserEntity;
-use Data\User\UserRepositoryInterface;
+use Shared\AbstractBaseRepository;
+use User\Data\UserEntity;
+
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 
+/**
+ * @extends AbstractBaseRepository<UserEntity>
+ */
 class UserRepository extends AbstractBaseRepository implements UserRepositoryInterface
 {
    protected string $table = 'users';

@@ -2,8 +2,8 @@
 
 namespace Presentation\ApiCredential;
 
-use Data\User\UserEntity;
-use Data\User\UserRepositoryInterface;
+use User\Data\UserEntity;
+use User\Data\UserRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
 

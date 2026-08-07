@@ -2,7 +2,7 @@
 
 namespace Data\PlatformConfig;
 
-use Data\AbstractBaseRepository;
+use Shared\AbstractBaseRepository;
 use Data\PlatformConfig\PlatformConfigEntity;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;

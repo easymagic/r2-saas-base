@@ -1,42 +1,49 @@
 <?php 
-namespace Business;
+namespace Shared;
 
-use Data\AbstractBaseRepositoryInterface;
-
+/**
+ * Abstract base service interface
+ * @template T of object
+ */
 interface AbstractBaseServiceInterface
 {
     /**
      * Find a record by id
      * @param int $id
-     * @return object
+     * @return T
      */
     public function find(int $id);
     /**
      * Find a record by a field
      * @param string $field
      * @param string $value
-     * @return object
+     * @return T
      */
     public function findBy(string $field, string $value);
+    /**
+     * Delete a record by id
+     * @param int $id
+     * @return bool
+     */
     public function delete(int $id);
     /**
      * Filter by a field
      * @param string $field
      * @param string $value
-     * @return self
+     * @return $this
      */
     public function filterBy(string $field, string $value);
 
     /**
      * Filter the data
      * @param array $filters
-     * @return self
+     * @return $this
      */
     public function filter(array $filters);
 
     /**
      * Fetch the data
-     * @return array
+     * @return T[]
      */
     public function fetch();
 

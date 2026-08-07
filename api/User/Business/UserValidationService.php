@@ -1,9 +1,9 @@
 <?php
 
-namespace Business\User;
+namespace User\Business;
 
-use Data\User\UserRepositoryInterface;
-use Data\User\UserEntity;
+use User\Data\UserRepositoryInterface;
+use User\Data\UserEntity;
 use Exception;
 
 class UserValidationService implements UserValidationServiceInterface

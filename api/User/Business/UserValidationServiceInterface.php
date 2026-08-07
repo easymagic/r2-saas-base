@@ -1,8 +1,8 @@
 <?php
 
-namespace Business\User;
+namespace User\Business;
 
-use Data\User\UserEntity;
+use User\Data\UserEntity;
 
 interface UserValidationServiceInterface
 {

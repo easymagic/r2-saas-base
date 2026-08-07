@@ -2,7 +2,7 @@
 
 namespace Data\Notifications;
 
-use Data\AbstractBaseRepository;
+use Shared\AbstractBaseRepository;
 use Data\Notifications\NotificationEntity;
 use Data\Notifications\NotificationRepositoryInterface;
 

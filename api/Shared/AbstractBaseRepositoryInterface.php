@@ -1,11 +1,13 @@
 <?php 
 
-namespace Data;
+namespace Shared;
 
 use Exception;
-use R2Packages\Framework\Infrastructure\Framework\Db\DbConnectionServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 
+/**
+ * Abstract base repository interface
+ * @template T of object
+ */
 interface AbstractBaseRepositoryInterface
 {
 
@@ -13,21 +15,21 @@ interface AbstractBaseRepositoryInterface
      * Add a filter
      * @param string $key
      * @param callable $callback
-     * @return self
+     * @return $this
      */
     function addFilter(string $key, callable $callback);
 
     /**
      * Add an applied filter
      * @param callable $callback
-     * @return self
+     * @return $this
      */
     function addAppliedFilter(callable $callback);
 
     /**
      * Filter the data
      * @param array $filters
-     * @return self
+     * @return $this
      */
     public function filter(array $filters);
 
@@ -47,13 +49,13 @@ interface AbstractBaseRepositoryInterface
     /**
      * Find a row by id
      * @param int $id
-     * @return object
+     * @return T
      */
     function find(int $id);
 
     /**
      * Fetch all rows from the database
-     * @return array
+     * @return T[]
      */
     function fetchAll();
 
@@ -61,7 +63,7 @@ interface AbstractBaseRepositoryInterface
      * Find a row by a field
      * @param string $field
      * @param string $value
-     * @return object
+     * @return T
      */
     function findBy(string $field,string $value);
 
@@ -71,13 +73,13 @@ interface AbstractBaseRepositoryInterface
      * @param string $value
      * @param string $operator
      * @param string $comparison
-     * @return self
+     * @return $this
      */
     function filterBy(string $field,string $value, string $operator = "AND", string $comparison = "=");
 
     /**
      * Fetch data from the database
-     * @return array
+     * @return T[]
      */
     function fetch();
 
@@ -86,7 +88,7 @@ interface AbstractBaseRepositoryInterface
      * Save an entity
      * @param int $id
      * @param array $data
-     * @return object
+     * @return T
      */
     function save(int $id, array $data);
 
@@ -96,6 +98,13 @@ interface AbstractBaseRepositoryInterface
      * @return bool
      */
     function delete(int $id);
+
+    /**
+     * Hydrate a row into an entity
+     * @param array $row
+     * @return T
+     */
+    function hydrate(array $row);
 
 
 }

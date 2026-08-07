@@ -1,7 +1,7 @@
 <?php 
 namespace Data\Notifications;
 
-use Data\AbstractBaseRepositoryInterface;
+use Shared\AbstractBaseRepositoryInterface;
 
 interface NotificationRepositoryInterface extends AbstractBaseRepositoryInterface
 {

@@ -6,16 +6,8 @@
  */
 
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
-use Business\User\UserService;
-use Business\User\UserServiceInterface;
-use Business\User\UserValidationServiceInterface;
-use Business\User\UserValidationService;
-use Business\User\AccountMailNotificationServiceInterface;
-use Business\User\AccountMailNotificationService;
-use Data\User\UserRepositoryInterface;
-use Data\User\UserRepository;
-use Data\User\UserMigrationRepositoryInterface;
-use Data\User\UserMigrationRepository;
+
+
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use Presentation\ApiCredential\ApiCredentialService;
 use Business\Wallet\WalletServiceInterface;
@@ -50,6 +42,17 @@ use Data\ProxyOrder\Order\ProxyOrderMigrationRepositoryInterface;
 use Data\ProxyOrder\Order\ProxyOrderMigrationRepository;
 use Business\MailTheme\BaseMailThemeInterface;
 use Business\MailTheme\BaseMailTheme;
+
+use User\Business\AccountMailNotificationService;
+use User\Business\AccountMailNotificationServiceInterface;
+use User\Business\UserService;
+use User\Business\UserServiceInterface;
+use User\Business\UserValidationService;
+use User\Business\UserValidationServiceInterface;
+use User\Data\UserMigrationRepository;
+use User\Data\UserMigrationRepositoryInterface;
+use User\Data\UserRepository;
+use User\Data\UserRepositoryInterface;
 
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 

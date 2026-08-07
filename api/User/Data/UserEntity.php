@@ -1,8 +1,8 @@
 <?php 
 
-namespace Data\User;
+namespace User\Data;
 
-use Data\AbstractBaseEntity;
+use Shared\AbstractBaseEntity;
 
 class UserEntity extends AbstractBaseEntity
 {

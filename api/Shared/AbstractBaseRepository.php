@@ -1,11 +1,14 @@
 <?php 
 
-namespace Data;
+namespace Shared;
 
 use Exception;
-use R2Packages\Framework\Infrastructure\Framework\Db\DbConnectionServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 
+/**
+ * Abstract base repository
+ * @template T of object
+ */
 abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
 {
     private DbServiceInterface $db;
@@ -19,6 +22,10 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
 
     protected string $table = '';
 
+    /**
+     * Constructor
+     * @param DbServiceInterface $db
+     */
     public function __construct(DbServiceInterface $db)
     {
         $this->db = $db;
@@ -38,6 +45,11 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
         return $this;
     }
 
+    /**
+     * Filter the data
+     * @param array $filters
+     * @return $this
+     */
     public function filter(array $filters){
         foreach($filters as $key => $value){
             if(isset($this->filters[$key])){
@@ -70,23 +82,36 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
     }
 
     /**
+     * Hydrate a row into an entity
+     * @param array $row
+     * @return T
+     */
+    function hydrate(array $row){
+        $cls = $this->hydrateClass;
+        return new $cls($row);
+    }
+
+
+    /**
      * Find a row by id
      * @param int $id
-     * @return object
+     * @return T
      */
     function find(int $id){
         $this->sql = "SELECT * FROM {$this->table} WHERE id = :id";
         $this->params = [];
         $this->params['id'] = $id;
-        // print_r($this->params);
         $result = $this->db->fetchOne($this->sql, $this->params);
         $entity = $this->hydrate($result);
-        // if(method_exists($entity, 'isEmpty') && $entity->isEmpty()){
-        //     throw new Exception("Entity: {$this->table} not found");
-        // }
         return $entity;
     }
 
+    
+
+    /**
+     * Fetch all rows from the database
+     * @return T[]
+     */
     function fetchAll(){
         $result = $this->db->fetchAll($this->sql, $this->params);
         return array_map([$this, 'hydrate'], $result);
@@ -96,7 +121,7 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
      * Find a row by a field
      * @param string $field
      * @param string $value
-     * @return object
+     * @return T
      */
     function findBy(string $field,string $value){
         $this->sql = "SELECT * FROM {$this->table} WHERE {$field} = :val";
@@ -115,7 +140,7 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
      * Filter by a field
      * @param string $field
      * @param string $value
-     * @return self
+     * @return $this
      */
     function filterBy(string $field,string $value, string $operator = "AND", string $comparison = "="){
         $this->sql .= " {$operator} {$field} {$comparison} :{$field}";
@@ -126,24 +151,19 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
 
     /**
      * Fetch data from the database
-     * @return array
+     * @return T[]
      */
     function fetch(){
        $result = $this->db->paginate($this->sql, $this->size, $this->params);
        return array_map([$this, 'hydrate'], $result->items);
     }
 
-    private function hydrate(array $row){
-        $cls = $this->hydrateClass;
-        $entity = new $cls($row);
-        return $entity;
-    }
 
     /**
      * Save an entity
      * @param int $id
      * @param array $data
-     * @return object
+     * @return T
      */
     function save(int $id, array $data){
         if($id == 0){

@@ -2,7 +2,7 @@
 
 namespace Data\ProxyOrder\Order;
 
-use Data\AbstractBaseRepository;
+use Shared\AbstractBaseRepository;
 use Data\ProxyOrder\Order\ProxyOrderRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 
