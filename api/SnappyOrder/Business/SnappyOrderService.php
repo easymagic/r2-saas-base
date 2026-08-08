@@ -4,6 +4,7 @@ namespace SnappyOrder\Business;
 
 use Exception;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
+use ProxyOrderChangeLog\Business\ProxyOrderChangeLogServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
@@ -28,6 +29,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     private UserServiceInterface $userService;
     private WalletServiceInterface $walletService;
 
+    private ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService;
+
     public function __construct(
         SnappyOrderMigrationRepositoryInterface $snappyOrderMigrationRepositoryInterface,
         SnappyOrderRepositoryInterface $snappyOrderRepository,
@@ -36,7 +39,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         UserRepositoryInterface $userRepository,
         PlatformConfigServiceInterface $platformConfigService,
         UserServiceInterface $userService,
-        WalletServiceInterface $walletService
+        WalletServiceInterface $walletService,
+        ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService
     ) {
         parent::__construct($snappyOrderRepository);
         $this->snappyOrderMigrationRepositoryInterface = $snappyOrderMigrationRepositoryInterface;
@@ -47,6 +51,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         $this->platformConfigService = $platformConfigService;
         $this->userService = $userService;
         $this->walletService = $walletService;
+        $this->proxyOrderChangeLogService = $proxyOrderChangeLogService;
     }
 
     public function migrate()
@@ -172,6 +177,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             ]);
         }
 
+        $this->proxyOrderChangeLogService->log($order->id, 'status', $order->status, $status);
+
         $this->snappyOrderMailService->notifyCustomerOfStatusChange($order->id, $status);
 
         return $order;
@@ -208,6 +215,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             'agent_id' => $agent_id,
             'status' => 'assigned',
         ]);
+
+        $this->proxyOrderChangeLogService->log($order->id, 'agent_id', $order->agent_id, $agent_id);
 
         $this->snappyOrderMailService->notifyAgenOfOrderAssignment($order->id, $agent_id);
         $this->snappyOrderMailService->notifyCustomerOfAgentAssignment($order->id, $agent_id);
@@ -309,6 +318,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             'grand_total_naira' => $this->getTotalAmountNaira($price),
             'price_adjustment_sent' => 1,
         ]);
+
+        $this->proxyOrderChangeLogService->log($order->id, 'total_amount_usd', $order->total_amount_usd, $price);
 
         $this->snappyOrderMailService->notifyCustomerOfPriceChange($order->id, $price);
 

@@ -68,6 +68,16 @@ use SnappyOrder\Data\SnappyOrderMigrationRepositoryInterface;
 use SnappyOrder\Data\SnappyOrderRepository;
 use SnappyOrder\Data\SnappyOrderRepositoryInterface;
 
+/*
+ * ProxyOrderChangeLog
+ */
+use ProxyOrderChangeLog\Business\ProxyOrderChangeLogService;
+use ProxyOrderChangeLog\Business\ProxyOrderChangeLogServiceInterface;
+use ProxyOrderChangeLog\Data\ProxyOrderChangeLogMigrationRepository;
+use ProxyOrderChangeLog\Data\ProxyOrderChangeLogMigrationRepositoryInterface;
+use ProxyOrderChangeLog\Data\ProxyOrderChangeLogRepository;
+use ProxyOrderChangeLog\Data\ProxyOrderChangeLogRepositoryInterface;
+
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
@@ -106,6 +116,10 @@ $appServiceContainer->container()->map(SnappyOrderServiceInterface::class, Snapp
 $appServiceContainer->container()->map(SnappyOrderMailServiceInterface::class, SnappyOrderMailService::class);
 $appServiceContainer->container()->map(SnappyOrderMigrationRepositoryInterface::class, SnappyOrderMigrationRepository::class);
 $appServiceContainer->container()->map(SnappyOrderRepositoryInterface::class, SnappyOrderRepository::class);
+
+$appServiceContainer->container()->map(ProxyOrderChangeLogServiceInterface::class, ProxyOrderChangeLogService::class);
+$appServiceContainer->container()->map(ProxyOrderChangeLogMigrationRepositoryInterface::class, ProxyOrderChangeLogMigrationRepository::class);
+$appServiceContainer->container()->map(ProxyOrderChangeLogRepositoryInterface::class, ProxyOrderChangeLogRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 
