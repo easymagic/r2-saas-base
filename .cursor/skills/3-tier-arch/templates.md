@@ -196,6 +196,61 @@ class {Module}Service extends AbstractBaseService implements {Module}ServiceInte
 
 ---
 
+## `api/{Module}/Presentation/{Module}Controller.php`
+
+```php
+<?php
+
+namespace {Module}\Presentation;
+
+use R2Packages\Framework\Infrastructure\Framework\Container\Request;
+use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use {Module}\Business\{Module}ServiceInterface;
+
+class {Module}Controller
+{
+    private {Module}ServiceInterface ${module}Service;
+    private JsonResponseServiceInterface $jsonResponseService;
+    private Request $request;
+
+    public function __construct(
+        {Module}ServiceInterface ${module}Service,
+        Request $request,
+        JsonResponseServiceInterface $jsonResponseService
+    ) {
+        $this->{module}Service = ${module}Service;
+        $this->request = $request;
+        $this->jsonResponseService = $jsonResponseService;
+    }
+
+    function migrate()
+    {
+        $result = $this->{module}Service->migrate();
+        $this->jsonResponseService->success([
+            'message' => 'Migration completed successfully',
+            'result' => $result,
+        ]);
+    }
+
+    // Add action methods only when requested (see UserController):
+    // function create()
+    // {
+    //     $name = $this->request->get('name');
+    //     $item = $this->{module}Service->create($name);
+    //     $this->jsonResponseService->success([
+    //         '{module}' => $item,
+    //         'message' => 'Created successfully',
+    //     ]);
+    // }
+}
+```
+
+Inject `Presentation\ApiCredential\ApiCredentialServiceInterface` only when auth is required (see `UserController::me`).
+
+Do not register the controller in `boot.php`. Wire routes in `api/Presentation/Http/Routes/web.php` only if the user asks.
+
+---
+
 ## `api/Kernel/boot.php` registration
 
 Add `use` imports (group with other module imports):
@@ -230,4 +285,5 @@ $appServiceContainer->container()->map({Module}RepositoryInterface::class, {Modu
 | `api/User/Data/UserMigrationRepository.php` | Migration field chain |
 | `api/User/Business/UserServiceInterface.php` | Domain + `migrate()` |
 | `api/User/Business/UserService.php` | DI + `migrate()` delegation |
+| `api/User/Presentation/UserController.php` | HTTP actions + JSON responses |
 | `api/Kernel/boot.php` | Interface → class maps |

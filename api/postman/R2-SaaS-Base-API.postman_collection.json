@@ -13,6 +13,7 @@
     { "key": "walletId", "value": "1" },
     { "key": "notificationId", "value": "1" },
     { "key": "orderId", "value": "1" },
+    { "key": "agentId", "value": "1" },
     { "key": "platformConfigId", "value": "1" }
   ],
   "auth": {
@@ -506,20 +507,9 @@
       ]
     },
     {
-      "name": "Proxy Orders",
+      "name": "Snappy Orders",
       "description": "Requires `x-token` + `x-user-token`.",
       "item": [
-        {
-          "name": "My Orders",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
-            ],
-            "url": "{{baseUrl}}/v2/proxy-orders/my-orders"
-          }
-        },
         {
           "name": "Create Order",
           "event": [
@@ -543,25 +533,59 @@
             "method": "POST",
             "header": [
               { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"purchase\",\n  \"reference\": \"REF-001\",\n  \"link\": \"https://store.example.com/item/1\",\n  \"description\": \"Proxy purchase request\",\n  \"total_amount_usd\": 50,\n  \"screen_shot1\": \"\",\n  \"screen_shot2\": \"\",\n  \"screen_shot3\": \"\"\n}"
+              "mode": "formdata",
+              "formdata": [
+                { "key": "link", "value": "https://store.example.com/item/1", "type": "text" },
+                { "key": "description", "value": "Snappy order request", "type": "text" },
+                { "key": "total_amount_usd", "value": "50", "type": "text" },
+                { "key": "screen_shot1", "type": "file", "src": "" },
+                { "key": "screen_shot2", "type": "file", "src": "" },
+                { "key": "screen_shot3", "type": "file", "src": "" }
+              ]
             },
-            "url": "{{baseUrl}}/v2/proxy-orders"
+            "url": "{{baseUrl}}/v2/snappy-orders",
+            "description": "Saves `order.id` → `orderId` on success. Attach screenshot files in form-data."
           }
         },
         {
-          "name": "Show Order",
+          "name": "My Orders (Customer)",
           "request": {
             "method": "GET",
             "header": [
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}"
+            "url": {
+              "raw": "{{baseUrl}}/v2/snappy-orders/my-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "snappy-orders", "my-orders"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My Orders (Agent)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/snappy-orders/agent-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "snappy-orders", "agent-orders"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            }
           }
         },
         {
@@ -572,13 +596,13 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/pay-from-wallet"
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/pay-from-wallet"
           }
         }
       ]
     },
     {
-      "name": "Proxy Orders (Admin)",
+      "name": "Snappy Orders (Admin)",
       "description": "Requires `x-token` + `x-user-token` and an admin role.",
       "item": [
         {
@@ -589,11 +613,21 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/proxy-orders/admin-orders"
+            "url": {
+              "raw": "{{baseUrl}}/v2/snappy-orders/admin-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "snappy-orders", "admin-orders"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "user_id", "value": "", "disabled": true },
+                { "key": "agent_id", "value": "", "disabled": true }
+              ]
+            }
           }
         },
         {
-          "name": "Adjust Price",
+          "name": "Change Status",
           "request": {
             "method": "POST",
             "header": [
@@ -603,25 +637,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"price\": 75.5\n}"
+              "raw": "{\n  \"status\": \"assigned\"\n}"
             },
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/adjust-price"
-          }
-        },
-        {
-          "name": "Assign To Batch",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"batch_id\": 1\n}"
-            },
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/assign-to-batch"
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/change-status",
+            "description": "Valid statuses: pending, paid, assigned, completed, cancelled. Cannot change back to pending."
           }
         },
         {
@@ -635,65 +654,28 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"agent_id\": 1\n}"
+              "raw": "{\n  \"agent_id\": {{agentId}}\n}"
             },
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/assign-to-agent"
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/assign-to-agent"
           }
         },
         {
-          "name": "Approve Payment",
+          "name": "Publish Settings",
           "request": {
             "method": "POST",
             "header": [
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/approve-payment"
-          }
-        },
-        {
-          "name": "Update Status",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"processing\"\n}"
-            },
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/update-status"
-          }
-        },
-        {
-          "name": "Cancel Payment",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
-            ],
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}/cancel-payment"
-          }
-        },
-        {
-          "name": "Delete Order",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
-            ],
-            "url": "{{baseUrl}}/v2/proxy-orders/{{orderId}}"
+            "url": "{{baseUrl}}/v2/snappy-orders/publish-settings",
+            "description": "Publishes SERVICE_CHARGE, SHIPPING_COST, DOLLAR_TO_NAIRA_RATE to platform config."
           }
         }
       ]
     },
     {
       "name": "Migrations",
-      "description": "Schema/data migrate endpoints.",
+      "description": "Schema/data migrate endpoints. `x-token` only (GlobalApiMiddleware).",
       "item": [
         {
           "name": "Migrate Users",
@@ -722,10 +704,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              { "key": "x-token", "value": "{{xToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/notifications/migrate"
+            "url": "{{baseUrl}}/v2/notifications/migrate",
+            "description": "x-token only."
           }
         },
         {
@@ -733,21 +715,21 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              { "key": "x-token", "value": "{{xToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/platform-configs/migrate"
+            "url": "{{baseUrl}}/v2/platform-configs/migrate",
+            "description": "x-token only."
           }
         },
         {
-          "name": "Migrate Proxy Orders",
+          "name": "Migrate Snappy Orders",
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              { "key": "x-token", "value": "{{xToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/proxy-orders/migrate"
+            "url": "{{baseUrl}}/v2/snappy-orders/migrate",
+            "description": "x-token only."
           }
         }
       ]

@@ -43,14 +43,6 @@ use PlatformConfig\Data\PlatformConfigRepository;
 use PlatformConfig\Data\PlatformConfigMigrationRepositoryInterface;
 use PlatformConfig\Data\PlatformConfigMigrationRepository;
 
-use Business\ProxyOrder\Order\ProxyOrderServiceInterface;
-use Business\ProxyOrder\Order\ProxyOrderService;
-use Business\ProxyOrder\Order\ProxyOrderMailNotificationInterface;
-use Business\ProxyOrder\Order\ProxyOrderMailNotification;
-use Data\ProxyOrder\Order\ProxyOrderRepositoryInterface;
-use Data\ProxyOrder\Order\ProxyOrderRepository;
-use Data\ProxyOrder\Order\ProxyOrderMigrationRepositoryInterface;
-use Data\ProxyOrder\Order\ProxyOrderMigrationRepository;
 use Business\MailTheme\BaseMailThemeInterface;
 use Business\MailTheme\BaseMailTheme;
 use User\Business\AccountMailNotificationService;
@@ -63,6 +55,18 @@ use User\Data\UserMigrationRepository;
 use User\Data\UserMigrationRepositoryInterface;
 use User\Data\UserRepository;
 use User\Data\UserRepositoryInterface;
+
+/*
+ * SnappyOrder
+ */
+use SnappyOrder\Business\SnappyOrderMailService;
+use SnappyOrder\Business\SnappyOrderMailServiceInterface;
+use SnappyOrder\Business\SnappyOrderService;
+use SnappyOrder\Business\SnappyOrderServiceInterface;
+use SnappyOrder\Data\SnappyOrderMigrationRepository;
+use SnappyOrder\Data\SnappyOrderMigrationRepositoryInterface;
+use SnappyOrder\Data\SnappyOrderRepository;
+use SnappyOrder\Data\SnappyOrderRepositoryInterface;
 
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
@@ -98,13 +102,10 @@ $appServiceContainer->container()->map(PlatformConfigServiceInterface::class, Pl
 
 $appServiceContainer->container()->map(PlatformConfigMigrationRepositoryInterface::class, PlatformConfigMigrationRepository::class);
 
-$appServiceContainer->container()->map(ProxyOrderServiceInterface::class, ProxyOrderService::class);
-
-$appServiceContainer->container()->map(ProxyOrderRepositoryInterface::class, ProxyOrderRepository::class);
-
-$appServiceContainer->container()->map(ProxyOrderMailNotificationInterface::class, ProxyOrderMailNotification::class);
-
-$appServiceContainer->container()->map(ProxyOrderMigrationRepositoryInterface::class, ProxyOrderMigrationRepository::class);
+$appServiceContainer->container()->map(SnappyOrderServiceInterface::class, SnappyOrderService::class);
+$appServiceContainer->container()->map(SnappyOrderMailServiceInterface::class, SnappyOrderMailService::class);
+$appServiceContainer->container()->map(SnappyOrderMigrationRepositoryInterface::class, SnappyOrderMigrationRepository::class);
+$appServiceContainer->container()->map(SnappyOrderRepositoryInterface::class, SnappyOrderRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 

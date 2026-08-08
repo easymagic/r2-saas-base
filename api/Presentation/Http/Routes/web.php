@@ -4,6 +4,7 @@ use Notification\Presentation\NotificationController;
 use PlatformConfig\Presentation\PlatformConfigController;
 use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
+use SnappyOrder\Presentation\SnappyOrderController;
 use User\Presentation\UserController;
 use Wallet\Presentation\WalletController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
@@ -28,6 +29,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("migrate", [UserController::class, "migrate"]);
             $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
             $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
+            $route->get("snappy-orders/migrate", [SnappyOrderController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -94,26 +96,20 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
 
 
-                // Proxy order routes
-                $route->get("proxy-orders/my-orders", [ProxyOrderController::class, "myOrders"]);
-                $route->post("proxy-orders", [ProxyOrderController::class, "createOrder"]);
-                $route->get("proxy-orders/migrate", [ProxyOrderController::class, "migrate"]);
-                $route->post("proxy-orders/{order_id}/pay-from-wallet", [ProxyOrderController::class, "payFromWallet"]);
+                // Snappy order routes
+                $route->post("snappy-orders", [SnappyOrderController::class, "create"]);
+                $route->get("snappy-orders/my-orders", [SnappyOrderController::class, "getMyOrdersAsCustomer"]);
+                $route->get("snappy-orders/agent-orders", [SnappyOrderController::class, "getMyOrdersAsAgent"]);
+                $route->post("snappy-orders/{order_id}/pay-from-wallet", [SnappyOrderController::class, "payOrderFromWallet"]);
 
                 $route->middleware([
                     GlobalApiAuthAdminMiddleware::class
                 ], function (RouteServiceInterface $route) {
-                    $route->delete("proxy-orders/{order_id}", [ProxyOrderController::class, "destroy"]);
-                    $route->post("proxy-orders/{order_id}/adjust-price", [ProxyOrderController::class, "adjustPrice"]);
-                    $route->post("proxy-orders/{order_id}/assign-to-batch", [ProxyOrderController::class, "assignToBatch"]);
-                    $route->post("proxy-orders/{order_id}/assign-to-agent", [ProxyOrderController::class, "assignToAgent"]);
-                    $route->get("proxy-orders/admin-orders", [ProxyOrderController::class, "adminOrders"]);
-                    $route->post("proxy-orders/{order_id}/approve-payment", [ProxyOrderController::class, "approvePayment"]);
-                    $route->post("proxy-orders/{order_id}/update-status", [ProxyOrderController::class, "updateStatus"]);
-                    $route->post("proxy-orders/{order_id}/cancel-payment", [ProxyOrderController::class, "cancelPayment"]);
+                    $route->get("snappy-orders/admin-orders", [SnappyOrderController::class, "getMyOrderAsAdmin"]);
+                    $route->post("snappy-orders/{order_id}/change-status", [SnappyOrderController::class, "changeStatus"]);
+                    $route->post("snappy-orders/{order_id}/assign-to-agent", [SnappyOrderController::class, "assignToAgent"]);
+                    $route->post("snappy-orders/publish-settings", [SnappyOrderController::class, "publishSettings"]);
                 });
-
-                $route->get("proxy-orders/{order_id}", [ProxyOrderController::class, "show"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

@@ -1,165 +1,151 @@
 <?php
-namespace Business\ProxyOrder\Order;
+
+namespace SnappyOrder\Business;
 
 use Business\MailTheme\BaseMailThemeInterface;
-use Data\ProxyOrder\Order\ProxyOrderRepositoryInterface;
-use Data\ProxyOrder\Order\ProxyOrderEntity;
-use Data\User\UserRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Env\EnvServiceInterface;
+use SnappyOrder\Data\SnappyOrderEntity;
+use SnappyOrder\Data\SnappyOrderRepositoryInterface;
+use User\Data\UserRepositoryInterface;
 
-class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
+class SnappyOrderMailService implements SnappyOrderMailServiceInterface
 {
-
     private MailServiceInterface $mailService;
-    private ProxyOrderRepositoryInterface $proxyOrderRepository;
+    private SnappyOrderRepositoryInterface $snappyOrderRepository;
     private EnvServiceInterface $envService;
     private UserRepositoryInterface $userRepository;
     private BaseMailThemeInterface $baseMailTheme;
 
     public function __construct(
         MailServiceInterface $mailService,
-        ProxyOrderRepositoryInterface $proxyOrderRepository,
+        SnappyOrderRepositoryInterface $snappyOrderRepository,
         EnvServiceInterface $envService,
         UserRepositoryInterface $userRepository,
         BaseMailThemeInterface $baseMailTheme
     ) {
         $this->mailService = $mailService;
-        $this->proxyOrderRepository = $proxyOrderRepository;
+        $this->snappyOrderRepository = $snappyOrderRepository;
         $this->envService = $envService;
         $this->userRepository = $userRepository;
         $this->baseMailTheme = $baseMailTheme;
     }
 
-    public function sendCustomerOrderCreatedNotification(int $proxyOrderId)
+    public function notifyCustomerOfOrderCreation(int $order_id)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
         $subject = 'Order Created';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($user->name)
             . $this->intro('Your order has been created successfully. Here are the details:')
-            . $this->orderDetailsCard($proxyOrder)
+            . $this->orderDetailsCard($order)
             . $this->signOff()
         );
         $this->mailService->send($user->email, $subject, $this->from(), $body);
     }
 
-    public function sendAdminOrderCreatedNotification(int $proxyOrderId)
+    public function notifyAdminOfOrderCreation(int $order_id)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
         $subject = 'Order Created';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting('Admin')
-            . $this->intro('A new order/request was created by <strong>' . $this->e($user->name) . '</strong>.')
-            . $this->orderDetailsCard($proxyOrder)
+            . $this->intro('A new order was created by <strong>' . $this->e($user->name) . '</strong>.')
+            . $this->orderDetailsCard($order)
             . $this->signOff()
         );
         $this->mailService->send($this->envService->get('ADMIN_EMAIL'), $subject, $this->from(), $body);
     }
 
-    public function sendCustomerOrderStatusChangedNotification(int $proxyOrderId)
+    public function notifyCustomerOfStatusChange(int $order_id, string $status)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
         $subject = 'Order Status Changed';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($user->name)
             . $this->intro('Your order status has been updated.')
-            . $this->statusBanner('New status', $proxyOrder->status)
-            . $this->orderDetailsCard($proxyOrder, true)
+            . $this->statusBanner('New status', $status)
+            . $this->orderDetailsCard($order, true)
             . $this->signOff()
         );
         $this->mailService->send($user->email, $subject, $this->from(), $body);
     }
 
-    public function sendCustomerOrderReadyForPickupNotification(int $proxyOrderId)
+    public function notifyCustomerOfOrderPayment(int $order_id)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
+        $subject = 'Order Paid';
+        $body = $this->baseMailTheme->wrapTemplate(
+            $this->greeting($user->name)
+            . $this->intro('Your order has been paid successfully. Thank you!')
+            . $this->statusBanner('Payment status', $order->status)
+            . $this->orderDetailsCard($order, true)
+            . $this->signOff()
+        );
+        $this->mailService->send($user->email, $subject, $this->from(), $body);
+    }
+
+    public function notifyCustomerOfPickupOTP(int $order_id, string $otp)
+    {
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
         $subject = 'Order Ready for Pickup';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($user->name)
             . $this->intro('Great news — your order is ready for pickup. Present the OTP below at the facility.')
-            . $this->otpBox($proxyOrder->pickup_otp_code)
-            . $this->orderDetailsCard($proxyOrder, true)
+            . $this->otpBox($otp)
+            . $this->orderDetailsCard($order, true)
             . $this->signOff()
         );
         $this->mailService->send($user->email, $subject, $this->from(), $body);
     }
 
-    public function sendAgentOrderAssignedNotification(int $proxyOrderId)
+    public function notifyAgenOfOrderAssignment(int $order_id, int $agent_id)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $agent = $this->userRepository->find($proxyOrder->agent_id);
-        $user = $this->userRepository->find($proxyOrder->user_id);
-        $subject = 'Order Assigned to You';
-        $body = $this->baseMailTheme->wrapTemplate(
-            $this->greeting($user->name)
-            . $this->intro('Your order/request has been assigned to an agent.')
-            . $this->highlightBox('Assigned agent', $agent->name)
-            . $this->orderDetailsCard($proxyOrder, true)
-            . $this->signOff()
-        );
-        $this->mailService->send($user->email, $subject, $this->from(), $body);
-    }
-
-    public function notifyAgentOfNewOrder(int $proxyOrderId)
-    {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $agent = $this->userRepository->find($proxyOrder->agent_id);
-        $user = $this->userRepository->find($proxyOrder->user_id);
-        $subject = 'New Order/Request';
+        $order = $this->snappyOrderRepository->find($order_id);
+        $agent = $this->userRepository->find($agent_id);
+        $user = $this->userRepository->find($order->user_id);
+        $subject = 'New Order Assignment';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($agent->name)
-            . $this->intro('A new order/request has been assigned to you.')
+            . $this->intro('A new order has been assigned to you.')
             . $this->highlightBox('Customer', $user->name)
-            . $this->orderDetailsCard($proxyOrder, true)
+            . $this->orderDetailsCard($order, true)
             . $this->signOff()
         );
         $this->mailService->send($agent->email, $subject, $this->from(), $body);
     }
 
-    public function sendCustomerPriceAdjustedNotification(int $proxyOrderId)
+    public function notifyCustomerOfAgentAssignment(int $order_id, int $agent_id)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
-        $subject = 'Price Adjusted';
+        $order = $this->snappyOrderRepository->find($order_id);
+        $agent = $this->userRepository->find($agent_id);
+        $user = $this->userRepository->find($order->user_id);
+        $subject = 'Order Assigned to Agent';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($user->name)
-            . $this->intro('Your order price has been adjusted. You will be charged the new amount. Log in to view the price and pay from your wallet.')
-            . $this->priceBreakdownCard($proxyOrder)
-            . $this->orderDetailsCard($proxyOrder, true)
+            . $this->intro('Your order has been assigned to an agent.')
+            . $this->highlightBox('Assigned agent', $agent->name)
+            . $this->orderDetailsCard($order, true)
             . $this->signOff()
         );
         $this->mailService->send($user->email, $subject, $this->from(), $body);
     }
 
-    public function sendCustomerOrderPaidNotification(int $proxyOrderId)
+    public function notifyCustomerOfPriceChange(int $order_id, float $price)
     {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
-        $subject = 'Order Paid';
+        $order = $this->snappyOrderRepository->find($order_id);
+        $user = $this->userRepository->find($order->user_id);
+        $subject = 'Order Price Updated';
         $body = $this->baseMailTheme->wrapTemplate(
             $this->greeting($user->name)
-            . $this->intro('Your order has been paid successfully. Thank you!')
-            . $this->statusBanner('Payment status', $proxyOrder->status)
-            . $this->orderDetailsCard($proxyOrder, true)
-            . $this->signOff()
-        );
-        $this->mailService->send($user->email, $subject, $this->from(), $body);
-    }
-
-    public function sendCustomerOrderPaymentApprovedNotification(int $proxyOrderId)
-    {
-        $proxyOrder = $this->proxyOrderRepository->find($proxyOrderId);
-        $user = $this->userRepository->find($proxyOrder->user_id);
-        $subject = 'Payment Request Approved';
-        $body = $this->baseMailTheme->wrapTemplate(
-            $this->greeting($user->name)
-            . $this->intro('Your payment request has been approved. Log in to view the updated price and complete payment from your wallet.')
-            . $this->orderDetailsCard($proxyOrder, true)
+            . $this->intro('Your order price has been adjusted. Log in to view the updated amount and complete payment.')
+            . $this->highlightBox('New amount (USD)', '$ ' . number_format($price, 2))
+            . $this->orderDetailsCard($order, true)
             . $this->signOff()
         );
         $this->mailService->send($user->email, $subject, $this->from(), $body);
@@ -227,22 +213,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
             . '</td></tr></table>';
     }
 
-    private function priceBreakdownCard(ProxyOrderEntity $order): string
-    {
-        $rows = [
-            'Grand total (₦)' => '₦ ' . number_format((float) $order->grand_total_naira, 2),
-            'Shipping fee' => '$ ' . number_format((float) $order->shipping_cost_usd, 2),
-            'Service fee' => '$ ' . number_format((float) $order->service_charge_usd, 2),
-            'FX rate' => '$1 = ₦ ' . number_format((float) $order->dollar_to_naira_rate, 2),
-        ];
-
-        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px 0;background-color:#fffbeb;border:1px solid #fde68a;border-radius:10px;overflow:hidden;">'
-            . '<tr><td style="padding:12px 16px;background-color:#f59e0b;font-size:13px;font-weight:bold;color:#ffffff;">Updated pricing</td></tr>'
-            . '<tr><td style="padding:8px 16px 16px 16px;">' . $this->detailRows($rows) . '</td></tr>'
-            . '</table>';
-    }
-
-    private function orderDetailsCard(ProxyOrderEntity $order, bool $includeUpdatedAt = false): string
+    private function orderDetailsCard(SnappyOrderEntity $order, bool $includeUpdatedAt = false): string
     {
         $link = $this->e($order->link);
         $rows = [
@@ -268,7 +239,7 @@ class ProxyOrderMailNotification implements ProxyOrderMailNotificationInterface
 
     /**
      * @param array $rows
-     * @param array $rawHtmlKeys keys whose values are already escaped HTML
+     * @param array $rawHtmlKeys
      */
     private function detailRows(array $rows, array $rawHtmlKeys = []): string
     {
