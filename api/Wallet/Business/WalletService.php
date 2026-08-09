@@ -196,6 +196,8 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
             "status" => $status,
         ]);
 
+        // echo "got here " . $status;
+
         // top up wallet
         $this->userService->topUpWallet($wallet->user_id, $wallet->amount);
 

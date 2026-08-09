@@ -3,6 +3,7 @@ namespace Notification\Business;
 
 use Shared\AbstractBaseServiceInterface;
 use Notification\Data\NotificationEntity;
+use Shared\Query\QueryObject;
 
 /**
  * Notification Service Interface
@@ -24,7 +25,7 @@ interface NotificationServiceInterface extends AbstractBaseServiceInterface
     /**
      * Get all notifications for a user
      * @param int $userId
-     * @return NotificationEntity[]
+     * @return QueryObject
      */
     public function myNotifications(int $userId);
 

@@ -33,7 +33,8 @@ class NotificationController
         $user = $this->apiCredentialService->getAuthUser();
         $userId = $user->id;
         $notifications = $this->notificationService->myNotifications($userId);
-        $count = $this->notificationService->count($userId);
+        $count = $notifications->count();
+        $notifications = $notifications->fetch();
         return $this->jsonResponseService->success([
             "notifications" => $notifications,
             "count" => $count

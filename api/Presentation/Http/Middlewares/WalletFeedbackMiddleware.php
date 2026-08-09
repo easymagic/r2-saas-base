@@ -36,6 +36,7 @@ class WalletFeedbackMiddleware implements MiddlewareServiceInterface
         foreach ($wallets as $wallet) {
             $this->paymentService->verify($wallet->reference);
             $status = $this->paymentService->getStatus();
+            // echo $status;
             if ($status == 'success') {
                 $this->walletService->approveManualTopUp($wallet->id, 'approved');
             } else {

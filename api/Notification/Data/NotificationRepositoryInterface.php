@@ -2,6 +2,7 @@
 namespace Notification\Data;
 
 use Shared\AbstractBaseRepositoryInterface;
+use Shared\Query\QueryObject;
 
 /**
  * Notification Repository Interface
@@ -9,4 +10,10 @@ use Shared\AbstractBaseRepositoryInterface;
  */
 interface NotificationRepositoryInterface extends AbstractBaseRepositoryInterface
 {
+
+    /**
+     * Get a query object
+     * @return QueryObject
+     */
+    public function query(array $filters);
 }

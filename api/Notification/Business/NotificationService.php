@@ -21,6 +21,7 @@ class NotificationService extends AbstractBaseService implements NotificationSer
 
     public function __construct(NotificationRepositoryInterface $notificationRepository, NotificationMigrationRepositoryInterface $notificationMigrationRepository)
     {
+        parent::__construct($notificationRepository);
         $this->notificationRepository = $notificationRepository;
         $this->notificationMigrationRepository = $notificationMigrationRepository;
     }
@@ -47,7 +48,9 @@ class NotificationService extends AbstractBaseService implements NotificationSer
     }
 
     public function myNotifications(int $userId) {
-      return $this->notificationRepository->filterBy("user_id", $userId)->fetch();
+      return $this->notificationRepository->query([
+        "user_id" => $userId,
+      ]);
     }
 
     public function markAsRead(int $notificationId, int $userId) {
