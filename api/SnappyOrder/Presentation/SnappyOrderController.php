@@ -77,6 +77,18 @@ class SnappyOrderController
         ]);
     }
 
+    function assignToBatch()
+    {
+        $order = $this->snappyOrderService->assignToBatch(
+            (int) $this->request->get('order_id'),
+            (int) $this->request->get('batch_id')
+        );
+        $this->jsonResponseService->success([
+            'order' => $order,
+            'message' => 'Order assigned to batch successfully',
+        ]);
+    }
+
     function getMyOrdersAsAgent()
     {
         $user = $this->apiCredentialService->getAuthUser();

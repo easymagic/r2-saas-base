@@ -4,6 +4,7 @@ namespace Shared;
 
 use Exception;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * Abstract base repository
@@ -11,7 +12,7 @@ use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
  */
 abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
 {
-    private DbServiceInterface $db;
+    protected DbServiceInterface $db;
 
     protected string $sql = "";
     protected array $params = [];
@@ -34,6 +35,13 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
             $params["id"] = $value;
         });
     }
+
+    /**
+     * Add a filter
+     * @param string $key
+     * @param callable $callback function(mixed $value, string &$sql, array &$params): void
+     * @return $this
+     */
 
     function addFilter(string $key, callable $callback){
         $this->filters[$key] = $callback;
@@ -145,7 +153,6 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
     function filterBy(string $field,string $value, string $operator = "AND", string $comparison = "="){
         $this->sql .= " {$operator} {$field} {$comparison} :{$field}";
         $this->params[$field] = $value;
-        // die($this->sql);
         return $this;
     }
 

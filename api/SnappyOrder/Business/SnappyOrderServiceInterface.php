@@ -93,4 +93,12 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
      */
     public function payOrderFromWallet(int $order_id, int $user_id);
 
+
+    /**
+     * @param int $order_id
+     * @param int $batch_id
+     * @return SnappyOrderEntity
+     */
+    public function assignToBatch(int $order_id, int $batch_id);
+
 }

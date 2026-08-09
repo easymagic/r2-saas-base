@@ -13,6 +13,8 @@
     { "key": "walletId", "value": "1" },
     { "key": "notificationId", "value": "1" },
     { "key": "orderId", "value": "1" },
+    { "key": "batchId", "value": "1" },
+    { "key": "threadId", "value": "1" },
     { "key": "agentId", "value": "1" },
     { "key": "platformConfigId", "value": "1" }
   ],
@@ -507,6 +509,133 @@
       ]
     },
     {
+      "name": "Batches",
+      "description": "Requires `x-token` + `x-user-token`.",
+      "item": [
+        {
+          "name": "Create Batch",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var batch = json.data && json.data.batch ? json.data.batch : (json.batch || null);",
+                  "  if (batch && batch.id) {",
+                  "    pm.collectionVariables.set('batchId', String(batch.id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Batch 1\",\n  \"description\": \"First order batch\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/batches",
+            "description": "Saves `batch.id` → `batchId` on success."
+          }
+        },
+        {
+          "name": "List Batches",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/batches",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "batches"],
+              "query": [
+                { "key": "id", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Batch",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/batches/{{batchId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Threads",
+      "description": "Order message threads. Requires `x-token` + `x-user-token`. `sender_id` is taken from the authenticated user.\n\nOn create: creates an in-app notification for the order owner. If the sender is not the order owner, also emails the customer via ThreadNotificationService.",
+      "item": [
+        {
+          "name": "Create Thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var thread = json.data && json.data.thread ? json.data.thread : (json.thread || null);",
+                  "  if (thread && thread.id) {",
+                  "    pm.collectionVariables.set('threadId', String(thread.id));",
+                  "  }",
+                  "  if (thread && thread.order_id) {",
+                  "    pm.collectionVariables.set('orderId', String(thread.order_id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "order_id", "value": "{{orderId}}", "type": "text" },
+                { "key": "message", "value": "Hello, checking on my order.", "type": "text" },
+                { "key": "attachment_url", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/threads",
+            "description": "POST /v2/threads\n\nBody (form-data): `order_id`, `message`, optional `attachment_url` file.\n`sender_id` = authenticated user.\n\nSide effects: in-app notification to order owner; email to customer when sender ≠ order owner.\nSaves `thread.id` → `threadId` on success."
+          }
+        },
+        {
+          "name": "List Threads For Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/threads/{{orderId}}",
+            "description": "GET /v2/threads/{order_id}\n\nReturns all thread messages for the order (ordered by `created_at` ASC) plus `count`."
+          }
+        }
+      ]
+    },
+    {
       "name": "Snappy Orders",
       "description": "Requires `x-token` + `x-user-token`.",
       "item": [
@@ -660,6 +789,23 @@
           }
         },
         {
+          "name": "Assign To Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_id\": {{batchId}}\n}"
+            },
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/assign-to-batch",
+            "description": "Admin only. Assigns a snappy order to an existing batch. Uses `orderId` and `batchId` collection variables."
+          }
+        },
+        {
           "name": "Publish Settings",
           "request": {
             "method": "POST",
@@ -729,6 +875,28 @@
               { "key": "x-token", "value": "{{xToken}}" }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/migrate",
+            "description": "x-token only."
+          }
+        },
+        {
+          "name": "Migrate Batches",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/batches/migrate",
+            "description": "x-token only."
+          }
+        },
+        {
+          "name": "Migrate Threads",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/threads/migrate",
             "description": "x-token only."
           }
         }

@@ -78,6 +78,28 @@ use ProxyOrderChangeLog\Data\ProxyOrderChangeLogMigrationRepositoryInterface;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogRepository;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogRepositoryInterface;
 
+/*
+ * Batch
+ */
+use Batch\Business\BatchService;
+use Batch\Business\BatchServiceInterface;
+use Batch\Data\BatchMigrationRepository;
+use Batch\Data\BatchMigrationRepositoryInterface;
+use Batch\Data\BatchRepository;
+use Batch\Data\BatchRepositoryInterface;
+
+/*
+ * Thread
+ */
+use Thread\Business\ThreadNotificationService;
+use Thread\Business\ThreadNotificationServiceInterface;
+use Thread\Business\ThreadService;
+use Thread\Business\ThreadServiceInterface;
+use Thread\Data\ThreadMigrationRepository;
+use Thread\Data\ThreadMigrationRepositoryInterface;
+use Thread\Data\ThreadRepository;
+use Thread\Data\ThreadRepositoryInterface;
+
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
@@ -120,6 +142,15 @@ $appServiceContainer->container()->map(SnappyOrderRepositoryInterface::class, Sn
 $appServiceContainer->container()->map(ProxyOrderChangeLogServiceInterface::class, ProxyOrderChangeLogService::class);
 $appServiceContainer->container()->map(ProxyOrderChangeLogMigrationRepositoryInterface::class, ProxyOrderChangeLogMigrationRepository::class);
 $appServiceContainer->container()->map(ProxyOrderChangeLogRepositoryInterface::class, ProxyOrderChangeLogRepository::class);
+
+$appServiceContainer->container()->map(BatchServiceInterface::class, BatchService::class);
+$appServiceContainer->container()->map(BatchMigrationRepositoryInterface::class, BatchMigrationRepository::class);
+$appServiceContainer->container()->map(BatchRepositoryInterface::class, BatchRepository::class);
+
+$appServiceContainer->container()->map(ThreadServiceInterface::class, ThreadService::class);
+$appServiceContainer->container()->map(ThreadNotificationServiceInterface::class, ThreadNotificationService::class);
+$appServiceContainer->container()->map(ThreadMigrationRepositoryInterface::class, ThreadMigrationRepository::class);
+$appServiceContainer->container()->map(ThreadRepositoryInterface::class, ThreadRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 

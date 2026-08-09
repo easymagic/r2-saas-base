@@ -2,8 +2,6 @@
 
 namespace Shared;
 
-use Exception;
-
 /**
  * Abstract base repository interface
  * @template T of object
@@ -105,6 +103,5 @@ interface AbstractBaseRepositoryInterface
      * @return T
      */
     function hydrate(array $row);
-
 
 }

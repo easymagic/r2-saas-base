@@ -50,7 +50,7 @@ class PlatformConfigController
       $user = $this->apiCredentialService->getAuthUser();
       $userId = $user->id;
       $id =  $this->request->get('platform_config_id');
-      $result = $this->platformConfigService->delete($id, $userId);
+      $result = $this->platformConfigService->delete($id);
       return $this->jsonResponseService->success([
         'message' => 'Platform config deleted successfully',
         'result' => $result

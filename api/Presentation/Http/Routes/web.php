@@ -4,7 +4,9 @@ use Notification\Presentation\NotificationController;
 use PlatformConfig\Presentation\PlatformConfigController;
 use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
+use Batch\Presentation\BatchController;
 use SnappyOrder\Presentation\SnappyOrderController;
+use Thread\Presentation\ThreadController;
 use User\Presentation\UserController;
 use Wallet\Presentation\WalletController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
@@ -30,6 +32,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("notifications/migrate", [NotificationController::class, "migrate"]);
             $route->get("platform-configs/migrate", [PlatformConfigController::class, "migrate"]);
             $route->get("snappy-orders/migrate", [SnappyOrderController::class, "migrate"]);
+            $route->get("batches/migrate", [BatchController::class, "migrate"]);
+            $route->get("threads/migrate", [ThreadController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -102,12 +106,22 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("snappy-orders/agent-orders", [SnappyOrderController::class, "getMyOrdersAsAgent"]);
                 $route->post("snappy-orders/{order_id}/pay-from-wallet", [SnappyOrderController::class, "payOrderFromWallet"]);
 
+                // Batch routes
+                $route->get("batches", [BatchController::class, "getBatchList"]);
+                $route->post("batches", [BatchController::class, "create"]);
+                $route->delete("batches/{batch_id}", [BatchController::class, "remove"]);
+
+                // Thread routes
+                $route->post("threads", [ThreadController::class, "createThread"]);
+                $route->get("threads/{order_id}", [ThreadController::class, "getThreadListForOrder"]);
+
                 $route->middleware([
                     GlobalApiAuthAdminMiddleware::class
                 ], function (RouteServiceInterface $route) {
                     $route->get("snappy-orders/admin-orders", [SnappyOrderController::class, "getMyOrderAsAdmin"]);
                     $route->post("snappy-orders/{order_id}/change-status", [SnappyOrderController::class, "changeStatus"]);
                     $route->post("snappy-orders/{order_id}/assign-to-agent", [SnappyOrderController::class, "assignToAgent"]);
+                    $route->post("snappy-orders/{order_id}/assign-to-batch", [SnappyOrderController::class, "assignToBatch"]);
                     $route->post("snappy-orders/publish-settings", [SnappyOrderController::class, "publishSettings"]);
                 });
             });

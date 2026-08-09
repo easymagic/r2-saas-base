@@ -44,6 +44,12 @@ class SnappyOrderRepository extends AbstractBaseRepository implements SnappyOrde
          $params["search"] = "%" . $value . "%";
       });
 
+      // batch_id
+      $this->addFilter("batch_id", function (int $value, string &$sql, array &$params) {
+         $sql .= " AND batch_id = :batch_id";
+         $params["batch_id"] = $value;
+      });
+
       $this->addAppliedFilter(function (string &$sql, array &$params) {
          $sql .= " ORDER BY created_at DESC ";
       });

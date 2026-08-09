@@ -2,6 +2,7 @@
 
 namespace SnappyOrder\Business;
 
+use Batch\Data\BatchRepositoryInterface;
 use Exception;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
 use ProxyOrderChangeLog\Business\ProxyOrderChangeLogServiceInterface;
@@ -28,8 +29,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     private PlatformConfigServiceInterface $platformConfigService;
     private UserServiceInterface $userService;
     private WalletServiceInterface $walletService;
-
     private ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService;
+    private BatchRepositoryInterface $batchRepository;
 
     public function __construct(
         SnappyOrderMigrationRepositoryInterface $snappyOrderMigrationRepositoryInterface,
@@ -40,7 +41,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         PlatformConfigServiceInterface $platformConfigService,
         UserServiceInterface $userService,
         WalletServiceInterface $walletService,
-        ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService
+        ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService,
+        BatchRepositoryInterface $batchRepository
     ) {
         parent::__construct($snappyOrderRepository);
         $this->snappyOrderMigrationRepositoryInterface = $snappyOrderMigrationRepositoryInterface;
@@ -52,6 +54,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         $this->userService = $userService;
         $this->walletService = $walletService;
         $this->proxyOrderChangeLogService = $proxyOrderChangeLogService;
+        $this->batchRepository = $batchRepository;
     }
 
     public function migrate()
@@ -370,6 +373,46 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         ]);
 
         $this->snappyOrderMailService->notifyCustomerOfOrderPayment($order->id);
+
+        return $order;
+    }
+
+    /**
+     * @param int $order_id
+     * @param int $batch_id
+     * @return SnappyOrderEntity
+     */
+    public function assignToBatch(int $order_id, int $batch_id)
+    {
+        if (empty($order_id)) {
+            throw new Exception('Order ID is required');
+        }
+        if (empty($batch_id)) {
+            throw new Exception('Batch ID is required');
+        }
+
+        $batch = $this->batchRepository->find($batch_id);
+        if ($batch->isEmpty()) {
+            throw new Exception('Batch not found');
+        }
+
+        $order = $this->snappyOrderRepository->find($order_id);
+        if ($order->isEmpty()) {
+            throw new Exception('Order not found');
+        }
+
+        $old_batch_id = (string) $order->batch_id;
+
+        $order = $this->snappyOrderRepository->save($order->id, [
+            'batch_id' => $batch_id,
+        ]);
+
+        $this->proxyOrderChangeLogService->log(
+            $order->id,
+            'batch_id',
+            $old_batch_id,
+            (string) $batch_id
+        );
 
         return $order;
     }
