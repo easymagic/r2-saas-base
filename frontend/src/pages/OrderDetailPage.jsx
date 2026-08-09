@@ -222,6 +222,7 @@ export function OrderDetailPage() {
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustSubmitting, setAdjustSubmitting] = useState(false);
   const [adjustError, setAdjustError] = useState('');
+  const [adjustSuccess, setAdjustSuccess] = useState('');
   const [priceChangeSubmitting, setPriceChangeSubmitting] = useState(false);
   const [statusSelectValue, setStatusSelectValue] = useState('');
   const [statusCodeValue, setStatusCodeValue] = useState('');
@@ -323,8 +324,12 @@ export function OrderDetailPage() {
     if (!order) return;
     const v = order.total_amount_usd ?? order.total_amount;
     setAdjustAmount(v != null && v !== '' ? String(v) : '');
-    setAdjustError('');
   }, [order?.id, order?.total_amount_usd, order?.total_amount]);
+
+  useEffect(() => {
+    setAdjustError('');
+    setAdjustSuccess('');
+  }, [order?.id]);
 
   useEffect(() => {
     if (!order) return;
@@ -390,6 +395,7 @@ export function OrderDetailPage() {
   async function handleAdjustPrice(e) {
     e.preventDefault();
     setAdjustError('');
+    setAdjustSuccess('');
     const u = getStoredUser();
     if (!u?.token || order?.id == null) {
       navigate('/login', { replace: true });
@@ -419,12 +425,17 @@ export function OrderDetailPage() {
         showToast(m, 'error');
         return;
       }
+      const successMessage =
+        typeof r.message === 'string' && r.message.length > 0
+          ? r.message
+          : 'Order price updated successfully';
       if (r.order) setOrder(r.order);
       else {
         const fr = await fetchOrderFromApi(u, order.id);
         if (fr.ok) setOrder(fr.order);
       }
-      showToast(r.message || 'Order price updated successfully.', 'success');
+      setAdjustSuccess(successMessage);
+      showToast(successMessage, 'success');
     } catch {
       const m = 'Network error. Check that the API is running.';
       setAdjustError(m);
@@ -840,11 +851,6 @@ export function OrderDetailPage() {
                       recalculates charges, sets <code className="rounded bg-slate-100 px-1">price_adjustment_sent</code>,
                       and emails the customer. Only while status is pending.
                     </p>
-                    {Number(order.price_adjustment_sent) === 1 ? (
-                      <p className="mt-2 text-xs font-medium text-orange-700">
-                        A price adjustment was already sent for this order.
-                      </p>
-                    ) : null}
                     <form className="mt-3 space-y-3" onSubmit={handleAdjustPrice} noValidate>
                       {adjustError ? (
                         <p
@@ -852,6 +858,14 @@ export function OrderDetailPage() {
                           role="alert"
                         >
                           {adjustError}
+                        </p>
+                      ) : null}
+                      {adjustSuccess ? (
+                        <p
+                          className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800"
+                          role="status"
+                        >
+                          {adjustSuccess}
                         </p>
                       ) : null}
                       <Input
@@ -862,7 +876,11 @@ export function OrderDetailPage() {
                         min="0"
                         step="0.01"
                         value={adjustAmount}
-                        onChange={(ev) => setAdjustAmount(ev.target.value)}
+                        onChange={(ev) => {
+                          setAdjustAmount(ev.target.value);
+                          setAdjustSuccess('');
+                          setAdjustError('');
+                        }}
                         disabled={priceChangeSubmitting}
                         required
                       />
