@@ -26,7 +26,7 @@ const featureCards = [
   },
   {
     title: 'Trackable orders',
-    body: 'Follow pending → paid → assigned → completed with thread updates.',
+    body: 'Follow pending → paid → placed → delivered with thread updates.',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path

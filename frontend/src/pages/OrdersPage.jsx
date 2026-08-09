@@ -42,8 +42,8 @@ function formatOrderStatusLabel(status) {
 function orderStatusBadgeVariant(status) {
   const s = String(status || '').toLowerCase();
   if (s === 'pending') return 'pending';
-  if (s === 'completed') return 'delivered';
-  if (s === 'paid' || s === 'assigned') return 'approved';
+  if (s === 'delivered' || s === 'ready-for-pickup') return 'delivered';
+  if (s === 'paid' || s === 'placed') return 'approved';
   if (s === 'cancelled') return 'rejected';
   return 'default';
 }
@@ -51,8 +51,9 @@ function orderStatusBadgeVariant(status) {
 const ORDER_SUMMARY_METRICS = [
   { key: 'pending', label: 'Pending' },
   { key: 'paid', label: 'Paid' },
-  { key: 'assigned', label: 'Assigned' },
-  { key: 'completed', label: 'Completed' },
+  { key: 'placed', label: 'Placed' },
+  { key: 'ready-for-pickup', label: 'Ready for pickup' },
+  { key: 'delivered', label: 'Delivered' },
   { key: 'cancelled', label: 'Cancelled' },
 ];
 

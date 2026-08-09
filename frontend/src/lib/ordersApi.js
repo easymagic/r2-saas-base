@@ -1,4 +1,5 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders } from './apiConfig.js';
+import { endpoints } from './endpoints.js';
 import { ORDER_STATUS_FILTERS } from './orderStatuses.js';
 
 function validStatusQuery(status) {
@@ -30,17 +31,23 @@ function threadsFromPayload(data) {
 
 function listPathForRole(user) {
   const role = String(user?.role || '').toLowerCase();
-  if (role === 'admin') return '/v2/snappy-orders/admin-orders';
-  if (role === 'agent') return '/v2/snappy-orders/agent-orders';
-  return '/v2/snappy-orders/my-orders';
+  if (role === 'admin') return endpoints.snappyAdminOrders();
+  if (role === 'agent') return endpoints.snappyAgentOrders();
+  return endpoints.snappyMyOrders();
 }
 
 function summarizeOrders(orders) {
   const statusCounts = {
     pending: 0,
     paid: 0,
-    assigned: 0,
-    completed: 0,
+    placed: 0,
+    'shipped-to-facility': 0,
+    'arrived-at-facility': 0,
+    'shipped-to-destination-country': 0,
+    'arrived-at-destination-country': 0,
+    'arrived-at-destination-facility': 0,
+    'ready-for-pickup': 0,
+    delivered: 0,
     cancelled: 0,
   };
   let totalAmount = 0;
@@ -148,7 +155,7 @@ export async function assignOrderToBatchFromApi(user, orderId, batchId) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/snappy-orders/${encodeURIComponent(oid)}/assign-to-batch`), {
+    const res = await fetch(apiUrl(endpoints.snappyAssignBatch(oid)), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -186,7 +193,7 @@ export async function assignOrderToAgentFromApi(user, orderId, agentId) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/snappy-orders/${encodeURIComponent(oid)}/assign-to-agent`), {
+    const res = await fetch(apiUrl(endpoints.snappyAssignAgent(oid)), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -227,7 +234,7 @@ export async function fetchOrderThreadsFromApi(user, orderId) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/threads/${encodeURIComponent(id)}`), {
+    const res = await fetch(apiUrl(endpoints.threadsForOrder(id)), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -265,7 +272,7 @@ export async function postOrderThread(user, orderId, { message = '', file = null
   }
 
   try {
-    const res = await fetch(apiUrl('/v2/threads'), {
+    const res = await fetch(apiUrl(endpoints.threads()), {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -307,7 +314,7 @@ export async function postChangeOrderStatus(user, orderId, { status } = {}) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/snappy-orders/${encodeURIComponent(id)}/change-status`), {
+    const res = await fetch(apiUrl(endpoints.snappyChangeStatus(id)), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -339,7 +346,7 @@ export async function payOrderFromWalletFromApi(user, orderId) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/snappy-orders/${encodeURIComponent(id)}/pay-from-wallet`), {
+    const res = await fetch(apiUrl(endpoints.snappyPayFromWallet(id)), {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -372,7 +379,7 @@ export async function publishOrderSettingsFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/snappy-orders/publish-settings'), {
+    const res = await fetch(apiUrl(endpoints.snappyPublishSettings()), {
       method: 'POST',
       headers,
       credentials: 'include',

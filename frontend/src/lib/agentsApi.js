@@ -1,8 +1,8 @@
-import { fetchUserByIdFromApi, updateUserOnApi } from './userApi.js';
+import { fetchUserByIdFromApi, fetchUsersFromApi, updateUserOnApi } from './userApi.js';
 
 /**
- * Agent activate/deactivate/list are not separate v2 routes.
- * Activate/deactivate map to user status updates; list returns empty (use user id lookup).
+ * No dedicated agents routes in Postman.
+ * List agents via GET /v2/auth/users?search=agent; activate/deactivate via POST /v2/auth/user/{id}.
  */
 async function patchAgentStatus(user, agentId, status) {
   const id = agentId != null ? String(agentId).trim() : '';
@@ -40,20 +40,23 @@ export async function deactivateAgentFromApi(user, agentId) {
   return patchAgentStatus(user, agentId, 'inactive');
 }
 
-export async function fetchAgentsFromApi() {
-  return {
-    ok: true,
-    agents: [],
-    lookupOnly: true,
-    data: { success: true, data: { agents: [] } },
-  };
+function isAgentUser(u) {
+  return String(u?.role || '')
+    .toLowerCase()
+    .split(/[\s,|]+/)
+    .includes('agent');
 }
 
-export async function fetchInactiveAgentsFromApi() {
-  return {
-    ok: true,
-    agents: [],
-    lookupOnly: true,
-    data: { success: true, data: { agents: [] } },
-  };
+export async function fetchAgentsFromApi(user) {
+  const r = await fetchUsersFromApi(user, 1, { search: 'agent' });
+  if (!r.ok) return r;
+  const agents = r.users.filter(isAgentUser);
+  return { ok: true, agents, total: agents.length, data: r.data };
+}
+
+export async function fetchInactiveAgentsFromApi(user) {
+  const r = await fetchAgentsFromApi(user);
+  if (!r.ok) return r;
+  const agents = r.agents.filter((a) => String(a?.status || '').toLowerCase() === 'inactive');
+  return { ok: true, agents, total: agents.length, data: r.data };
 }

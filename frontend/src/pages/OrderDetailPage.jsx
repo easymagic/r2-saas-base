@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useSyncedWalletBalance } from '../hooks/useSyncedWalletBalance.js';
 import { apiMediaUrl } from '../lib/apiConfig.js';
+import { fetchAgentsFromApi } from '../lib/agentsApi.js';
 import { getStoredUser } from '../lib/authSession.js';
 import { ORDER_FULFILLMENT_STATUS_SEQUENCE } from '../lib/orderStatuses.js';
 import {
@@ -28,7 +29,7 @@ import { initialsFromName } from '../lib/userDisplay.js';
 
 function isOrderFulfillmentFinalized(status) {
   const s = String(status || '').toLowerCase();
-  return s === 'completed' || s === 'cancelled';
+  return s === 'delivered' || s === 'cancelled';
 }
 
 function formatOrderDate(value) {
@@ -57,9 +58,9 @@ function formatOrderStatusLabel(status) {
 function orderStatusBadgeVariant(status) {
   const s = String(status || '').toLowerCase();
   if (s === 'cancelled') return 'rejected';
-  if (s === 'completed') return 'delivered';
+  if (s === 'delivered' || s === 'ready-for-pickup') return 'delivered';
   if (s === 'pending') return 'pending';
-  if (s === 'paid' || s === 'assigned') return 'approved';
+  if (s === 'paid' || s === 'placed') return 'approved';
   return 'default';
 }
 
@@ -273,9 +274,31 @@ export function OrderDetailPage() {
       setAgentsLoading(false);
       return;
     }
-    setAgents([]);
-    setAgentsLoading(false);
-    setAgentsError('Enter an agent user id (no agents list endpoint on v2).');
+    let cancelled = false;
+    const u = getStoredUser();
+    if (!u?.token) return;
+    setAgentsLoading(true);
+    setAgentsError('');
+    fetchAgentsFromApi(u).then((r) => {
+      if (cancelled) return;
+      setAgentsLoading(false);
+      if (!r.ok) {
+        setAgents([]);
+        setAgentsError(
+          typeof r.message === 'string' && r.message.length > 0
+            ? r.message
+            : 'Could not load agents. You can still enter an agent user id.'
+        );
+        return;
+      }
+      setAgents(r.agents);
+      if (r.agents.length === 0) {
+        setAgentsError('No agents found via GET /v2/auth/users?search=agent. Enter an agent user id.');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [isAdmin]);
 
   useEffect(() => {
@@ -496,11 +519,15 @@ export function OrderDetailPage() {
 
   const statusLabel = order ? formatOrderStatusLabel(order.status) : '';
   const payLabel = order
-    ? String(order.status || '').toLowerCase() === 'paid' || String(order.status || '').toLowerCase() === 'completed'
-      ? 'Paid / settled'
-      : String(order.status || '').toLowerCase() === 'pending'
-        ? 'Awaiting payment'
-        : formatOrderStatusLabel(order.status)
+    ? (() => {
+        const s = String(order.status || '').toLowerCase();
+        if (s === 'pending') return 'Awaiting payment';
+        if (s === 'cancelled') return 'Cancelled';
+        if (s === 'paid' || ORDER_FULFILLMENT_STATUS_SEQUENCE.indexOf(s) > ORDER_FULFILLMENT_STATUS_SEQUENCE.indexOf('paid')) {
+          return 'Paid / settled';
+        }
+        return formatOrderStatusLabel(order.status);
+      })()
     : '';
   const orderFulfillmentLocked = order != null && isOrderFulfillmentFinalized(order.status);
   const assignedAgent =
@@ -786,13 +813,17 @@ export function OrderDetailPage() {
                   <div className="mt-6 border-t border-gray-200 pt-5">
                     <h3 className="text-sm font-semibold text-gray-900">Assign agent</h3>
                     <p className="mt-1 text-xs text-gray-500">
-                      POST /v2/snappy-orders/&#123;id&#125;/assign-to-agent with an agent user id.
+                      Agents load from <code className="rounded bg-slate-100 px-1">GET /v2/auth/users?search=agent</code>,
+                      then assign via <code className="rounded bg-slate-100 px-1">POST …/assign-to-agent</code>.
                     </p>
                     <dl className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                        <dt className="text-gray-500">Current agent id</dt>
+                        <dt className="text-gray-500">Current agent</dt>
                         <dd className="font-medium text-gray-900">
-                          {hasAssignedAgent ? `#${order.agent_id}` : 'Unassigned'}
+                          {hasAssignedAgent
+                            ? agentDisplayName(agents.find((a) => String(a.id) === String(order.agent_id))) ||
+                              `#${order.agent_id}`
+                            : 'Unassigned'}
                         </dd>
                       </div>
                     </dl>
@@ -810,17 +841,40 @@ export function OrderDetailPage() {
                           {agentsError}
                         </p>
                       ) : null}
-                      <Input
-                        id="assign-order-agent"
-                        name="agent_id"
-                        label="Agent user id"
-                        type="text"
-                        inputMode="numeric"
-                        value={selectedAgentId}
-                        onChange={(ev) => setSelectedAgentId(ev.target.value)}
-                        disabled={agentAssignSubmitting}
-                        placeholder="e.g. 12"
-                      />
+                      {agents.length > 0 ? (
+                        <div>
+                          <label htmlFor="assign-order-agent" className="block text-sm font-medium text-gray-700">
+                            Agent
+                          </label>
+                          <select
+                            id="assign-order-agent"
+                            name="agent_id"
+                            value={selectedAgentId}
+                            onChange={(ev) => setSelectedAgentId(ev.target.value)}
+                            disabled={agentAssignSubmitting || agentsLoading}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">{agentsLoading ? 'Loading agents…' : 'Select an agent'}</option>
+                            {agents.map((agent) => (
+                              <option key={agent.id} value={agent.id}>
+                                {agentDisplayName(agent)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <Input
+                          id="assign-order-agent"
+                          name="agent_id"
+                          label="Agent user id"
+                          type="text"
+                          inputMode="numeric"
+                          value={selectedAgentId}
+                          onChange={(ev) => setSelectedAgentId(ev.target.value)}
+                          disabled={agentAssignSubmitting}
+                          placeholder="e.g. 12"
+                        />
+                      )}
                       <Button
                         type="submit"
                         variant="orange"
@@ -841,8 +895,8 @@ export function OrderDetailPage() {
                     <div className="w-full max-w-sm space-y-3">
                       <h3 className="text-sm font-semibold text-gray-900">Change fulfillment status</h3>
                       <p className="text-xs text-gray-500">
-                        Valid statuses: pending, paid, assigned, completed, cancelled. The server rejects invalid
-                        transitions.
+                        Valid statuses follow the fulfillment sequence through delivered (or cancelled from pending).
+                        The server rejects invalid values and transitions.
                       </p>
                       {orderFulfillmentLocked ? (
                         <p className="text-xs font-medium text-gray-500">

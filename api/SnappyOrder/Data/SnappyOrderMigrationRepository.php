@@ -25,7 +25,7 @@ class SnappyOrderMigrationRepository implements SnappyOrderMigrationRepositoryIn
             ->field('screen_shot2')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('screen_shot3')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('description')->definition('TEXT DEFAULT NULL')->run()
-            ->field('status')->definition("ENUM('pending','paid','assigned','completed','cancelled') NOT NULL DEFAULT 'pending'")->run()
+            ->field('status')->definition("ENUM('pending','paid','placed','shipped-to-facility','arrived-at-facility','shipped-to-destination-country','arrived-at-destination-country','arrived-at-destination-facility','ready-for-pickup','delivered','cancelled') NOT NULL DEFAULT 'pending'")->run()
             ->field('total_amount_usd')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('grand_total_naira')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('shipping_cost_usd')->definition('FLOAT DEFAULT NULL')->run()

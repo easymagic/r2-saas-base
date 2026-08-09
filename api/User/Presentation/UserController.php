@@ -257,11 +257,10 @@ class UserController
     function fetch()
     {
         $data = $this->request->all();
-        $users = $this->userService->fetch($data);
-        $count = $this->userService->count($data);
+        $users = $this->userService->fetchUsersAsAdmin($data);
         $this->jsonResponseService->success([
-            'users' => $users,
-            'count' => $count,
+            'users' => $users->fetch(),
+            'count' => $users->count(),
             "message" => "Users fetched successfully",
         ]);
     }

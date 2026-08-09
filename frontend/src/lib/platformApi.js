@@ -1,4 +1,5 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders } from './apiConfig.js';
+import { endpoints } from './endpoints.js';
 
 function configsFromPayload(data) {
   const nested = apiData(data);
@@ -25,7 +26,7 @@ export async function fetchPlatformConfig(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/platform-configs'), {
+    const res = await fetch(apiUrl(endpoints.platformConfigs()), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -66,7 +67,7 @@ export async function updatePlatformConfigSetting(user, settingName, settingValu
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/platform-configs/update'), {
+    const res = await fetch(apiUrl(endpoints.platformConfigsUpdate()), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -127,7 +128,7 @@ export async function deletePlatformConfig(user, platformConfigId) {
   if (!id) return { ok: false, error: 'invalid_id' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/platform-configs/${encodeURIComponent(id)}/delete`), {
+    const res = await fetch(apiUrl(endpoints.platformConfigDelete(id)), {
       method: 'DELETE',
       headers,
       credentials: 'include',

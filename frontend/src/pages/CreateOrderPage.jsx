@@ -8,6 +8,7 @@ import { Textarea } from '../components/ui/Textarea.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useSyncedWalletBalance } from '../hooks/useSyncedWalletBalance.js';
 import { getStoredUser, mergeSessionTokenFromOrderUser } from '../lib/authSession.js';
+import { endpoints } from '../lib/endpoints.js';
 import { initialsFromName } from '../lib/userDisplay.js';
 
 export function CreateOrderPage() {
@@ -69,7 +70,7 @@ export function CreateOrderPage() {
     if (screenShot3 instanceof File) body.append('screen_shot3', screenShot3);
 
     try {
-      const res = await fetch(apiUrl('/v2/snappy-orders'), {
+      const res = await fetch(apiUrl(endpoints.snappyOrders()), {
         method: 'POST',
         headers,
         credentials: 'include',

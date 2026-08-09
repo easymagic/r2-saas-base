@@ -144,7 +144,12 @@ export function AdminUsersPage() {
     }
     setLoading(true);
     setError('');
-    const r = await fetchUsersFromApi(u, page);
+    const search = String(searchParams.get('search') || '').trim();
+    const email = String(searchParams.get('email') || '').trim();
+    const r = await fetchUsersFromApi(u, page, {
+      ...(search ? { search } : {}),
+      ...(email ? { email } : {}),
+    });
     setLoading(false);
     if (!r.ok) {
       setError(typeof r.message === 'string' && r.message.length > 0 ? r.message : 'Could not load users.');
@@ -162,10 +167,7 @@ export function AdminUsersPage() {
     setLastPage(lp);
     setHasNext(!!r.hasNext);
     setHasPrev(!!r.hasPrev);
-    if (r.lookupOnly) {
-      setError('User list is not on v2 — look up a user by id, or create one below.');
-    }
-  }, [navigate, page, listRefresh]);
+  }, [navigate, page, listRefresh, searchParams]);
 
   async function handleLookupUser(e) {
     e.preventDefault();
@@ -275,6 +277,36 @@ export function AdminUsersPage() {
                 {total !== users.length || lastPage > 1 ? ` · ${total} total` : ''}
               </span>
             )}
+            <form
+              className="flex flex-wrap items-end gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const next = new URLSearchParams(searchParams);
+                const q = String(fd.get('search') || '').trim();
+                if (q) next.set('search', q);
+                else next.delete('search');
+                next.set('page', '1');
+                setSearchParams(next, { replace: false });
+              }}
+            >
+              <div>
+                <label htmlFor="users-search" className="sr-only">
+                  Search users
+                </label>
+                <input
+                  id="users-search"
+                  name="search"
+                  type="search"
+                  defaultValue={String(searchParams.get('search') || '')}
+                  placeholder="Search (name/email/phone/role)"
+                  className="w-56 rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <Button type="submit" variant="secondary" disabled={loading}>
+                Search
+              </Button>
+            </form>
             <form className="flex flex-wrap items-end gap-2" onSubmit={handleLookupUser}>
               <div>
                 <label htmlFor="user-lookup-id" className="sr-only">

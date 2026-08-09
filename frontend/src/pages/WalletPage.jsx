@@ -199,11 +199,10 @@ export function WalletPage() {
         return;
       }
 
-      const row = result.data?.data;
-      if (row?.user) saveAuthUser(row.user);
+      if (result.wallet?.user) saveAuthUser(result.wallet.user);
       await refreshWalletBalance();
       await loadWalletTransactions();
-      showToast(result.data?.message || 'Manual top-up request submitted.', 'success');
+      showToast(result.message || 'Manual top-up request submitted.', 'success');
       resetWalletModalState();
     } catch {
       setFormError('Network error. Check that the API is running.');
@@ -253,26 +252,28 @@ export function WalletPage() {
         return;
       }
 
-      const wallet = result.data.wallet;
+      const wallet = result.wallet;
       if (wallet?.user) saveAuthUser(wallet.user);
       await refreshWalletBalance();
       await loadWalletTransactions();
 
-      const payUrl = wallet?.payment_url;
-      if (typeof payUrl === 'string' && payUrl.startsWith('http')) {
+      const payUrl = typeof wallet?.payment_url === 'string' ? wallet.payment_url.trim() : '';
+      if (payUrl.startsWith('http')) {
         if (paymentTab && !paymentTab.closed) {
           paymentTab.location.replace(payUrl);
         } else {
           const fallback = window.open(payUrl, '_blank', 'noopener,noreferrer');
           if (!fallback) {
             showToast('Allow pop-ups for this site to open checkout in a new tab.', 'info');
+            window.location.assign(payUrl);
           }
         }
+        showToast('Continue in the payment window to finish your top-up.', 'success');
       } else {
         paymentTab?.close();
+        showToast('Top-up created, but no payment URL was returned.', 'error');
       }
 
-      showToast(result.data.message || 'Continue in the payment window to finish.', 'success');
       resetWalletModalState();
     } catch {
       paymentTab?.close();

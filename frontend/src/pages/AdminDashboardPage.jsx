@@ -11,8 +11,9 @@ import { formatNaira } from '../lib/userDisplay.js';
 const ORDER_STATUS_METRICS = [
   { key: 'pending', label: 'Pending', to: '/orders?status=pending' },
   { key: 'paid', label: 'Paid', to: '/orders?status=paid' },
-  { key: 'assigned', label: 'Assigned', to: '/orders?status=assigned' },
-  { key: 'completed', label: 'Completed', to: '/orders?status=completed' },
+  { key: 'placed', label: 'Placed', to: '/orders?status=placed' },
+  { key: 'ready-for-pickup', label: 'Ready for pickup', to: '/orders?status=ready-for-pickup' },
+  { key: 'delivered', label: 'Delivered', to: '/orders?status=delivered' },
   { key: 'cancelled', label: 'Cancelled', to: '/orders?status=cancelled' },
 ];
 
@@ -52,8 +53,8 @@ function formatOrderStatusLabel(status) {
 function orderStatusBadgeVariant(status) {
   const s = String(status || '').toLowerCase();
   if (s === 'pending') return 'pending';
-  if (s === 'completed') return 'delivered';
-  if (s === 'paid' || s === 'assigned') return 'approved';
+  if (s === 'delivered' || s === 'ready-for-pickup') return 'delivered';
+  if (s === 'paid' || s === 'placed') return 'approved';
   if (s === 'cancelled') return 'rejected';
   return 'default';
 }

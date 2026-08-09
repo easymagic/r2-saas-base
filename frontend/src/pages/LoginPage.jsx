@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, xTokenHeader } from '../lib/apiConfig.js';
 import { getStoredUser, resolvePostLoginPath, saveAuthUser } from '../lib/authSession.js';
+import { endpoints } from '../lib/endpoints.js';
 import { syncSettingsFromApi } from '../lib/settingsApi.js';
 import { fetchMeFromApi } from '../lib/userApi.js';
 
@@ -29,7 +30,7 @@ export function LoginPage() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(apiUrl('/v2/auth/login'), {
+      const res = await fetch(apiUrl(endpoints.authLogin()), {
         method: 'POST',
         headers: jsonHeaders({ 'x-token': xTokenHeader() }),
         credentials: 'include',

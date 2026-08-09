@@ -39,7 +39,7 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
 
     /**
      * @param int $order_id
-     * @param string $status Valid statuses are: pending, paid, assigned, completed, cancelled
+     * @param string $status Valid statuses are defined in SnappyOrderRepositoryInterface::ALLOWED_STATUSES
      * @return SnappyOrderEntity 
      */
     public function changeStatus(int $order_id, string $status);

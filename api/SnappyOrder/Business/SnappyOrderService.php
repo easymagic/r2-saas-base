@@ -151,7 +151,9 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             throw new Exception('Status is required');
         }
         if (!in_array($status, SnappyOrderRepositoryInterface::ALLOWED_STATUSES, true)) {
-            throw new Exception('Invalid status');
+            throw new Exception(
+                'Invalid status. Allowed: ' . implode(', ', SnappyOrderRepositoryInterface::ALLOWED_STATUSES)
+            );
         }
 
         $order = $this->snappyOrderRepository->find($order_id);
@@ -159,15 +161,18 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             throw new Exception('Order not found');
         }
 
-        if ($status === 'pending' && $order->status !== 'pending') {
+        $previousStatus = $order->status;
+
+        if ($status === 'pending' && $previousStatus !== 'pending') {
             throw new Exception('Status cannot be changed back to pending');
         }
 
-        if ($status === 'cancelled' && $order->status !== 'pending') {
+        if ($status === 'cancelled' && $previousStatus !== 'pending') {
             throw new Exception('Can only cancel pending orders');
         }
 
-        if ($status === 'completed') {
+        // Pickup OTP is issued when the order becomes ready for pickup.
+        if ($status === 'ready-for-pickup') {
             $otp_code = rand(100000, 999999);
             $order = $this->snappyOrderRepository->save($order_id, [
                 'status' => $status,
@@ -180,7 +185,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             ]);
         }
 
-        $this->proxyOrderChangeLogService->log($order->id, 'status', $order->status, $status);
+        $this->proxyOrderChangeLogService->log($order->id, 'status', $previousStatus, $status);
 
         $this->snappyOrderMailService->notifyCustomerOfStatusChange($order->id, $status);
 
@@ -214,12 +219,13 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             throw new Exception('Order not found');
         }
 
+        $previousAgentId = $order->agent_id;
         $order = $this->snappyOrderRepository->save($order->id, [
             'agent_id' => $agent_id,
-            'status' => 'assigned',
+            'status' => 'placed',
         ]);
 
-        $this->proxyOrderChangeLogService->log($order->id, 'agent_id', $order->agent_id, $agent_id);
+        $this->proxyOrderChangeLogService->log($order->id, 'agent_id', $previousAgentId, $agent_id);
 
         $this->snappyOrderMailService->notifyAgenOfOrderAssignment($order->id, $agent_id);
         $this->snappyOrderMailService->notifyCustomerOfAgentAssignment($order->id, $agent_id);

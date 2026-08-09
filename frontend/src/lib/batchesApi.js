@@ -1,4 +1,5 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders } from './apiConfig.js';
+import { endpoints } from './endpoints.js';
 
 function batchesFromPayload(data) {
   const nested = apiData(data);
@@ -18,7 +19,7 @@ export async function fetchBatchesFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/batches'), {
+    const res = await fetch(apiUrl(endpoints.batches()), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -51,7 +52,7 @@ export async function createBatchFromApi(user, { name, description = '' } = {}) 
   }
 
   try {
-    const res = await fetch(apiUrl('/v2/batches'), {
+    const res = await fetch(apiUrl(endpoints.batches()), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -108,7 +109,7 @@ export async function deleteBatchFromApi(user, batchId) {
   if (!id) return { ok: false, error: 'invalid_id' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/batches/${encodeURIComponent(id)}`), {
+    const res = await fetch(apiUrl(endpoints.batch(id)), {
       method: 'DELETE',
       headers,
       credentials: 'include',

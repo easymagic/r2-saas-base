@@ -364,4 +364,9 @@ class UserService extends AbstractBaseService implements UserServiceInterface
         ]);
         return $user;
     }
+
+    public function fetchUsersAsAdmin(array $filters = [])
+    {
+        return $this->userRepository->query($filters);
+    }
 }

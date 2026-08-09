@@ -4,7 +4,7 @@ import { fetchWalletBalanceFromApi } from '../lib/walletApi.js';
 import { fetchMeFromApi } from '../lib/userApi.js';
 import { formatNaira } from '../lib/userDisplay.js';
 
-/** Shows cached balance, then refreshes from GET /api/me (full profile); falls back to GET /api/wallet. */
+/** Shows cached balance, then refreshes from GET /v2/auth/me; falls back to POST /v2/auth/me/wallet-balance. */
 export function useSyncedWalletBalance() {
   const [label, setLabel] = useState(() => formatNaira(getStoredUser()?.wallet_balance));
 

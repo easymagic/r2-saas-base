@@ -6,6 +6,7 @@ use Shared\AbstractBaseRepository;
 use User\Data\UserEntity;
 
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * @extends AbstractBaseRepository<UserEntity>
@@ -28,6 +29,14 @@ class UserRepository extends AbstractBaseRepository implements UserRepositoryInt
         $sql .= " AND email = :email";
         $params['email'] = $value;
       });
+   }
+
+   public function query(array $filters = [])
+   {
+      $this->sql = "SELECT * FROM users WHERE 1=1 ";
+      $this->params = [];
+      $this->filter($filters);
+      return new QueryObject($this->sql, $this->params, $this->db, $this->hydrateClass);
    }
 
 }

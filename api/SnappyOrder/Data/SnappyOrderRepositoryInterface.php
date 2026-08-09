@@ -10,14 +10,32 @@ use Shared\Query\QueryObject;
  */
 interface SnappyOrderRepositoryInterface extends AbstractBaseRepositoryInterface
 {
-    const ALLOWED_STATUSES = [
-        'pending',
-        'paid',
-        'assigned',
-        'completed',
-        'cancelled',
-    ];
 
+    const ALLOWED_STATUSES = [
+
+        'pending',
+
+        'paid',
+
+        'placed',
+
+        'shipped-to-facility',
+
+        'arrived-at-facility',
+
+        'shipped-to-destination-country',
+
+        'arrived-at-destination-country',
+
+        'arrived-at-destination-facility',
+
+        'ready-for-pickup',
+
+        'delivered',
+
+        'cancelled',
+
+    ];
     /**
      * @param array $filters
      * @return QueryObject<SnappyOrderEntity>

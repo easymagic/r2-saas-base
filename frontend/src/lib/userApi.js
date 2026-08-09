@@ -1,4 +1,5 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders } from './apiConfig.js';
+import { endpoints, withQuery } from './endpoints.js';
 
 function userFromPayload(data) {
   const nested = apiData(data);
@@ -17,7 +18,7 @@ export async function fetchMeFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/me'), {
+    const res = await fetch(apiUrl(endpoints.authMe()), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -46,7 +47,7 @@ export async function fetchNotificationsFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/notifications/my-notifications'), {
+    const res = await fetch(apiUrl(endpoints.notificationsMine()), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -68,7 +69,7 @@ export async function fetchNotificationsFromApi(user) {
   }
 }
 
-/** Unread = filter client-side (no dedicated unread route). */
+/** Unread = filter client-side from my-notifications. */
 export async function fetchUnreadNotificationsFromApi(user) {
   const r = await fetchNotificationsFromApi(user);
   if (!r.ok) return r;
@@ -97,7 +98,7 @@ export async function markNotificationReadOnApi(user, notificationId) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/notifications/${encodeURIComponent(id)}/mark-as-read`), {
+    const res = await fetch(apiUrl(endpoints.notificationMarkRead(id)), {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -119,7 +120,69 @@ export async function markNotificationReadOnApi(user, notificationId) {
   }
 }
 
-/** GET /v2/auth/user/{id} — single-user lookup (no list route in v2). */
+/** POST /v2/notifications/{id}/mark-as-unread */
+export async function markNotificationUnreadOnApi(user, notificationId) {
+  const id = notificationId != null ? String(notificationId).trim() : '';
+  if (!id) return { ok: false, error: 'bad_id' };
+
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.notificationMarkUnread(id)), {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return { ok: true, message: apiMessage(data, 'Marked as unread.'), data };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not mark notification as unread.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+/** DELETE /v2/notifications/{id}/delete */
+export async function deleteNotificationOnApi(user, notificationId) {
+  const id = notificationId != null ? String(notificationId).trim() : '';
+  if (!id) return { ok: false, error: 'bad_id' };
+
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.notificationDelete(id)), {
+      method: 'DELETE',
+      headers,
+      credentials: 'include',
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return { ok: true, message: apiMessage(data, 'Notification deleted.'), data };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not delete notification.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+/** GET /v2/auth/user/{id} */
 export async function fetchUserByIdFromApi(user, userId) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
@@ -128,7 +191,7 @@ export async function fetchUserByIdFromApi(user, userId) {
   if (!id) return { ok: false, error: 'invalid_id' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/auth/user/${encodeURIComponent(id)}`), {
+    const res = await fetch(apiUrl(endpoints.authUser(id)), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -152,32 +215,74 @@ export async function fetchUserByIdFromApi(user, userId) {
 }
 
 /**
- * List users is not exposed on v2; keep a stub that returns empty so pages can fall back to lookup-by-id.
+ * GET /v2/auth/users — admin list.
+ * Postman filters: `search`, `email`.
  */
-export async function fetchUsersFromApi(user, page = 1) {
+export async function fetchUsersFromApi(user, page = 1, filters = {}) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
-  return {
-    ok: true,
-    users: [],
-    total: 0,
-    page: Math.max(1, parseInt(String(page), 10) || 1),
-    perPage: 20,
-    lastPage: 1,
-    hasNext: false,
-    hasPrev: false,
-    data: { success: true, data: { users: [], count: 0 } },
-    lookupOnly: true,
+
+  const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+  const query = {
+    search: filters.search,
+    email: filters.email,
   };
+
+  try {
+    const res = await fetch(apiUrl(withQuery(endpoints.authUsers(), query)), {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (!data?.success) {
+      return { ok: false, message: apiMessage(data, 'Could not load users.'), data };
+    }
+
+    const nested = apiData(data);
+    const users = Array.isArray(nested?.users)
+      ? nested.users
+      : Array.isArray(data?.users)
+        ? data.users
+        : [];
+    const total =
+      typeof nested?.count === 'number'
+        ? nested.count
+        : typeof data?.count === 'number'
+          ? data.count
+          : users.length;
+    const perPage = 10;
+    const lastPage = total === 0 ? 1 : Math.max(1, Math.ceil(total / perPage));
+
+    return {
+      ok: true,
+      users,
+      total,
+      page: pageNum,
+      perPage,
+      lastPage,
+      hasNext: pageNum < lastPage,
+      hasPrev: pageNum > 1,
+      data,
+    };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
 }
 
-/** POST /v2/auth/create — admin create user (JSON). */
+/** POST /v2/auth/create */
 export async function createUserOnApi(user, payload) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/create'), {
+    const res = await fetch(apiUrl(endpoints.authCreate()), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -212,7 +317,7 @@ export async function createUserOnApi(user, payload) {
   }
 }
 
-/** POST /v2/auth/user/{id} — admin update user (JSON). */
+/** POST /v2/auth/user/{id} */
 export async function updateUserOnApi(user, userId, payload) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
@@ -221,7 +326,7 @@ export async function updateUserOnApi(user, userId, payload) {
   if (!id) return { ok: false, error: 'invalid_id' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/auth/user/${encodeURIComponent(id)}`), {
+    const res = await fetch(apiUrl(endpoints.authUser(id)), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -254,7 +359,38 @@ export async function updateUserOnApi(user, userId, payload) {
   }
 }
 
-/** No dedicated admin password-reset route; update status/fields only. */
+/** DELETE /v2/auth/user/{id} */
+export async function deleteUserOnApi(user, userId) {
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
+
+  const id = String(userId ?? '').trim();
+  if (!id) return { ok: false, error: 'invalid_id' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.authUser(id)), {
+      method: 'DELETE',
+      headers,
+      credentials: 'include',
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return { ok: true, user: userFromPayload(data), message: apiMessage(data, 'User deleted.'), data };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not delete user.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+/** No dedicated admin password-reset route; use forgot/reset password. */
 export async function changeUserPasswordOnApi() {
   return {
     ok: false,
@@ -268,7 +404,7 @@ export async function logoutFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/login'), {
+    const res = await fetch(apiUrl(endpoints.authLogout()), {
       method: 'DELETE',
       headers,
       credentials: 'include',
@@ -290,13 +426,13 @@ export async function logoutFromApi(user) {
   }
 }
 
-/** POST /v2/auth/me/change-password — JSON: old_password, new_password, confirm_password. */
+/** POST /v2/auth/me/change-password */
 export async function changeMyPasswordOnApi(user, { currentPassword, newPassword, confirmPassword }) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/me/change-password'), {
+    const res = await fetch(apiUrl(endpoints.authChangePassword()), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -323,13 +459,13 @@ export async function changeMyPasswordOnApi(user, { currentPassword, newPassword
   }
 }
 
-/** POST /v2/auth/me — JSON: name, phone, delivery_address. */
+/** POST /v2/auth/me */
 export async function postMeOnApi(user, payload) {
   const baseHeaders = userAuthHeaders(user);
   if (!baseHeaders) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/me'), {
+    const res = await fetch(apiUrl(endpoints.authMe()), {
       method: 'POST',
       headers: jsonHeaders(baseHeaders),
       credentials: 'include',
@@ -363,7 +499,7 @@ export async function fetchAuthWalletBalanceFromApi(user) {
   if (!headers) return { ok: false, error: 'no_session' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/me/wallet-balance'), {
+    const res = await fetch(apiUrl(endpoints.authWalletBalance()), {
       method: 'POST',
       headers,
       credentials: 'include',

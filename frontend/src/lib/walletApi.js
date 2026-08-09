@@ -1,4 +1,5 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders } from './apiConfig.js';
+import { endpoints } from './endpoints.js';
 import { fetchAuthWalletBalanceFromApi } from './userApi.js';
 
 /** Pull balance from common API response shapes (PHP / JSON). */
@@ -57,16 +58,19 @@ function sortWalletsNewestFirst(rows) {
   });
 }
 
-/** POST /v2/wallet/top-up-online — JSON: amount, optional payment_url. */
-export async function postWalletTopUp(user, amount, paymentUrl = '') {
+/**
+ * POST /v2/wallet/top-up-online — JSON: `{ amount }`.
+ * Success: `{ success, data: { wallet: { payment_url, ... }, message } }`.
+ * Open `wallet.payment_url` (Paystack checkout) to complete payment.
+ */
+export async function postWalletTopUp(user, amount) {
   const headers = userAuthHeaders(user);
   if (!headers) return { ok: false, error: 'no_session' };
 
   const body = { amount: Number(String(amount).trim()) || String(amount).trim() };
-  if (paymentUrl) body.payment_url = String(paymentUrl).trim();
 
   try {
-    const res = await fetch(apiUrl('/v2/wallet/top-up-online'), {
+    const res = await fetch(apiUrl(endpoints.walletTopUpOnline()), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -80,7 +84,12 @@ export async function postWalletTopUp(user, amount, paymentUrl = '') {
     }
 
     if (data?.success) {
-      return { ok: true, wallet: walletFromPayload(data), data };
+      return {
+        ok: true,
+        wallet: walletFromPayload(data),
+        message: apiMessage(data, 'Top up online successful'),
+        data,
+      };
     }
 
     return { ok: false, message: apiMessage(data, 'Could not start top-up.'), data };
@@ -102,7 +111,7 @@ export async function postPendingManualTopUp(user, { amount, description, proofF
   }
 
   try {
-    const res = await fetch(apiUrl('/v2/wallet/top-up-manual'), {
+    const res = await fetch(apiUrl(endpoints.walletTopUpManual()), {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -116,7 +125,12 @@ export async function postPendingManualTopUp(user, { amount, description, proofF
     }
 
     if (data?.success) {
-      return { ok: true, wallet: walletFromPayload(data), data };
+      return {
+        ok: true,
+        wallet: walletFromPayload(data),
+        message: apiMessage(data, 'Manual top-up request submitted.'),
+        data,
+      };
     }
 
     return { ok: false, message: apiMessage(data, 'Could not submit manual top-up request.'), data };
@@ -154,7 +168,7 @@ async function fetchWalletList(user, path) {
 
 /** Admin: pending manual top-ups. */
 export async function fetchPendingManualTopupRequests(user) {
-  const r = await fetchWalletList(user, '/v2/wallet/manual-pending-wallet-transactions');
+  const r = await fetchWalletList(user, endpoints.walletManualPending());
   if (!r.ok) return r;
   return { ok: true, requests: r.wallets, total: r.wallets.length, data: r.data };
 }
@@ -177,7 +191,7 @@ export async function approvePendingManualTopupRequest(user, requestId) {
   if (!id) return { ok: false, error: 'invalid_id' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/wallet/${encodeURIComponent(id)}/approve-manual-top-up`), {
+    const res = await fetch(apiUrl(endpoints.walletApproveManual(id)), {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -210,7 +224,7 @@ export async function rejectPendingManualTopupRequest(user, requestId, reason) {
   if (!reasonText) return { ok: false, error: 'invalid_reason', message: 'Rejection reason is required.' };
 
   try {
-    const res = await fetch(apiUrl(`/v2/wallet/${encodeURIComponent(id)}/reject-manual-top-up`), {
+    const res = await fetch(apiUrl(endpoints.walletRejectManual(id)), {
       method: 'POST',
       headers: jsonHeaders(headers),
       credentials: 'include',
@@ -245,8 +259,8 @@ export async function fetchWalletFromApi(user, page = 1) {
 
   try {
     const [pending, approved, balanceRes] = await Promise.all([
-      fetchWalletList(user, '/v2/wallet/my-pending-wallet-transactions'),
-      fetchWalletList(user, '/v2/wallet/my-approved-wallet-transactions'),
+      fetchWalletList(user, endpoints.walletMyPending()),
+      fetchWalletList(user, endpoints.walletMyApproved()),
       fetchAuthWalletBalanceFromApi(user),
     ]);
 
@@ -290,13 +304,13 @@ export async function fetchWalletFromApi(user, page = 1) {
 }
 
 export async function fetchApprovedTopupRequests(user) {
-  const r = await fetchWalletList(user, '/v2/wallet/manual-approved-wallet-transactions');
+  const r = await fetchWalletList(user, endpoints.walletManualApproved());
   if (!r.ok) return r;
   return { ok: true, requests: r.wallets, total: r.wallets.length, data: r.data };
 }
 
 export async function fetchRejectedTopupRequests(user) {
-  const r = await fetchWalletList(user, '/v2/wallet/manual-rejected-wallet-transactions');
+  const r = await fetchWalletList(user, endpoints.walletManualRejected());
   if (!r.ok) return r;
   return { ok: true, requests: r.wallets, total: r.wallets.length, data: r.data };
 }

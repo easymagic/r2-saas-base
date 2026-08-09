@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { apiUrl, xTokenHeader } from '../lib/apiConfig.js';
+import { endpoints } from '../lib/endpoints.js';
 
 function formatMigrationResponse(text) {
   if (!text) return 'Migration request completed.';
@@ -24,13 +25,14 @@ export function MigrationsPage() {
     setError('');
 
     const migratePaths = [
-      '/v2/migrate',
-      '/v2/wallet/migrate',
-      '/v2/notifications/migrate',
-      '/v2/platform-configs/migrate',
-      '/v2/snappy-orders/migrate',
-      '/v2/batches/migrate',
-      '/v2/threads/migrate',
+      endpoints.migrateUsers(),
+      endpoints.migrateWallet(),
+      endpoints.migrateNotifications(),
+      endpoints.migratePlatformConfigs(),
+      endpoints.migrateSnappyOrders(),
+      endpoints.migrateBatches(),
+      endpoints.migrateThreads(),
+      endpoints.migrateProxyOrderChangeLogs(),
     ];
 
     try {

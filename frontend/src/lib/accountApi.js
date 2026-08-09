@@ -1,5 +1,6 @@
 import { apiData, apiMessage, apiUrl, jsonHeaders, readApiJson, userAuthHeaders, xTokenHeader } from './apiConfig.js';
 import { getStoredUser } from './authSession.js';
+import { endpoints } from './endpoints.js';
 
 function userFromAccountPayload(data) {
   const nested = apiData(data);
@@ -12,10 +13,7 @@ function registrationHeaders() {
   return userAuthHeaders(u) || { 'x-token': xTokenHeader() };
 }
 
-/**
- * POST /v2/auth/register — JSON body.
- * Fields: name, email, password, phone, delivery_address, social_security_number, country_code.
- */
+/** POST /v2/auth/register */
 export async function postRegisterAccount(fields) {
   const {
     name = '',
@@ -28,7 +26,7 @@ export async function postRegisterAccount(fields) {
   } = fields || {};
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/register'), {
+    const res = await fetch(apiUrl(endpoints.authRegister()), {
       method: 'POST',
       headers: jsonHeaders(registrationHeaders()),
       credentials: 'include',
@@ -59,15 +57,13 @@ export async function postRegisterAccount(fields) {
   }
 }
 
-/**
- * POST /v2/auth/user/verify-email — JSON: email, otp.
- */
+/** POST /v2/auth/user/verify-email */
 export async function postVerifyAccountOtp({ email, otp }) {
   const mail = String(email ?? '').trim();
   if (!mail) return { ok: false, message: 'Email is required.' };
 
   try {
-    const res = await fetch(apiUrl('/v2/auth/user/verify-email'), {
+    const res = await fetch(apiUrl(endpoints.authVerifyEmail()), {
       method: 'POST',
       headers: jsonHeaders({ 'x-token': xTokenHeader() }),
       credentials: 'include',
@@ -89,6 +85,66 @@ export async function postVerifyAccountOtp({ email, otp }) {
     }
 
     return { ok: false, message: apiMessage(data, 'Could not verify code.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+/** POST /v2/auth/user/forgot-password */
+export async function postForgotPassword({ email }) {
+  const mail = String(email ?? '').trim();
+  if (!mail) return { ok: false, message: 'Email is required.' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.authForgotPassword()), {
+      method: 'POST',
+      headers: jsonHeaders({ 'x-token': xTokenHeader() }),
+      credentials: 'include',
+      body: JSON.stringify({ email: mail }),
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return { ok: true, message: apiMessage(data, 'Password reset email sent.'), data };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not request password reset.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+/** POST /v2/auth/user/reset-password */
+export async function postResetPassword({ email, otp, password, confirm_password }) {
+  try {
+    const res = await fetch(apiUrl(endpoints.authResetPassword()), {
+      method: 'POST',
+      headers: jsonHeaders({ 'x-token': xTokenHeader() }),
+      credentials: 'include',
+      body: JSON.stringify({
+        email: String(email ?? '').trim(),
+        otp: String(otp ?? '').trim(),
+        password: String(password ?? ''),
+        confirm_password: String(confirm_password ?? ''),
+      }),
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return { ok: true, message: apiMessage(data, 'Password reset.'), data };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not reset password.'), data };
   } catch {
     return { ok: false, error: 'network' };
   }

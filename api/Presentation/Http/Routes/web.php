@@ -5,6 +5,7 @@ use PlatformConfig\Presentation\PlatformConfigController;
 use Presentation\Http\Controllers\ProxyOrderController;
 use Presentation\Http\Controllers\TestController;
 use Batch\Presentation\BatchController;
+use ProxyOrderChangeLog\Presentation\ProxyOrderChangeLogController;
 use SnappyOrder\Presentation\SnappyOrderController;
 use Thread\Presentation\ThreadController;
 use User\Presentation\UserController;
@@ -34,6 +35,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("snappy-orders/migrate", [SnappyOrderController::class, "migrate"]);
             $route->get("batches/migrate", [BatchController::class, "migrate"]);
             $route->get("threads/migrate", [ThreadController::class, "migrate"]);
+            $route->get("proxy-order-change-logs/migrate", [ProxyOrderChangeLogController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -68,6 +70,12 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->delete("login", [UserController::class, "logout"]);
                     $route->post("me/wallet-balance", [UserController::class, "getWalletBalance"]);
                     $route->get("me", [UserController::class, "me"]);
+
+                    $route->middleware([
+                        GlobalApiAuthAdminMiddleware::class
+                    ], function (RouteServiceInterface $route) {
+                        $route->get("users", [UserController::class, "fetch"]);
+                    });
                 });
             });
 

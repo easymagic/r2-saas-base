@@ -3,7 +3,8 @@
 namespace User\Business;
 
 use Shared\AbstractBaseServiceInterface;
-use Data\User\UserEntity;
+use User\Data\UserEntity;
+use Shared\Query\QueryObject;
 
 interface UserServiceInterface extends AbstractBaseServiceInterface
 {
@@ -182,4 +183,11 @@ interface UserServiceInterface extends AbstractBaseServiceInterface
      * @return UserEntity
      */
     public function refreshOtp(int $userId);
+
+
+    /**
+     * @param array $filters
+     * @return QueryObject
+     */
+    public function fetchUsersAsAdmin(array $filters = []);
 }
