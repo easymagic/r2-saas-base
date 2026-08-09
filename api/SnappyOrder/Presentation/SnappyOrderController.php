@@ -65,6 +65,22 @@ class SnappyOrderController
         ]);
     }
 
+    function changePrice()
+    {
+        $price = $this->request->get('price');
+        if ($price === null || $price === '') {
+            $price = $this->request->get('total_amount_usd');
+        }
+        $order = $this->snappyOrderService->changePrice(
+            (int) $this->request->get('order_id'),
+            (float) $price
+        );
+        $this->jsonResponseService->success([
+            'order' => $order,
+            'message' => 'Order price updated successfully',
+        ]);
+    }
+
     function assignToAgent()
     {
         $order = $this->snappyOrderService->assignToAgent(

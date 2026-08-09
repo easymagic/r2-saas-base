@@ -15,6 +15,7 @@ import {
   fetchOrderFromApi,
   fetchOrderThreadsFromApi,
   payOrderFromWalletFromApi,
+  postAdjustOrderPrice,
   postChangeOrderStatus,
   postOrderThread,
 } from '../lib/ordersApi.js';
@@ -221,6 +222,7 @@ export function OrderDetailPage() {
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustSubmitting, setAdjustSubmitting] = useState(false);
   const [adjustError, setAdjustError] = useState('');
+  const [priceChangeSubmitting, setPriceChangeSubmitting] = useState(false);
   const [statusSelectValue, setStatusSelectValue] = useState('');
   const [statusCodeValue, setStatusCodeValue] = useState('');
   const [statusChangeSubmitting, setStatusChangeSubmitting] = useState(false);
@@ -387,8 +389,49 @@ export function OrderDetailPage() {
 
   async function handleAdjustPrice(e) {
     e.preventDefault();
-    setAdjustError('Price adjustment is not available on this API yet.');
-    showToast('Price adjustment is not available on this API yet.', 'error');
+    setAdjustError('');
+    const u = getStoredUser();
+    if (!u?.token || order?.id == null) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const amount = Number(String(adjustAmount).trim());
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setAdjustError('Enter a valid USD amount greater than zero.');
+      return;
+    }
+
+    if (String(order.status || '').toLowerCase() !== 'pending') {
+      setAdjustError('Price can only be changed when the order is pending.');
+      return;
+    }
+
+    setPriceChangeSubmitting(true);
+    try {
+      const r = await postAdjustOrderPrice(u, order.id, amount);
+      if (!r.ok) {
+        const m =
+          typeof r.message === 'string' && r.message.length > 0
+            ? r.message
+            : 'Could not update order price.';
+        setAdjustError(m);
+        showToast(m, 'error');
+        return;
+      }
+      if (r.order) setOrder(r.order);
+      else {
+        const fr = await fetchOrderFromApi(u, order.id);
+        if (fr.ok) setOrder(fr.order);
+      }
+      showToast(r.message || 'Order price updated successfully.', 'success');
+    } catch {
+      const m = 'Network error. Check that the API is running.';
+      setAdjustError(m);
+      showToast(m, 'error');
+    } finally {
+      setPriceChangeSubmitting(false);
+    }
   }
 
   async function handlePayFromWallet() {
@@ -787,18 +830,46 @@ export function OrderDetailPage() {
                   <div
                     className={cn(
                       'mt-6 border-t border-gray-200 pt-5 transition-opacity',
-                      orderFulfillmentLocked && 'pointer-events-none opacity-50'
+                      String(order.status || '').toLowerCase() !== 'pending' &&
+                        'pointer-events-none opacity-50'
                     )}
                   >
-                    <h3 className="text-sm font-semibold text-gray-900">Price tools</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">Adjust price (USD)</h3>
                     <p className="mt-1 text-xs text-gray-500">
-                      Adjust-price is not exposed on v2 yet. Amounts shown above come from the snappy order record.
+                      Updates <code className="rounded bg-slate-100 px-1">total_amount_usd</code>,
+                      recalculates charges, sets <code className="rounded bg-slate-100 px-1">price_adjustment_sent</code>,
+                      and emails the customer. Only while status is pending.
                     </p>
-                    {adjustError ? (
-                      <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                        {adjustError}
+                    {Number(order.price_adjustment_sent) === 1 ? (
+                      <p className="mt-2 text-xs font-medium text-orange-700">
+                        A price adjustment was already sent for this order.
                       </p>
                     ) : null}
+                    <form className="mt-3 space-y-3" onSubmit={handleAdjustPrice} noValidate>
+                      {adjustError ? (
+                        <p
+                          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+                          role="alert"
+                        >
+                          {adjustError}
+                        </p>
+                      ) : null}
+                      <Input
+                        id="adjust-order-price"
+                        label="New amount (USD)"
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        value={adjustAmount}
+                        onChange={(ev) => setAdjustAmount(ev.target.value)}
+                        disabled={priceChangeSubmitting}
+                        required
+                      />
+                      <Button type="submit" disabled={priceChangeSubmitting}>
+                        {priceChangeSubmitting ? 'Saving…' : 'Change/approve price'}
+                      </Button>
+                    </form>
                   </div>
 
                   <div className="mt-6 border-t border-gray-200 pt-5">

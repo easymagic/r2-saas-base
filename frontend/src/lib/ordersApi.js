@@ -354,8 +354,46 @@ export async function deleteOrderThread() {
   return { ok: false, message: 'Deleting thread messages is not available on this API.' };
 }
 
-export async function postAdjustOrderPrice() {
-  return { ok: false, message: 'Price adjustment is not available on this API yet.' };
+/** POST /v2/snappy-orders/{orderId}/change-price — JSON: price (admin). */
+export async function postAdjustOrderPrice(user, orderId, price) {
+  const id = orderId != null ? String(orderId).trim() : '';
+  if (!id) return { ok: false, error: 'bad_id' };
+
+  const amount = Number(price);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { ok: false, message: 'Enter a valid price greater than zero.' };
+  }
+
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.snappyChangePrice(id)), {
+      method: 'POST',
+      headers: jsonHeaders(headers),
+      credentials: 'include',
+      body: JSON.stringify({ price: amount }),
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return {
+        ok: true,
+        order: orderFromPayload(data),
+        message: apiMessage(data, 'Order price updated successfully'),
+        data,
+      };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not update order price.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
 }
 
 /** POST /v2/snappy-orders/{id}/change-status — JSON: status (admin). */

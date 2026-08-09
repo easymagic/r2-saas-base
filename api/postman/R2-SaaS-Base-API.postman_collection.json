@@ -834,6 +834,23 @@
           }
         },
         {
+          "name": "Change Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 55.5\n}"
+            },
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/change-price",
+            "description": "Admin only. `SnappyOrderController::changePrice` → `SnappyOrderService::changePrice`.\n\nBody JSON (either key):\n- `{ \"price\": 55.5 }`\n- `{ \"total_amount_usd\": 55.5 }`\n\nRules:\n- Order status must be `pending`\n- Recalculates service charge, shipping, FX, and `grand_total_naira`\n- Sets `price_adjustment_sent` = 1 and emails the customer\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order price updated successfully\"\n  }\n}\n```"
+          }
+        },
+        {
           "name": "Assign To Agent",
           "request": {
             "method": "POST",

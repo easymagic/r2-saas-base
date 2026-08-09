@@ -119,6 +119,14 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
 
                 // Snappy order routes
+
+                $route->middleware([
+                    GlobalApiAuthAdminMiddleware::class
+                ], function (RouteServiceInterface $route) {
+                    $route->get("snappy-orders/admin-orders", [SnappyOrderController::class, "getMyOrderAsAdmin"]);
+                });
+
+
                 $route->post("snappy-orders", [SnappyOrderController::class, "create"]);
                 $route->get("snappy-orders/my-orders", [SnappyOrderController::class, "getMyOrdersAsCustomer"]);
                 $route->get("snappy-orders/agent-orders", [SnappyOrderController::class, "getMyOrdersAsAgent"]);
@@ -137,8 +145,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->middleware([
                     GlobalApiAuthAdminMiddleware::class
                 ], function (RouteServiceInterface $route) {
-                    $route->get("snappy-orders/admin-orders", [SnappyOrderController::class, "getMyOrderAsAdmin"]);
                     $route->post("snappy-orders/{order_id}/change-status", [SnappyOrderController::class, "changeStatus"]);
+                    $route->post("snappy-orders/{order_id}/change-price", [SnappyOrderController::class, "changePrice"]);
                     $route->post("snappy-orders/{order_id}/assign-to-agent", [SnappyOrderController::class, "assignToAgent"]);
                     $route->post("snappy-orders/{order_id}/assign-to-batch", [SnappyOrderController::class, "assignToBatch"]);
                     $route->post("snappy-orders/{order_id}/unassign-from-batch", [SnappyOrderController::class, "unassignFromBatch"]);

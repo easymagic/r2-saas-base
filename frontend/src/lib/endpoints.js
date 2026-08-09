@@ -68,6 +68,8 @@ export const endpoints = {
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/pay-from-wallet`,
   snappyChangeStatus: (orderId) =>
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/change-status`,
+  snappyChangePrice: (orderId) =>
+    `/v2/snappy-orders/${encodeURIComponent(orderId)}/change-price`,
   snappyAssignAgent: (orderId) =>
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/assign-to-agent`,
   snappyAssignBatch: (orderId) =>
