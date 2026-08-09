@@ -34,6 +34,7 @@ class NotificationRepository extends AbstractBaseRepository implements Notificat
     {
         $this->sql = "SELECT * FROM notifications WHERE 1=1 ";
         $this->params = [];
+        $this->filter($filters);
         return new QueryObject($this->sql, $this->params, $this->db, $this->hydrateClass);
     }
 

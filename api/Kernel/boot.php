@@ -100,6 +100,16 @@ use Thread\Data\ThreadMigrationRepositoryInterface;
 use Thread\Data\ThreadRepository;
 use Thread\Data\ThreadRepositoryInterface;
 
+/*
+ * Log
+ */
+use Log\Business\LogService;
+use Log\Business\LogServiceInterface;
+use Log\Data\LogMigrationRepository;
+use Log\Data\LogMigrationRepositoryInterface;
+use Log\Data\LogRepository;
+use Log\Data\LogRepositoryInterface;
+
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
@@ -151,6 +161,10 @@ $appServiceContainer->container()->map(ThreadServiceInterface::class, ThreadServ
 $appServiceContainer->container()->map(ThreadNotificationServiceInterface::class, ThreadNotificationService::class);
 $appServiceContainer->container()->map(ThreadMigrationRepositoryInterface::class, ThreadMigrationRepository::class);
 $appServiceContainer->container()->map(ThreadRepositoryInterface::class, ThreadRepository::class);
+
+$appServiceContainer->container()->map(LogServiceInterface::class, LogService::class);
+$appServiceContainer->container()->map(LogMigrationRepositoryInterface::class, LogMigrationRepository::class);
+$appServiceContainer->container()->map(LogRepositoryInterface::class, LogRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 

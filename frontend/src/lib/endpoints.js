@@ -71,6 +71,8 @@ export const endpoints = {
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/assign-to-agent`,
   snappyAssignBatch: (orderId) =>
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/assign-to-batch`,
+  snappyUnassignBatch: (orderId) =>
+    `/v2/snappy-orders/${encodeURIComponent(orderId)}/unassign-from-batch`,
   snappyPublishSettings: () => '/v2/snappy-orders/publish-settings',
 
   // Migrations
@@ -82,6 +84,8 @@ export const endpoints = {
   migrateBatches: () => '/v2/batches/migrate',
   migrateThreads: () => '/v2/threads/migrate',
   migrateProxyOrderChangeLogs: () => '/v2/proxy-order-change-logs/migrate',
+  migrateLogs: () => '/v2/logs/migrate',
+  logs: () => '/v2/logs',
 };
 
 export function withQuery(path, params = {}) {

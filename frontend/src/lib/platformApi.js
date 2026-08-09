@@ -13,7 +13,7 @@ function configsToMap(list) {
   for (const row of list) {
     const key = row?.setting_key ?? row?.setting_name ?? row?.key;
     if (key == null || key === '') continue;
-    map[String(key)] = row?.setting_value ?? row?.value ?? '';
+    map[String(key).toUpperCase()] = row?.setting_value ?? row?.value ?? '';
   }
   return map;
 }

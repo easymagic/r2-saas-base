@@ -5,6 +5,7 @@ namespace Notification\Business;
 use Notification\Data\NotificationMigrationRepositoryInterface;
 use Notification\Data\NotificationRepositoryInterface;
 use Exception;
+use Log\Business\LogServiceInterface;
 use Shared\AbstractBaseService;
 use Notification\Data\NotificationEntity;
 
@@ -19,21 +20,28 @@ class NotificationService extends AbstractBaseService implements NotificationSer
 
     private NotificationMigrationRepositoryInterface $notificationMigrationRepository;
 
-    public function __construct(NotificationRepositoryInterface $notificationRepository, NotificationMigrationRepositoryInterface $notificationMigrationRepository)
-    {
+    private LogServiceInterface $logService;
+
+    public function __construct(
+        NotificationRepositoryInterface $notificationRepository,
+        NotificationMigrationRepositoryInterface $notificationMigrationRepository,
+        LogServiceInterface $logService
+    ) {
         parent::__construct($notificationRepository);
         $this->notificationRepository = $notificationRepository;
         $this->notificationMigrationRepository = $notificationMigrationRepository;
+        $this->logService = $logService;
     }
 
-    public function create(int $userId, string $title, string $message) {
-        if (empty($userId)){
+    public function create(int $userId, string $title, string $message)
+    {
+        if (empty($userId)) {
             throw new \Exception('User ID is required');
         }
-        if (empty($title)){
+        if (empty($title)) {
             throw new \Exception('Title is required');
         }
-        if (empty($message)){
+        if (empty($message)) {
             throw new Exception('Message is required');
         }
         $notification = $this->notificationRepository->save(0, [
@@ -47,15 +55,24 @@ class NotificationService extends AbstractBaseService implements NotificationSer
         return $notification;
     }
 
-    public function myNotifications(int $userId) {
-      return $this->notificationRepository->query([
-        "user_id" => $userId,
-      ]);
+    public function myNotifications(int $userId)
+    {
+        return $this->notificationRepository->query([
+            "user_id" => $userId,
+        ]);
     }
 
-    public function markAsRead(int $notificationId, int $userId) {
+    public function markAsRead(int $notificationId, int $userId)
+    {
         $notification = $this->notificationRepository->find($notificationId);
         if ($notification->user_id !== $userId) {
+            $this->logService->createLog('notification_mark_as_read', json_encode([
+                "notification" => $notification,
+                "user_id" => $userId,
+            ]), json_encode([
+                "status" => "error",
+                "message" => 'You are not authorized to mark this notification as read',
+            ]), 'error');
             throw new Exception('You are not authorized to mark this notification as read');
         }
         $notification = $this->notificationRepository->find($notificationId);
@@ -65,19 +82,61 @@ class NotificationService extends AbstractBaseService implements NotificationSer
         ]);
     }
 
-    public function markAsUnread(int $notificationId, int $userId) {
+    public function markAsUnread(int $notificationId, int $userId)
+    {
         $notification = $this->notificationRepository->find($notificationId);
         if ($notification->user_id !== $userId) {
+            $this->logService->createLog('notification_mark_as_unread', json_encode([
+                "notification" => $notification,
+                "user_id" => $userId,
+            ]), json_encode([
+                "status" => "error",
+                "message" => 'You are not authorized to mark this notification as unread',
+            ]), 'error');
             throw new Exception('You are not authorized to mark this notification as unread');
         }
         $notification = $this->notificationRepository->find($notificationId);
-        return$this->notificationRepository->save($notification->id, [
+        return $this->notificationRepository->save($notification->id, [
             "is_read" => 0,
         ]);
     }
 
+    /**
+     * @param int $notificationId
+     * @param int $userId
+     * @return NotificationEntity
+     */
+    public function remove(int $notificationId, int $userId)
+    {
+        if (empty($notificationId)) {
+            throw new Exception('Notification ID is required');
+        }
+        if (empty($userId)) {
+            throw new Exception('User ID is required');
+        }
 
-    public function migrate() {
+        $notification = $this->notificationRepository->find($notificationId);
+        if ($notification->isEmpty()) {
+            throw new Exception('Notification not found');
+        }
+        if ((int) $notification->user_id !== (int) $userId) {
+            $this->logService->createLog('notification_remove', json_encode([
+                "notification" => $notification,
+                "user_id" => $userId,
+            ]), json_encode([
+                "status" => "error",
+                "message" => 'You are not authorized to delete this notification',
+            ]), 'error');
+            throw new Exception('You are not authorized to delete this notification');
+        }
+
+        $this->notificationRepository->delete($notification->id);
+
+        return $notification;
+    }
+
+    public function migrate()
+    {
         return $this->notificationMigrationRepository->migrate();
     }
 }

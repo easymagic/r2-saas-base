@@ -10,6 +10,7 @@ use SnappyOrder\Presentation\SnappyOrderController;
 use Thread\Presentation\ThreadController;
 use User\Presentation\UserController;
 use Wallet\Presentation\WalletController;
+use Log\Presentation\LogController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
@@ -36,6 +37,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("batches/migrate", [BatchController::class, "migrate"]);
             $route->get("threads/migrate", [ThreadController::class, "migrate"]);
             $route->get("proxy-order-change-logs/migrate", [ProxyOrderChangeLogController::class, "migrate"]);
+            $route->get("logs/migrate", [LogController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -56,7 +58,6 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
                 $route->middleware([
                     GlobalApiAuthMiddleware::class,
-                    WalletFeedbackMiddleware::class
                 ], function (RouteServiceInterface $route) {
 
                     $route->post("create", [UserController::class, "create"]);
@@ -65,11 +66,17 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->delete("user/{user_id}", [UserController::class, "delete"]);
                     $route->get("user/{user_id}", [UserController::class, "find"]);
 
+                    $route->middleware([
+                        WalletFeedbackMiddleware::class
+                    ], function (RouteServiceInterface $route) {
+                        $route->get("me", [UserController::class, "me"]);
+                    });
+
                     $route->post("me", [UserController::class, "updateProfile"]);
                     $route->post("me/change-password", [UserController::class, "changePassword"]);
                     $route->delete("login", [UserController::class, "logout"]);
                     $route->post("me/wallet-balance", [UserController::class, "getWalletBalance"]);
-                    $route->get("me", [UserController::class, "me"]);
+
 
                     $route->middleware([
                         GlobalApiAuthAdminMiddleware::class
@@ -81,19 +88,24 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
 
             $route->middleware([
-                GlobalApiAuthMiddleware::class,
-                WalletFeedbackMiddleware::class
+                GlobalApiAuthMiddleware::class
             ], function (RouteServiceInterface $route) {
-                // Wallet routes
-                $route->post("wallet/top-up-online", [WalletController::class, "topUpOnline"]);
-                $route->post("wallet/top-up-manual", [WalletController::class, "topUpManual"]);
-                $route->post("wallet/{wallet_id}/approve-manual-top-up", [WalletController::class, "approveManualTopUp"]);
-                $route->post("wallet/{wallet_id}/reject-manual-top-up", [WalletController::class, "rejectManualTopUp"]);
-                $route->get("wallet/my-pending-wallet-transactions", [WalletController::class, "myPendingWalletTransactions"]);
-                $route->get("wallet/my-approved-wallet-transactions", [WalletController::class, "myApprovedWalletTransactions"]);
-                $route->get("wallet/manual-pending-wallet-transactions", [WalletController::class, "manualPendingWalletTransactions"]);
-                $route->get("wallet/manual-approved-wallet-transactions", [WalletController::class, "manualApprovedWalletTransactions"]);
-                $route->get("wallet/manual-rejected-wallet-transactions", [WalletController::class, "manualRejectedWalletTransactions"]);
+
+
+                $route->middleware([
+                    WalletFeedbackMiddleware::class
+                ], function (RouteServiceInterface $route) {
+                    // Wallet routes
+                    $route->post("wallet/top-up-online", [WalletController::class, "topUpOnline"]);
+                    $route->post("wallet/top-up-manual", [WalletController::class, "topUpManual"]);
+                    $route->post("wallet/{wallet_id}/approve-manual-top-up", [WalletController::class, "approveManualTopUp"]);
+                    $route->post("wallet/{wallet_id}/reject-manual-top-up", [WalletController::class, "rejectManualTopUp"]);
+                    $route->get("wallet/my-pending-wallet-transactions", [WalletController::class, "myPendingWalletTransactions"]);
+                    $route->get("wallet/my-approved-wallet-transactions", [WalletController::class, "myApprovedWalletTransactions"]);
+                    $route->get("wallet/manual-pending-wallet-transactions", [WalletController::class, "manualPendingWalletTransactions"]);
+                    $route->get("wallet/manual-approved-wallet-transactions", [WalletController::class, "manualApprovedWalletTransactions"]);
+                    $route->get("wallet/manual-rejected-wallet-transactions", [WalletController::class, "manualRejectedWalletTransactions"]);
+                });
 
                 // Notifications routes
                 $route->get("notifications/my-notifications", [NotificationController::class, "myNotifications"]);
@@ -101,12 +113,10 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("notifications/{notification_id}/mark-as-unread", [NotificationController::class, "markAsUnread"]);
                 $route->delete("notifications/{notification_id}/delete", [NotificationController::class, "delete"]);
 
-
                 // Platform config routes
                 $route->get("platform-configs", [PlatformConfigController::class, "all"]);
                 $route->post("platform-configs/update", [PlatformConfigController::class, "update"]);
                 $route->delete("platform-configs/{platform_config_id}/delete", [PlatformConfigController::class, "delete"]);
-
 
                 // Snappy order routes
                 $route->post("snappy-orders", [SnappyOrderController::class, "create"]);
@@ -130,7 +140,9 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->post("snappy-orders/{order_id}/change-status", [SnappyOrderController::class, "changeStatus"]);
                     $route->post("snappy-orders/{order_id}/assign-to-agent", [SnappyOrderController::class, "assignToAgent"]);
                     $route->post("snappy-orders/{order_id}/assign-to-batch", [SnappyOrderController::class, "assignToBatch"]);
+                    $route->post("snappy-orders/{order_id}/unassign-from-batch", [SnappyOrderController::class, "unassignFromBatch"]);
                     $route->post("snappy-orders/publish-settings", [SnappyOrderController::class, "publishSettings"]);
+                    $route->get("logs", [LogController::class, "fetch"]);
                 });
             });
 

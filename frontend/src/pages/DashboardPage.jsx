@@ -112,6 +112,8 @@ function AdminDashboardLanding({ user }) {
             { title: 'Create order', body: 'Add a product request for fulfillment.', to: '/create-order', cta: 'Create order' },
             { title: 'Orders', body: 'Search, filter, assign, and open orders.', to: '/orders', cta: 'View orders' },
             { title: 'Top-up approvals', body: 'Review pending manual wallet credits.', to: '/admin/topups', cta: 'Review queue' },
+            { title: 'Logs', body: 'Inspect payment verification and system logs.', to: '/admin/logs', cta: 'View logs' },
+            { title: 'Migrations', body: 'Run schema migrations and publish order settings.', to: '/admin/migrations', cta: 'Open tools' },
             { title: 'Users', body: 'Manage platform accounts and agents.', to: '/admin/users', cta: 'Manage users' },
           ].map((item) => (
             <Link

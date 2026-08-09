@@ -46,4 +46,13 @@ interface NotificationServiceInterface extends AbstractBaseServiceInterface
      */
     public function markAsUnread(int $notificationId, int $userId);
 
+
+    /**
+     * Remove a notification
+     * @param int $notificationId
+     * @param int $userId
+     * @return NotificationEntity
+     */
+    public function remove(int $notificationId, int $userId);
+
 }

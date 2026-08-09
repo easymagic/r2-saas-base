@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext.jsx';
 import { useSyncedWalletBalance } from '../hooks/useSyncedWalletBalance.js';
 import { getStoredUser } from '../lib/authSession.js';
 import {
+  deleteNotificationOnApi,
   fetchNotificationsFromApi,
   markNotificationReadOnApi,
   notifyNotificationsChanged,
@@ -31,11 +32,17 @@ function formatNotificationDate(value) {
   });
 }
 
-function readStatusBadge(readStatus) {
-  const s = String(readStatus || '').toLowerCase();
-  if (s === 'unread') return { variant: 'pending', label: 'Unread' };
-  if (s === 'read') return { variant: 'default', label: 'Read' };
-  return { variant: 'default', label: String(readStatus || '').trim() || '—' };
+function isNotificationUnread(n) {
+  if (n?.is_read === true || n?.is_read === 1 || n?.is_read === '1') return false;
+  if (n?.read_at) return false;
+  const s = String(n?.read_status || '').toLowerCase();
+  if (s === 'read') return false;
+  return true;
+}
+
+function readStatusBadge(n) {
+  if (isNotificationUnread(n)) return { variant: 'pending', label: 'Unread' };
+  return { variant: 'default', label: 'Read' };
 }
 
 function NotificationMessage({ id, message }) {
@@ -73,6 +80,7 @@ export function NotificationsPage() {
   const [error, setError] = useState('');
   const [items, setItems] = useState([]);
   const [markingReadId, setMarkingReadId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const load = useCallback(async () => {
     const u = getStoredUser();
@@ -118,7 +126,9 @@ export function NotificationsPage() {
     }
     setItems((prev) =>
       prev.map((n) =>
-        Number(n.id) === Number(notificationId) ? { ...n, read_status: 'read' } : n
+        Number(n.id) === Number(notificationId)
+          ? { ...n, is_read: 1, read_status: 'read', read_at: n.read_at || new Date().toISOString() }
+          : n
       )
     );
     notifyNotificationsChanged();
@@ -128,7 +138,35 @@ export function NotificationsPage() {
     );
   }
 
-  const unreadCount = items.filter((n) => String(n.read_status || '').toLowerCase() === 'unread').length;
+  async function handleDelete(notificationId) {
+    const u = getStoredUser();
+    if (!u?.token || u.id == null) {
+      navigate('/login', { replace: true });
+      return;
+    }
+    if (!window.confirm('Delete this notification?')) return;
+
+    setDeletingId(notificationId);
+    const r = await deleteNotificationOnApi(u, notificationId);
+    setDeletingId(null);
+
+    if (!r.ok) {
+      const msg =
+        typeof r.message === 'string' && r.message.length > 0 ? r.message : 'Could not delete notification.';
+      showToast(msg, 'error');
+      return;
+    }
+
+    setItems((prev) => prev.filter((n) => Number(n.id) !== Number(notificationId)));
+    notifyNotificationsChanged();
+    showToast(
+      typeof r.message === 'string' && r.message.length > 0 ? r.message : 'Notification deleted.',
+      'success'
+    );
+  }
+
+  const unreadCount = items.filter((n) => isNotificationUnread(n)).length;
+  const actionBusy = markingReadId != null || deletingId != null;
 
   return (
     <>
@@ -177,8 +215,8 @@ export function NotificationsPage() {
           {items.length > 0 ? (
             <ul className="divide-y divide-gray-100 border-t border-gray-100">
               {items.map((n) => {
-                const rb = readStatusBadge(n.read_status);
-                const isUnread = String(n.read_status || '').toLowerCase() === 'unread';
+                const rb = readStatusBadge(n);
+                const isUnread = isNotificationUnread(n);
                 return (
                   <li
                     key={n.id}
@@ -203,19 +241,32 @@ export function NotificationsPage() {
                           <span className="tabular-nums">{formatNotificationDate(n.created_at)}</span>
                         </div>
                       </div>
-                      {isUnread ? (
+                      <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                        {isUnread ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="px-3 py-1.5 text-xs"
+                            disabled={actionBusy}
+                            onClick={() => handleMarkRead(n.id)}
+                          >
+                            {markingReadId != null && Number(markingReadId) === Number(n.id)
+                              ? 'Marking…'
+                              : 'Mark as read'}
+                          </Button>
+                        ) : null}
                         <Button
                           type="button"
                           variant="secondary"
-                          className="shrink-0 px-3 py-1.5 text-xs"
-                          disabled={markingReadId != null}
-                          onClick={() => handleMarkRead(n.id)}
+                          className="border-red-200 px-3 py-1.5 text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                          disabled={actionBusy}
+                          onClick={() => handleDelete(n.id)}
                         >
-                          {markingReadId != null && Number(markingReadId) === Number(n.id)
-                            ? 'Marking…'
-                            : 'Mark as read'}
+                          {deletingId != null && Number(deletingId) === Number(n.id)
+                            ? 'Deleting…'
+                            : 'Delete'}
                         </Button>
-                      ) : null}
+                      </div>
                     </div>
                   </li>
                 );

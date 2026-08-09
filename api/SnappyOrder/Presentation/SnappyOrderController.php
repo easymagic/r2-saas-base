@@ -89,6 +89,17 @@ class SnappyOrderController
         ]);
     }
 
+    function unassignFromBatch()
+    {
+        $order = $this->snappyOrderService->unassignFromBatch(
+            (int) $this->request->get('order_id')
+        );
+        $this->jsonResponseService->success([
+            'order' => $order,
+            'message' => 'Order unassigned from batch successfully',
+        ]);
+    }
+
     function getMyOrdersAsAgent()
     {
         $user = $this->apiCredentialService->getAuthUser();

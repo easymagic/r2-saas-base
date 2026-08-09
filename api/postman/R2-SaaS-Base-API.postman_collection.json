@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "R2 SaaS Base API",
-    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**Recent routes**\n- `GET /v2/auth/users` — admin list users (`UserController::fetch`)\n- `GET /v2/proxy-order-change-logs/migrate` — migrate proxy order change logs (`ProxyOrderChangeLogController::migrate`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
+    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**Recent routes**\n- `POST /v2/snappy-orders/{orderId}/unassign-from-batch` — admin clear order batch\n- `GET /v2/logs/migrate` — migrate logs table\n- `GET /v2/logs` — admin list logs (`type`, `search`, `id`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -235,7 +235,8 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/auth/me"
+            "url": "{{baseUrl}}/v2/auth/me",
+            "description": "GET /v2/auth/me\n\nRuns `WalletFeedbackMiddleware` first: verifies pending online top-ups via Paystack, approves/rejects them, and writes `wallet_feedback` rows to `GET /v2/logs`."
           }
         },
         {
@@ -339,7 +340,7 @@
     },
     {
       "name": "Wallet",
-      "description": "Requires `x-token` + `x-user-token`.",
+      "description": "Requires `x-token` + `x-user-token`.\n\nThese wallet routes run `WalletFeedbackMiddleware` before the controller: pending online top-ups are verified with Paystack; results are logged (`title: wallet_feedback`) and available via admin `GET /v2/logs`.",
       "item": [
         {
           "name": "Top Up Online",
@@ -503,14 +504,15 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/delete"
+            "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/delete",
+            "description": "DELETE /v2/notifications/{{notificationId}}/delete\n\nCalls `NotificationService::remove`. Only the owning user can delete.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"notification\": {},\n    \"message\": \"Notification deleted successfully\"\n  }\n}\n```"
           }
         }
       ]
     },
     {
       "name": "Platform Config",
-      "description": "Requires `x-token` + `x-user-token`.",
+      "description": "Requires `x-token` + `x-user-token`.\n\nRows are key/value settings (`setting_key`, `setting_value`). Update body uses `setting_name` + `setting_value` (stored uppercase as `setting_key`).",
       "item": [
         {
           "name": "List Platform Configs",
@@ -520,7 +522,8 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/platform-configs"
+            "url": "{{baseUrl}}/v2/platform-configs",
+            "description": "GET /v2/platform-configs\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"platform_configs\": [\n      {\n        \"id\": 1,\n        \"setting_key\": \"SERVICE_CHARGE\",\n        \"setting_value\": \"100\",\n        \"created_at\": \"2026-08-09 12:00:00\",\n        \"updated_at\": \"2026-08-09 12:00:00\"\n      }\n    ]\n  }\n}\n```"
           }
         },
         {
@@ -534,9 +537,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"setting_name\": \"example_setting\",\n  \"setting_value\": \"example_value\"\n}"
+              "raw": "{\n  \"setting_name\": \"SERVICE_CHARGE\",\n  \"setting_value\": \"100\"\n}"
             },
-            "url": "{{baseUrl}}/v2/platform-configs/update"
+            "url": "{{baseUrl}}/v2/platform-configs/update",
+            "description": "POST /v2/platform-configs/update\n\nBody: `{ \"setting_name\": \"SERVICE_CHARGE\", \"setting_value\": \"100\" }`\n\nCreates the key if missing, otherwise updates `setting_value`."
           }
         },
         {
@@ -547,7 +551,8 @@
               { "key": "x-token", "value": "{{xToken}}" },
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
-            "url": "{{baseUrl}}/v2/platform-configs/{{platformConfigId}}/delete"
+            "url": "{{baseUrl}}/v2/platform-configs/{{platformConfigId}}/delete",
+            "description": "DELETE /v2/platform-configs/{{platformConfigId}}/delete\n\nDeletes by row `id` from List Platform Configs."
           }
         }
       ]
@@ -850,6 +855,18 @@
           }
         },
         {
+          "name": "Unassign From Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/unassign-from-batch",
+            "description": "Admin only. Clears `batch_id` on the order.\n\nPOST /v2/snappy-orders/{{orderId}}/unassign-from-batch\n\nFails if the order is not assigned to a batch.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order unassigned from batch successfully\"\n  }\n}\n```"
+          }
+        },
+        {
           "name": "Publish Settings",
           "request": {
             "method": "POST",
@@ -858,7 +875,7 @@
               { "key": "x-user-token", "value": "{{xUserToken}}" }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/publish-settings",
-            "description": "Publishes SERVICE_CHARGE, SHIPPING_COST, DOLLAR_TO_NAIRA_RATE to platform config."
+            "description": "Admin only. `SnappyOrderController::publishSettings`.\n\nWrites current snappy-order defaults into platform config keys:\n- SERVICE_CHARGE\n- SHIPPING_COST\n- DOLLAR_TO_NAIRA_RATE\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Settings published successfully\"\n  }\n}\n```\n\nFrontend: Admin → Migrations (`/admin/migrations`)."
           }
         }
       ]
@@ -953,6 +970,44 @@
             ],
             "url": "{{baseUrl}}/v2/proxy-order-change-logs/migrate",
             "description": "GET /v2/proxy-order-change-logs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `ProxyOrderChangeLogController::migrate`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Migration completed successfully\",\n    \"result\": {}\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "Migrate Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/logs/migrate",
+            "description": "GET /v2/logs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `LogController::migrate`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs (Admin)",
+      "description": "Requires `x-token` + `x-user-token` + admin role.",
+      "item": [
+        {
+          "name": "List Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/logs?type=&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "logs"],
+              "query": [
+                { "key": "type", "value": "", "description": "success | error", "disabled": true },
+                { "key": "search", "value": "", "description": "Matches title, payload, or response", "disabled": true },
+                { "key": "id", "value": "", "description": "Exact log id", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/logs\n\nAdmin only. Filters: `type` (`success`|`error`), `search`, `id`.\n\nCommon titles include `wallet_feedback` (written by `WalletFeedbackMiddleware` when online top-ups are verified).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"logs\": [\n      {\n        \"id\": 1,\n        \"title\": \"wallet_feedback\",\n        \"payload\": \"{...wallet...}\",\n        \"response\": \"{\\\"status\\\":\\\"success\\\"}\",\n        \"type\": \"success\",\n        \"created_at\": \"2026-08-09 17:00:00\",\n        \"updated_at\": \"2026-08-09 17:00:00\"\n      }\n    ],\n    \"count\": 1,\n    \"message\": \"Logs fetched successfully\"\n  }\n}\n```"
           }
         }
       ]

@@ -178,9 +178,41 @@ export async function assignOrderToBatchFromApi(user, orderId, batchId) {
   }
 }
 
-/** Unassign is not in v2 — surface a clear error. */
-export async function unassignOrderFromBatchFromApi() {
-  return { ok: false, message: 'Unassign from batch is not available on this API.' };
+/** POST /v2/snappy-orders/{orderId}/unassign-from-batch (admin). */
+export async function unassignOrderFromBatchFromApi(user, orderId) {
+  const oid = orderId != null ? String(orderId).trim() : '';
+  if (!oid) return { ok: false, error: 'bad_id' };
+
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
+
+  try {
+    const res = await fetch(apiUrl(endpoints.snappyUnassignBatch(oid)), {
+      method: 'POST',
+      headers: jsonHeaders(headers),
+      credentials: 'include',
+      body: JSON.stringify({}),
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
+
+    if (data?.success) {
+      return {
+        ok: true,
+        order: orderFromPayload(data),
+        message: apiMessage(data, 'Order unassigned from batch successfully'),
+        data,
+      };
+    }
+
+    return { ok: false, message: apiMessage(data, 'Could not remove order from batch.'), data };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
 }
 
 /** POST /v2/snappy-orders/{orderId}/assign-to-agent — JSON: agent_id (admin). */

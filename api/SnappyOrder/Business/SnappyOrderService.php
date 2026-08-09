@@ -423,6 +423,41 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         return $order;
     }
 
+    /**
+     * @param int $order_id
+     * @return SnappyOrderEntity
+     */
+    public function unassignFromBatch(int $order_id)
+    {
+        if (empty($order_id)) {
+            throw new Exception('Order ID is required');
+        }
+
+        $order = $this->snappyOrderRepository->find($order_id);
+        if ($order->isEmpty()) {
+            throw new Exception('Order not found');
+        }
+
+        if (empty($order->batch_id)) {
+            throw new Exception('Order is not assigned to a batch');
+        }
+
+        $old_batch_id = (string) $order->batch_id;
+
+        $order = $this->snappyOrderRepository->save($order->id, [
+            'batch_id' => null,
+        ]);
+
+        $this->proxyOrderChangeLogService->log(
+            $order->id,
+            'batch_id',
+            $old_batch_id,
+            ''
+        );
+
+        return $order;
+    }
+
     private function getServiceCharge()
     {
         return $this->platformConfigService->get('SERVICE_CHARGE', 100);

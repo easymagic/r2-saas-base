@@ -69,8 +69,8 @@ class NotificationController
     {
         $user = $this->apiCredentialService->getAuthUser();
         $userId = $user->id;
-        $notificationId = $this->request->get('notification_id');
-        $notification = $this->notificationService->delete($notificationId, $userId);
+        $notificationId = (int) $this->request->get('notification_id');
+        $notification = $this->notificationService->remove($notificationId, $userId);
         return $this->jsonResponseService->success([
             "notification" => $notification,
             "message" => "Notification deleted successfully"

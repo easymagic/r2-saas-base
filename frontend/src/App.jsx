@@ -6,6 +6,8 @@ import { AdminBatchesPage } from './pages/AdminBatchesPage.jsx';
 import { AdminDashboardPage } from './pages/AdminDashboardPage.jsx';
 import { AdminPlatformConfigPage } from './pages/AdminPlatformConfigPage.jsx';
 import { AdminSettingsPage } from './pages/AdminSettingsPage.jsx';
+import { AdminLogsPage } from './pages/AdminLogsPage.jsx';
+import { AdminMigrationsPage } from './pages/AdminMigrationsPage.jsx';
 import { AdminTopupsPage } from './pages/AdminTopupsPage.jsx';
 import { AdminUserDetailPage } from './pages/AdminUserDetailPage.jsx';
 import { AdminUsersPage } from './pages/AdminUsersPage.jsx';
@@ -69,6 +71,14 @@ export default function App() {
           }
         />
         <Route
+          path="admin/logs"
+          element={
+            <AdminRoute>
+              <AdminLogsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="admin/batches"
           element={
             <AdminRoute>
@@ -105,6 +115,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminSettingsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/migrations"
+          element={
+            <AdminRoute>
+              <AdminMigrationsPage />
             </AdminRoute>
           }
         />

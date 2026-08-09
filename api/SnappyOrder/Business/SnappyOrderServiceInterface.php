@@ -101,4 +101,10 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
      */
     public function assignToBatch(int $order_id, int $batch_id);
 
+    /**
+     * @param int $order_id
+     * @return SnappyOrderEntity
+     */
+    public function unassignFromBatch(int $order_id);
+
 }
