@@ -115,8 +115,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
 
         $order = $this->snappyOrderRepository->save(0, [
             'user_id' => $user->id,
-            'type' => 'snappy',
-            'reference' => uniqid('SNAPPY_'),
+            'type' => 'manual',
+            'reference' => uniqid('MANUAL_'),
             'link' => $link,
             'description' => $description,
             'total_amount_usd' => $total_amount_usd,
