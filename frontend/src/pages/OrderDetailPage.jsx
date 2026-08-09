@@ -250,18 +250,9 @@ export function OrderDetailPage() {
       setOrder(null);
       return;
     }
-    const o = r.order;
-    const role = String(u.role || '').toLowerCase();
-    const isOwner = Number(o.user_id) === Number(u.id);
-    const isAssignedAgent = role === 'agent' && Number(o.agent_id) === Number(u.id);
-    if (!isAdmin && !isOwner && !isAssignedAgent) {
-      setLoadError('You can only open orders assigned to you.');
-      setOrder(null);
-      return;
-    }
-    setOrder(o);
+    setOrder(r.order);
     setLoadError('');
-  }, [orderId, navigate, isAdmin]);
+  }, [orderId, navigate]);
 
   useEffect(() => {
     loadOrder();

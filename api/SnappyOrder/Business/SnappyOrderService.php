@@ -128,7 +128,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             'shipping_cost_usd' => $this->getShippingCost(),
             'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
             'grand_total_naira' => $this->getTotalAmountNaira($total_amount_usd),
-            'price_adjustment_sent' => 1,
+            'price_adjustment_sent' => 0,
         ]);
 
         $this->snappyOrderMailService->notifyCustomerOfOrderCreation($order->id);
@@ -142,7 +142,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
      * @param string $status
      * @return SnappyOrderEntity
      */
-    public function changeStatus(int $order_id, string $status)
+    public function changeStatus(int $order_id, string $status, string $pickup_otp_code = "")
     {
         if (empty($order_id)) {
             throw new Exception('Order ID is required');
@@ -180,6 +180,14 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             ]);
             $this->snappyOrderMailService->notifyCustomerOfPickupOTP($order->id, (string) $otp_code);
         } else {
+            if ($status === 'delivered'){
+                if (empty($pickup_otp_code)) {
+                    throw new Exception('Pickup OTP code is required when status is delivered');
+                }
+                if ($pickup_otp_code !== $order->pickup_otp_code) {
+                    throw new Exception('Invalid pickup OTP code');
+                }
+            }    
             $order = $this->snappyOrderRepository->save($order_id, [
                 'status' => $status,
             ]);
@@ -454,6 +462,24 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             $old_batch_id,
             ''
         );
+
+        return $order;
+    }
+
+    /**
+     * @param int $id
+     * @return SnappyOrderEntity
+     */
+    public function getById(int $id)
+    {
+        if (empty($id)) {
+            throw new Exception('Order ID is required');
+        }
+
+        $order = $this->snappyOrderRepository->find($id);
+        if ($order->isEmpty()) {
+            throw new Exception('Order not found');
+        }
 
         return $order;
     }

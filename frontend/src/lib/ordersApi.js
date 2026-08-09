@@ -125,24 +125,45 @@ export async function fetchOrdersFromApi(user, { batchId, status, search, userId
   }
 }
 
-/** Resolve one order from role list (no GET-by-id route). */
+/** GET /v2/snappy-orders/{orderId} — `SnappyOrderService::getById`. */
 export async function fetchOrderFromApi(user, orderId) {
   const id = orderId != null ? String(orderId).trim() : '';
   if (!id) return { ok: false, error: 'bad_id' };
 
-  const r = await fetchOrdersFromApi(user, { search: id });
-  if (!r.ok) return r;
+  const headers = userAuthHeaders(user);
+  if (!headers) return { ok: false, error: 'no_session' };
 
-  const order =
-    r.orders.find((o) => String(o?.id) === id) ||
-    r.orders.find((o) => String(o?.reference || '') === id) ||
-    null;
+  try {
+    const res = await fetch(apiUrl(endpoints.snappyOrder(id)), {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+    });
+    let data = null;
+    try {
+      data = await readApiJson(res);
+    } catch {
+      return { ok: false, error: 'bad_json' };
+    }
 
-  if (!order) {
-    return { ok: false, message: 'Could not load this order.', data: r.data };
+    if (!data?.success) {
+      return { ok: false, message: apiMessage(data, 'Could not load this order.'), data };
+    }
+
+    const order = orderFromPayload(data);
+    if (!order) {
+      return { ok: false, message: 'Could not load this order.', data };
+    }
+
+    return {
+      ok: true,
+      order,
+      message: apiMessage(data, 'Order fetched successfully'),
+      data,
+    };
+  } catch {
+    return { ok: false, error: 'network' };
   }
-
-  return { ok: true, order, data: r.data };
 }
 
 /** POST /v2/snappy-orders/{orderId}/assign-to-batch — JSON: batch_id (admin). */

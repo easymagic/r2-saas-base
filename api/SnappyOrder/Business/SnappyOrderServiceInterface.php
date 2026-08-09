@@ -42,7 +42,7 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
      * @param string $status Valid statuses are defined in SnappyOrderRepositoryInterface::ALLOWED_STATUSES
      * @return SnappyOrderEntity 
      */
-    public function changeStatus(int $order_id, string $status);
+    public function changeStatus(int $order_id, string $status, string $pickup_otp_code = "");
 
     /**
      * @param int $order_id
@@ -106,5 +106,12 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
      * @return SnappyOrderEntity
      */
     public function unassignFromBatch(int $order_id);
+
+
+    /**
+     * @param int $id
+     * @return SnappyOrderEntity
+     */
+    public function getById(int $id);
 
 }

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "R2 SaaS Base API",
-    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**Recent routes**\n- `POST /v2/snappy-orders/{orderId}/unassign-from-batch` — admin clear order batch\n- `GET /v2/logs/migrate` — migrate logs table\n- `GET /v2/logs` — admin list logs (`type`, `search`, `id`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
+    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**Recent routes**\n- `GET /v2/snappy-orders/{orderId}` — get order by id\n- `POST /v2/snappy-orders/{orderId}/unassign-from-batch` — admin clear order batch\n- `GET /v2/logs/migrate` — migrate logs table\n- `GET /v2/logs` — admin list logs (`type`, `search`, `id`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -764,6 +764,18 @@
                 { "key": "search", "value": "", "disabled": true }
               ]
             }
+          }
+        },
+        {
+          "name": "Get Order By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}",
+            "description": "GET /v2/snappy-orders/{{orderId}}\n\nCalls `SnappyOrderController::getById` → `SnappyOrderService::getById`.\n\nAccess:\n- Admin: any order\n- Customer: own orders (`user_id`)\n- Agent: assigned orders (`agent_id`)\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order fetched successfully\"\n  }\n}\n```"
           }
         },
         {

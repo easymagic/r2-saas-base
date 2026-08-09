@@ -122,6 +122,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("snappy-orders", [SnappyOrderController::class, "create"]);
                 $route->get("snappy-orders/my-orders", [SnappyOrderController::class, "getMyOrdersAsCustomer"]);
                 $route->get("snappy-orders/agent-orders", [SnappyOrderController::class, "getMyOrdersAsAgent"]);
+                $route->get("snappy-orders/{order_id}", [SnappyOrderController::class, "getById"]);
                 $route->post("snappy-orders/{order_id}/pay-from-wallet", [SnappyOrderController::class, "payOrderFromWallet"]);
 
                 // Batch routes

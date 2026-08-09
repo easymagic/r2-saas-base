@@ -142,6 +142,27 @@ class SnappyOrderController
         ]);
     }
 
+    function getById()
+    {
+        $user = $this->apiCredentialService->getAuthUser();
+        $orderId = (int) $this->request->get('order_id');
+        $order = $this->snappyOrderService->getById($orderId);
+
+        $role = strtolower((string) $user->role);
+        $isAdmin = strpos($role, 'admin') !== false;
+        $isOwner = (int) $order->user_id === (int) $user->id;
+        $isAssignedAgent = $role === 'agent' && (int) $order->agent_id === (int) $user->id;
+
+        if (!$isAdmin && !$isOwner && !$isAssignedAgent) {
+            throw new \Exception('You are not authorized to view this order');
+        }
+
+        $this->jsonResponseService->success([
+            'order' => $order,
+            'message' => 'Order fetched successfully',
+        ]);
+    }
+
     function publishSettings()
     {
         $this->snappyOrderService->publishSettings();

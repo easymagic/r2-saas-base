@@ -63,6 +63,7 @@ export const endpoints = {
   snappyMyOrders: () => '/v2/snappy-orders/my-orders',
   snappyAgentOrders: () => '/v2/snappy-orders/agent-orders',
   snappyAdminOrders: () => '/v2/snappy-orders/admin-orders',
+  snappyOrder: (orderId) => `/v2/snappy-orders/${encodeURIComponent(orderId)}`,
   snappyPayFromWallet: (orderId) =>
     `/v2/snappy-orders/${encodeURIComponent(orderId)}/pay-from-wallet`,
   snappyChangeStatus: (orderId) =>

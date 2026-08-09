@@ -16,7 +16,7 @@ class WalletMigrationRepository implements WalletMigrationRepositoryInterface {
         $this->migration->withTable('wallets')
             ->field('user_id')->definition('INT NOT NULL')->run()
             ->field('reference')->definition('VARCHAR(255) DEFAULT \'\'')->run()
-            ->field('type')->definition('ENUM(\'manual\',\'online\') DEFAULT \'manual\'')->run() // manual or online
+            ->field('type')->definition('ENUM(\'manual\',\'online\',\'withdrawal\') DEFAULT \'manual\'')->run() // manual or online or withdrawal
             ->field('amount')->definition('FLOAT DEFAULT 0')->run()
             ->field('balance')->definition('FLOAT DEFAULT 0')->run()
             ->field('description')->definition('VARCHAR(255) DEFAULT \'\'')->run()

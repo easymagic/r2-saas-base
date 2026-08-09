@@ -5,26 +5,59 @@ import { Button } from '../ui/Button.jsx';
 import { clearAuthUser, getStoredUser } from '../../lib/authSession.js';
 import { logoutFromApi } from '../../lib/userApi.js';
 
-const customerNav = [
-  { to: '/profile', label: 'Profile' },
-  { to: '/create-order', label: 'Create order' },
-  { to: '/orders', label: 'Orders' },
-  { to: '/notifications', label: 'Notifications' },
-  { to: '/wallet', label: 'Wallet' },
+const customerNavGroups = [
+  {
+    label: 'Orders',
+    items: [
+      { to: '/create-order', label: 'Create order' },
+      { to: '/orders', label: 'Orders' },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { to: '/wallet', label: 'Wallet' },
+      { to: '/notifications', label: 'Notifications' },
+      { to: '/profile', label: 'Profile' },
+    ],
+  },
 ];
 
-const adminNav = [
-  { to: '/admin', label: 'Dashboard', end: true },
-  { to: '/orders', label: 'Orders' },
-  { to: '/admin/topups', label: 'Top-up approvals' },
-  { to: '/admin/logs', label: 'Logs' },
-  { to: '/admin/batches', label: 'Batches' },
-  { to: '/admin/users', label: 'Users' },
-  { to: '/admin/platform-config', label: 'Platform config' },
-  { to: '/admin/migrations', label: 'Migrations' },
-  { to: '/admin/settings', label: 'Settings' },
-  { to: '/notifications', label: 'Notifications' },
-  { to: '/wallet', label: 'Wallet' },
+const adminNavGroups = [
+  {
+    label: 'Overview',
+    items: [{ to: '/admin', label: 'Dashboard', end: true }],
+  },
+  {
+    label: 'Fulfillment',
+    items: [
+      { to: '/orders', label: 'Orders' },
+      { to: '/admin/batches', label: 'Batches' },
+    ],
+  },
+  {
+    label: 'Finance',
+    items: [
+      { to: '/admin/topups', label: 'Top-up approvals' },
+      { to: '/wallet', label: 'Wallet' },
+    ],
+  },
+  {
+    label: 'People',
+    items: [
+      { to: '/admin/users', label: 'Users' },
+      { to: '/notifications', label: 'Notifications' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { to: '/admin/platform-config', label: 'Platform config' },
+      { to: '/admin/migrations', label: 'Migrations' },
+      { to: '/admin/settings', label: 'Settings' },
+      { to: '/admin/logs', label: 'Logs' },
+    ],
+  },
 ];
 
 export function AppLayout() {
@@ -32,7 +65,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const isAdmin = String(user?.role || '').toLowerCase() === 'admin';
-  const navItems = isAdmin ? adminNav : customerNav;
+  const navGroups = isAdmin ? adminNavGroups : customerNavGroups;
 
   async function handleSignOut() {
     setOpen(false);
@@ -101,24 +134,33 @@ export function AppLayout() {
             ) : null}
           </div>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-blue-900 text-white shadow-sm shadow-blue-900/20'
-                    : 'text-gray-700 hover:bg-slate-100'
-                )
-              }
-            >
-              {item.label}
-            </NavLink>
+        <nav className="flex flex-1 flex-col gap-5 overflow-y-auto p-4" aria-label="Primary">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                {group.label}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-blue-900 text-white shadow-sm shadow-blue-900/20'
+                          : 'text-gray-700 hover:bg-slate-100'
+                      )
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
         <div className="border-t border-slate-100 p-4">
