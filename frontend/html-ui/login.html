@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — BorderlessFetch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['DM Sans', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body class="min-h-screen font-sans text-gray-900 antialiased" style="background: radial-gradient(900px 420px at 15% 0%, rgba(30,58,95,.18), transparent 55%), radial-gradient(700px 360px at 90% 10%, rgba(234,88,12,.14), transparent 45%), linear-gradient(165deg,#f8fafc 0%,#e2e8f0 100%);">
+  <main class="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
+    <div class="mb-8 text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-900 text-lg font-bold text-white shadow-lg shadow-blue-900/30">BF</div>
+      <h1 class="mt-4 text-2xl font-semibold tracking-tight text-gray-900">BorderlessFetch</h1>
+      <p class="mt-1 text-sm text-gray-500">Social commerce fulfillment</p>
+    </div>
+
+    <section class="w-full max-w-md rounded-2xl border border-white/70 bg-white/95 p-6 shadow-xl shadow-slate-900/10 backdrop-blur sm:p-8" aria-labelledby="signin-heading">
+      <h2 id="signin-heading" class="text-lg font-semibold text-gray-900">Sign in</h2>
+      <p class="mt-1 text-sm text-gray-500">API: <code class="rounded bg-slate-100 px-1 text-xs">POST /v2/auth/login</code> (JSON)</p>
+
+      <form class="mt-6 space-y-4" action="#" method="post">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="you@company.com" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button type="submit" class="w-full rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-blue-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Sign in</button>
+      </form>
+
+      <p class="mt-6 text-center text-xs text-gray-400">Headers: <code class="rounded bg-gray-100 px-1">x-token</code>, then <code class="rounded bg-gray-100 px-1">x-user-token</code> from <code class="rounded bg-gray-100 px-1">data.user.token</code></p>
+    </section>
+  </main>
+</body>
+</html>
