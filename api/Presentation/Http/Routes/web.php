@@ -11,6 +11,7 @@ use Thread\Presentation\ThreadController;
 use User\Presentation\UserController;
 use Wallet\Presentation\WalletController;
 use Log\Presentation\LogController;
+use Category\Presentation\CategoryController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
@@ -38,6 +39,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("threads/migrate", [ThreadController::class, "migrate"]);
             $route->get("proxy-order-change-logs/migrate", [ProxyOrderChangeLogController::class, "migrate"]);
             $route->get("logs/migrate", [LogController::class, "migrate"]);
+            $route->get("categories/migrate", [CategoryController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -138,6 +140,10 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->post("batches", [BatchController::class, "create"]);
                 $route->delete("batches/{batch_id}", [BatchController::class, "remove"]);
 
+                // Category routes
+                $route->get("categories", [CategoryController::class, "fetchForFrontend"]);
+                $route->get("categories/slug/{slug}", [CategoryController::class, "findBySlug"]);
+
                 // Thread routes
                 $route->post("threads", [ThreadController::class, "createThread"]);
                 $route->get("threads/{order_id}", [ThreadController::class, "getThreadListForOrder"]);
@@ -152,7 +158,16 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->post("snappy-orders/{order_id}/unassign-from-batch", [SnappyOrderController::class, "unassignFromBatch"]);
                     $route->post("snappy-orders/publish-settings", [SnappyOrderController::class, "publishSettings"]);
                     $route->get("logs", [LogController::class, "fetch"]);
+
+                    $route->get("categories/admin", [CategoryController::class, "fetchForAdmin"]);
+                    $route->post("categories", [CategoryController::class, "create"]);
+                    $route->post("categories/{category_id}", [CategoryController::class, "update"]);
+                    $route->delete("categories/{category_id}", [CategoryController::class, "remove"]);
+
                 });
+
+                // After static `categories/admin` so `{category_id}` does not capture "admin"
+                $route->get("categories/{category_id}", [CategoryController::class, "findById"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

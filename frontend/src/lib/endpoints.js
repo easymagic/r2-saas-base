@@ -88,7 +88,12 @@ export const endpoints = {
   migrateThreads: () => '/v2/threads/migrate',
   migrateProxyOrderChangeLogs: () => '/v2/proxy-order-change-logs/migrate',
   migrateLogs: () => '/v2/logs/migrate',
+  migrateCategories: () => '/v2/categories/migrate',
   logs: () => '/v2/logs',
+  categories: () => '/v2/categories',
+  categoriesAdmin: () => '/v2/categories/admin',
+  category: (categoryId) => `/v2/categories/${encodeURIComponent(categoryId)}`,
+  categoryBySlug: (slug) => `/v2/categories/slug/${encodeURIComponent(slug)}`,
 };
 
 export function withQuery(path, params = {}) {

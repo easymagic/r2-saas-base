@@ -16,6 +16,7 @@ export const MIGRATION_JOBS = [
     path: endpoints.migrateProxyOrderChangeLogs(),
   },
   { id: 'logs', label: 'Logs', path: endpoints.migrateLogs() },
+  { id: 'categories', label: 'Categories', path: endpoints.migrateCategories() },
 ];
 
 function formatMigrationBody(text) {

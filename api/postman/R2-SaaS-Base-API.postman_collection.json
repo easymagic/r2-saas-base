@@ -16,7 +16,9 @@
     { "key": "batchId", "value": "1" },
     { "key": "threadId", "value": "1" },
     { "key": "agentId", "value": "1" },
-    { "key": "platformConfigId", "value": "1" }
+    { "key": "platformConfigId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "categorySlug", "value": "electronics" }
   ],
   "auth": {
     "type": "noauth"
@@ -1010,6 +1012,146 @@
             ],
             "url": "{{baseUrl}}/v2/logs/migrate",
             "description": "GET /v2/logs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `LogController::migrate`."
+          }
+        },
+        {
+          "name": "Migrate Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/categories/migrate",
+            "description": "GET /v2/categories/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `CategoryController::migrate`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "description": "Requires `x-token` + `x-user-token`. Admin write routes also need an admin role.",
+      "item": [
+        {
+          "name": "List Categories (Frontend)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/categories?search=&parent_id=",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "categories"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "parent_id", "value": "", "disabled": true },
+                { "key": "slug", "value": "", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/categories\n\nActive categories only (`fetchForFrontend`).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"categories\": [],\n    \"count\": 0,\n    \"message\": \"Categories fetched successfully\"\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "List Categories (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/categories/admin?search=&parent_id=&active=",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "categories", "admin"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "parent_id", "value": "", "disabled": true },
+                { "key": "active", "value": "", "description": "0 | 1", "disabled": true },
+                { "key": "slug", "value": "", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/categories/admin\n\nAdmin only. Includes inactive categories."
+          }
+        },
+        {
+          "name": "Get Category By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
+            "description": "GET /v2/categories/{{categoryId}}\n\nCalls `CategoryService::findById`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"category\": {},\n    \"message\": \"Category fetched successfully\"\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "Get Category By Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/categories/slug/{{categorySlug}}",
+            "description": "GET /v2/categories/slug/{{categorySlug}}\n\nCalls `CategoryService::findBySlug`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"category\": {},\n    \"message\": \"Category fetched successfully\"\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Electronics", "type": "text" },
+                { "key": "parent_id", "value": "0", "type": "text" },
+                { "key": "description", "value": "Electronic goods", "type": "text" },
+                { "key": "slug", "value": "electronics", "type": "text" },
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/categories",
+            "description": "Admin only. Form-data: `name`, optional `parent_id`, `description`, `slug`, required `image` file.\n\nUpload uses `FileUploadServiceInterface` into `/uploads/categories` (same pattern as snappy order screenshots).\nSlug is auto-generated from name when omitted."
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Electronics", "type": "text" },
+                { "key": "parent_id", "value": "0", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" },
+                { "key": "slug", "value": "electronics", "type": "text" },
+                { "key": "image", "type": "file", "src": "", "disabled": true }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
+            "description": "Admin only. POST /v2/categories/{{categoryId}}.\n\nOmit `image` to keep the existing image. When provided, uploaded via `FileUploadServiceInterface`."
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
+            "description": "Admin only. Fails if the category has child categories."
           }
         }
       ]
