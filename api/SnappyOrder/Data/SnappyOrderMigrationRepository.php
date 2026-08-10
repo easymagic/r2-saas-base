@@ -20,7 +20,7 @@ class SnappyOrderMigrationRepository implements SnappyOrderMigrationRepositoryIn
             ->field('agent_id')->definition('INT DEFAULT NULL')->run()
             ->field('type')->definition('VARCHAR(255) NOT NULL')->run()
             ->field('reference')->definition('VARCHAR(255) NOT NULL')->run()
-            ->field('link')->definition('VARCHAR(255) NOT NULL')->run()
+            ->field('link')->definition('TEXT NOT NULL')->run()
             ->field('screen_shot1')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('screen_shot2')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('screen_shot3')->definition('VARCHAR(255) DEFAULT NULL')->run()
