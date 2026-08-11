@@ -59,6 +59,7 @@ interface ProductServiceInterface extends AbstractBaseServiceInterface
      * @param int $category_id
      * @param int $user_id
      * @param string $slug
+     * @param int $active 0 or 1
      * @param array $image_1 Uploaded file (optional; empty keeps existing)
      * @param array $image_2 Uploaded file (optional)
      * @param array $image_3 Uploaded file (optional)
@@ -78,13 +79,14 @@ interface ProductServiceInterface extends AbstractBaseServiceInterface
         int $category_id,
         int $user_id,
         string $slug,
+        int $active,
         array $image_1 = [],
         array $image_2 = [],
         array $image_3 = [],
         array $image_4 = [],
         array $image_5 = [],
         array $image_6 = [],
-        array $image_7 = []
+        array $image_7 = [],
     );
 
     public function remove(int $id);

@@ -1341,6 +1341,7 @@
                 { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
                 { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
                 { "key": "slug", "value": "sample-product", "type": "text" },
+                { "key": "active", "value": "1", "type": "text" },
                 { "key": "image_1", "type": "file", "src": "", "disabled": true },
                 { "key": "image_2", "type": "file", "src": "", "disabled": true },
                 { "key": "image_3", "type": "file", "src": "", "disabled": true },
@@ -1351,7 +1352,7 @@
               ]
             },
             "url": "{{baseUrl}}/v2/products/{{productId}}",
-            "description": "Admin only. POST /v2/products/{{productId}}.\n\nOmit any `image_*` field to keep that existing image. Uploading `image_1` also updates legacy `image`."
+            "description": "Admin only. POST /v2/products/{{productId}}.\n\nForm-data includes `active` (0 or 1). Omit any `image_*` field to keep that existing image. Uploading `image_1` also updates legacy `image`."
           }
         },
         {

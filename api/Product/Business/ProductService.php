@@ -120,6 +120,7 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
      * @param int $category_id
      * @param int $user_id
      * @param string $slug
+     * @param int $active
      * @param array $image_1
      * @param array $image_2
      * @param array $image_3
@@ -139,6 +140,7 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
         int $category_id,
         int $user_id,
         string $slug,
+        int $active,
         array $image_1 = [],
         array $image_2 = [],
         array $image_3 = [],
@@ -158,6 +160,10 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
 
         $this->assertProductPayload($name, $description, $price, $old_price, $stock_qty, $category_id, $user_id);
 
+        if ($active !== 0 && $active !== 1) {
+            throw new Exception('Active must be 0 or 1');
+        }
+
         $slug = $this->normalizeSlug($slug !== '' ? $slug : $name);
         $this->assertSlugAvailable($slug, $id);
         $this->assertCategoryExists($category_id);
@@ -171,6 +177,7 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
             'slug' => $slug,
             'user_id' => $user_id,
             'category_id' => $category_id,
+            'active' => $active,
         ];
 
         $imageSlots = [

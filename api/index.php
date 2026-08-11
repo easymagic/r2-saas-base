@@ -21,7 +21,14 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
     });
 });
 
-include_once __DIR__ . '/Presentation/Http/Routes/web.php';
+// scan routes directory
+$routes = glob(__DIR__ . '/Presentation/Http/Routes/*.php');
+
+foreach ($routes as $route) {
+    include_once $route;
+}
+
+// include_once __DIR__ . '/Presentation/Http/Routes/web.php';
 
 /**
  * Boots

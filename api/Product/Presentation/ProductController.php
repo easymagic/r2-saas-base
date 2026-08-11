@@ -84,6 +84,7 @@ class ProductController
             (int) $this->request->get('category_id', 0),
             $userId,
             (string) $this->request->get('slug', ''),
+            (int) $this->request->get('active', 0),
             $this->request->get('image_1', []),
             $this->request->get('image_2', []),
             $this->request->get('image_3', []),
