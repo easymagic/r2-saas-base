@@ -255,6 +255,24 @@ class UserKycService extends AbstractBaseService implements UserKycServiceInterf
         return $this->userKycRepository->query(['user_id' => $user_id]);
     }
 
+    /**
+     * @param int $user_id
+     * @return bool
+     */
+    public function isKycCompleted(int $user_id)
+    {
+        if (empty($user_id)) {
+            throw new Exception('User ID is required');
+        }
+
+        $query = $this->userKycRepository->query([
+            'user_id' => $user_id,
+            'approved' => 1,
+        ]);
+
+        return $query->count() > 0;
+    }
+
     private function assertPayload(int $user_id, string $nin, string $store_name, string $description)
     {
         if ($user_id <= 0) {

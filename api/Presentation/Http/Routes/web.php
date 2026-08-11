@@ -17,6 +17,7 @@ use UserKyc\Presentation\UserKycController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
+use Presentation\Http\Middlewares\ProductCheckMiddleware;
 use Presentation\Http\Middlewares\WalletFeedbackMiddleware;
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
@@ -150,9 +151,17 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
 
                 // Product routes
                 $route->get("products", [ProductController::class, "fetchForFrontend"]);
-                $route->get("products/merchant", [ProductController::class, "fetchForMerchant"]);
                 $route->get("products/slug/{slug}", [ProductController::class, "findBySlug"]);
                 $route->get("products/uuid/{uuid}", [ProductController::class, "findByUuid"]);
+
+                $route->middleware([
+                    ProductCheckMiddleware::class
+                ], function (RouteServiceInterface $route) {
+                    $route->get("products/merchant", [ProductController::class, "fetchForMerchant"]);
+                    $route->post("products", [ProductController::class, "create"]);
+                    $route->post("products/{product_id}", [ProductController::class, "update"]);
+                    $route->delete("products/{product_id}", [ProductController::class, "remove"]);
+                });
 
                 // User KYC routes
                 $route->get("user-kycs/my", [UserKycController::class, "fetchForUser"]);
@@ -180,9 +189,6 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->delete("categories/{category_id}", [CategoryController::class, "remove"]);
 
                     $route->get("products/admin", [ProductController::class, "fetchForAdmin"]);
-                    $route->post("products", [ProductController::class, "create"]);
-                    $route->post("products/{product_id}", [ProductController::class, "update"]);
-                    $route->delete("products/{product_id}", [ProductController::class, "remove"]);
 
                     $route->get("user-kycs/pending", [UserKycController::class, "fetchForApproval"]);
                     $route->get("user-kycs/approved", [UserKycController::class, "fetchApproved"]);

@@ -62,4 +62,6 @@ interface UserKycServiceInterface extends AbstractBaseServiceInterface
      * @return QueryObject<UserKycEntity>
      */
     public function fetchForUser(int $user_id); // user_id = $user_id
+
+    public function isKycCompleted(int $user_id);
 }
