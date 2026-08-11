@@ -130,6 +130,16 @@ use Product\Data\ProductMigrationRepositoryInterface;
 use Product\Data\ProductRepository;
 use Product\Data\ProductRepositoryInterface;
 
+/*
+ * UserKyc
+ */
+use UserKyc\Business\UserKycService;
+use UserKyc\Business\UserKycServiceInterface;
+use UserKyc\Data\UserKycMigrationRepository;
+use UserKyc\Data\UserKycMigrationRepositoryInterface;
+use UserKyc\Data\UserKycRepository;
+use UserKyc\Data\UserKycRepositoryInterface;
+
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
@@ -193,6 +203,10 @@ $appServiceContainer->container()->map(CategoryRepositoryInterface::class, Categ
 $appServiceContainer->container()->map(ProductServiceInterface::class, ProductService::class);
 $appServiceContainer->container()->map(ProductMigrationRepositoryInterface::class, ProductMigrationRepository::class);
 $appServiceContainer->container()->map(ProductRepositoryInterface::class, ProductRepository::class);
+
+$appServiceContainer->container()->map(UserKycServiceInterface::class, UserKycService::class);
+$appServiceContainer->container()->map(UserKycMigrationRepositoryInterface::class, UserKycMigrationRepository::class);
+$appServiceContainer->container()->map(UserKycRepositoryInterface::class, UserKycRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 
