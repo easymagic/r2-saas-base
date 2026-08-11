@@ -42,25 +42,37 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
     /**
      * @param string $name
      * @param string $description
-     * @param array $image
      * @param float $price
      * @param float $old_price
      * @param int $stock_qty
      * @param int $category_id
      * @param int $user_id
      * @param string $slug
+     * @param array $image_1
+     * @param array $image_2
+     * @param array $image_3
+     * @param array $image_4
+     * @param array $image_5
+     * @param array $image_6
+     * @param array $image_7
      * @return ProductEntity
      */
     public function create(
         string $name,
         string $description,
-        array $image,
         float $price,
         float $old_price,
         int $stock_qty,
         int $category_id,
         int $user_id,
-        string $slug
+        string $slug,
+        array $image_1,
+        array $image_2 = [],
+        array $image_3 = [],
+        array $image_4 = [],
+        array $image_5 = [],
+        array $image_6 = [],
+        array $image_7 = []
     ) {
         $this->assertProductPayload($name, $description, $price, $old_price, $stock_qty, $category_id, $user_id);
 
@@ -68,17 +80,30 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
         $this->assertSlugAvailable($slug);
         $this->assertCategoryExists($category_id);
 
-        $image_path = $this->uploadImage($image, true);
+        $image_1_path = $this->uploadImage($image_1, true, 'image_1');
+        $image_2_path = $this->uploadImage($image_2, false, 'image_2');
+        $image_3_path = $this->uploadImage($image_3, false, 'image_3');
+        $image_4_path = $this->uploadImage($image_4, false, 'image_4');
+        $image_5_path = $this->uploadImage($image_5, false, 'image_5');
+        $image_6_path = $this->uploadImage($image_6, false, 'image_6');
+        $image_7_path = $this->uploadImage($image_7, false, 'image_7');
 
         return $this->productRepository->save(0, [
             'name' => trim($name),
             'description' => trim($description),
-            'image' => $image_path,
+            'image' => $image_1_path,
+            'image_1' => $image_1_path,
+            'image_2' => $image_2_path !== '' ? $image_2_path : null,
+            'image_3' => $image_3_path !== '' ? $image_3_path : null,
+            'image_4' => $image_4_path !== '' ? $image_4_path : null,
+            'image_5' => $image_5_path !== '' ? $image_5_path : null,
+            'image_6' => $image_6_path !== '' ? $image_6_path : null,
+            'image_7' => $image_7_path !== '' ? $image_7_path : null,
             'price' => $price,
             'uuid' => uniqid('prd_', true),
             'old_price' => $old_price,
             'stock_qty' => $stock_qty,
-            'active' => 1,
+            'active' => 0,
             'slug' => $slug,
             'user_id' => $user_id,
             'category_id' => $category_id,
@@ -89,26 +114,38 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
      * @param int $id
      * @param string $name
      * @param string $description
-     * @param array $image
      * @param float $price
      * @param float $old_price
      * @param int $stock_qty
      * @param int $category_id
      * @param int $user_id
      * @param string $slug
+     * @param array $image_1
+     * @param array $image_2
+     * @param array $image_3
+     * @param array $image_4
+     * @param array $image_5
+     * @param array $image_6
+     * @param array $image_7
      * @return ProductEntity
      */
     public function update(
         int $id,
         string $name,
         string $description,
-        array $image,
         float $price,
         float $old_price,
         int $stock_qty,
         int $category_id,
         int $user_id,
-        string $slug
+        string $slug,
+        array $image_1 = [],
+        array $image_2 = [],
+        array $image_3 = [],
+        array $image_4 = [],
+        array $image_5 = [],
+        array $image_6 = [],
+        array $image_7 = []
     ) {
         if (empty($id)) {
             throw new Exception('Product ID is required');
@@ -136,9 +173,24 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
             'category_id' => $category_id,
         ];
 
-        $image_path = $this->uploadImage($image, false);
-        if ($image_path !== '') {
-            $payload['image'] = $image_path;
+        $imageSlots = [
+            'image_1' => $image_1,
+            'image_2' => $image_2,
+            'image_3' => $image_3,
+            'image_4' => $image_4,
+            'image_5' => $image_5,
+            'image_6' => $image_6,
+            'image_7' => $image_7,
+        ];
+
+        foreach ($imageSlots as $field => $file) {
+            $path = $this->uploadImage($file, false, $field);
+            if ($path !== '') {
+                $payload[$field] = $path;
+                if ($field === 'image_1') {
+                    $payload['image'] = $path;
+                }
+            }
         }
 
         return $this->productRepository->save($product->id, $payload);
@@ -289,8 +341,7 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
         if ($user_id <= 0) {
             throw new Exception('User ID is required');
         }
-        // old price must be greater than price
-        if ($old_price < $price) {
+        if ($old_price > 0 && $old_price < $price) {
             throw new Exception('Old price must be greater than price');
         }
     }
@@ -298,13 +349,14 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
     /**
      * @param array $image
      * @param bool $required
+     * @param string $label
      * @return string
      */
-    private function uploadImage(array $image, bool $required)
+    private function uploadImage(array $image, bool $required, string $label = 'image')
     {
         if (empty($image) || empty($image['tmp_name'])) {
             if ($required) {
-                throw new Exception('Image is required');
+                throw new Exception($label . ' is required');
             }
             return '';
         }
@@ -314,7 +366,7 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
 
         $image_path = $this->fileUploadService->uploadFile($image, $path, $full_path);
         if (!$image_path) {
-            throw new Exception('Failed to upload product image');
+            throw new Exception('Failed to upload ' . $label);
         }
 
         return (string) $image_path;

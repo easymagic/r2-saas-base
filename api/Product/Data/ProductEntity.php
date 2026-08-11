@@ -19,4 +19,12 @@ class ProductEntity extends AbstractBaseEntity
     public int $category_id = 0;
     public string $created_at = '';
     public string $updated_at = '';
+    // product image up to 7
+    public string $image_1 = '';
+    public string $image_2 = '';
+    public string $image_3 = '';
+    public string $image_4 = '';
+    public string $image_5 = '';
+    public string $image_6 = '';
+    public string $image_7 = '';
 }

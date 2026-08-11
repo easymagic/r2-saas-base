@@ -46,13 +46,19 @@ class ProductController
         $product = $this->productService->create(
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
-            $this->request->get('image', []),
             (float) $this->request->get('price', 0),
             (float) $this->request->get('old_price', 0),
             (int) $this->request->get('stock_qty', 0),
             (int) $this->request->get('category_id', 0),
             $userId,
-            (string) $this->request->get('slug', '')
+            (string) $this->request->get('slug', ''),
+            $this->request->get('image_1', []),
+            $this->request->get('image_2', []),
+            $this->request->get('image_3', []),
+            $this->request->get('image_4', []),
+            $this->request->get('image_5', []),
+            $this->request->get('image_6', []),
+            $this->request->get('image_7', [])
         );
         $this->jsonResponseService->success([
             'product' => $product,
@@ -72,13 +78,19 @@ class ProductController
             (int) $this->request->get('product_id'),
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
-            $this->request->get('image', []),
             (float) $this->request->get('price', 0),
             (float) $this->request->get('old_price', 0),
             (int) $this->request->get('stock_qty', 0),
             (int) $this->request->get('category_id', 0),
             $userId,
-            (string) $this->request->get('slug', '')
+            (string) $this->request->get('slug', ''),
+            $this->request->get('image_1', []),
+            $this->request->get('image_2', []),
+            $this->request->get('image_3', []),
+            $this->request->get('image_4', []),
+            $this->request->get('image_5', []),
+            $this->request->get('image_6', []),
+            $this->request->get('image_7', [])
         );
         $this->jsonResponseService->success([
             'product' => $product,

@@ -1297,11 +1297,17 @@
                 { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
                 { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
                 { "key": "slug", "value": "sample-product", "type": "text" },
-                { "key": "image", "type": "file", "src": "" }
+                { "key": "image_1", "type": "file", "src": "" },
+                { "key": "image_2", "type": "file", "src": "", "disabled": true },
+                { "key": "image_3", "type": "file", "src": "", "disabled": true },
+                { "key": "image_4", "type": "file", "src": "", "disabled": true },
+                { "key": "image_5", "type": "file", "src": "", "disabled": true },
+                { "key": "image_6", "type": "file", "src": "", "disabled": true },
+                { "key": "image_7", "type": "file", "src": "", "disabled": true }
               ]
             },
             "url": "{{baseUrl}}/v2/products",
-            "description": "Admin only. Form-data: `name`, `description`, `price`, `old_price`, `stock_qty`, `category_id`, optional `slug`, optional `user_id` (defaults to auth user), required `image`.\n\nUpload uses `FileUploadServiceInterface` into `/uploads/products`. UUID is generated server-side."
+            "description": "Admin only. Form-data: `name`, `description`, `price`, `old_price`, `stock_qty`, `category_id`, optional `slug`, optional `user_id` (defaults to auth user), required `image_1`, optional `image_2`…`image_7`.\n\nUploads via `FileUploadServiceInterface` into `/uploads/products`. `image` is set from `image_1`. UUID is generated server-side. New products start with `active=0`."
           }
         },
         {
@@ -1323,11 +1329,17 @@
                 { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
                 { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
                 { "key": "slug", "value": "sample-product", "type": "text" },
-                { "key": "image", "type": "file", "src": "", "disabled": true }
+                { "key": "image_1", "type": "file", "src": "", "disabled": true },
+                { "key": "image_2", "type": "file", "src": "", "disabled": true },
+                { "key": "image_3", "type": "file", "src": "", "disabled": true },
+                { "key": "image_4", "type": "file", "src": "", "disabled": true },
+                { "key": "image_5", "type": "file", "src": "", "disabled": true },
+                { "key": "image_6", "type": "file", "src": "", "disabled": true },
+                { "key": "image_7", "type": "file", "src": "", "disabled": true }
               ]
             },
             "url": "{{baseUrl}}/v2/products/{{productId}}",
-            "description": "Admin only. POST /v2/products/{{productId}}.\n\nOmit `image` to keep the existing image."
+            "description": "Admin only. POST /v2/products/{{productId}}.\n\nOmit any `image_*` field to keep that existing image. Uploading `image_1` also updates legacy `image`."
           }
         },
         {
