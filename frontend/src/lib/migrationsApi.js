@@ -18,6 +18,7 @@ export const MIGRATION_JOBS = [
   { id: 'logs', label: 'Logs', path: endpoints.migrateLogs() },
   { id: 'categories', label: 'Categories', path: endpoints.migrateCategories() },
   { id: 'products', label: 'Products', path: endpoints.migrateProducts() },
+  { id: 'user-kycs', label: 'User KYCs', path: endpoints.migrateUserKycs() },
 ];
 
 function formatMigrationBody(text) {

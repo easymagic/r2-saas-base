@@ -15,7 +15,7 @@ class UserKycEntity extends AbstractBaseEntity
     public string $document3 = '';
     public string $document4 = '';
     public string $document5 = '';
-    public int $approved = 0;
+    public int $approved = -1;
     public int $approved_by = 0;
     public string $reject_reason = '';
     public string $created_at = '';

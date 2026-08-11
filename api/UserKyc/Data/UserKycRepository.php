@@ -19,27 +19,27 @@ class UserKycRepository extends AbstractBaseRepository implements UserKycReposit
     public function __construct(DbServiceInterface $db)
     {
         parent::__construct($db);
-        $this->addFilter("approved", function(bool $value, string &$sql, array &$params){
+
+        $this->addFilter("approved", function ($value, string &$sql, array &$params) {
             $sql .= " AND approved = :approved";
             $params['approved'] = $value;
         });
-        $this->addFilter("approved_by", function(int $value, string &$sql, array &$params){
+
+        $this->addFilter("approved_by", function ($value, string &$sql, array &$params) {
             $sql .= " AND approved_by = :approved_by";
             $params['approved_by'] = $value;
         });
-        // search 
-        $this->addFilter("search", function(string $value, string &$sql, array &$params){
+
+        $this->addFilter("search", function (string $value, string &$sql, array &$params) {
             $sql .= " AND (nin LIKE :search OR store_name LIKE :search OR description LIKE :search)";
-            $params['search'] = "%$value%";
+            $params['search'] = "%" . $value . "%";
         });
-        $this->addFilter("user_id", function(int $value, string &$sql, array &$params){
+
+        $this->addFilter("user_id", function ($value, string &$sql, array &$params) {
             $sql .= " AND user_id = :user_id";
             $params['user_id'] = $value;
         });
-
-
     }
-
 
     public function query(array $filters = [])
     {

@@ -25,7 +25,7 @@ class UserKycMigrationRepository implements UserKycMigrationRepositoryInterface
             ->field('document3')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('document4')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('document5')->definition('VARCHAR(255) DEFAULT NULL')->run()
-            ->field('approved')->definition('TINYINT(1) NOT NULL DEFAULT 0')->run()
+            ->field('approved')->definition('TINYINT NOT NULL DEFAULT -1')->run()
             ->field('approved_by')->definition('INT DEFAULT NULL')->run()
             ->field('reject_reason')->definition('TEXT DEFAULT NULL')->run()
             ->field('created_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP')->run()

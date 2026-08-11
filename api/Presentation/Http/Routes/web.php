@@ -13,6 +13,7 @@ use Wallet\Presentation\WalletController;
 use Log\Presentation\LogController;
 use Category\Presentation\CategoryController;
 use Product\Presentation\ProductController;
+use UserKyc\Presentation\UserKycController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
@@ -42,6 +43,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("logs/migrate", [LogController::class, "migrate"]);
             $route->get("categories/migrate", [CategoryController::class, "migrate"]);
             $route->get("products/migrate", [ProductController::class, "migrate"]);
+            $route->get("user-kycs/migrate", [UserKycController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -152,6 +154,11 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("products/slug/{slug}", [ProductController::class, "findBySlug"]);
                 $route->get("products/uuid/{uuid}", [ProductController::class, "findByUuid"]);
 
+                // User KYC routes
+                $route->get("user-kycs/my", [UserKycController::class, "fetchForUser"]);
+                $route->post("user-kycs", [UserKycController::class, "create"]);
+                $route->post("user-kycs/{kyc_id}", [UserKycController::class, "update"]);
+
                 // Thread routes
                 $route->post("threads", [ThreadController::class, "createThread"]);
                 $route->get("threads/{order_id}", [ThreadController::class, "getThreadListForOrder"]);
@@ -176,6 +183,12 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->post("products", [ProductController::class, "create"]);
                     $route->post("products/{product_id}", [ProductController::class, "update"]);
                     $route->delete("products/{product_id}", [ProductController::class, "remove"]);
+
+                    $route->get("user-kycs/pending", [UserKycController::class, "fetchForApproval"]);
+                    $route->get("user-kycs/approved", [UserKycController::class, "fetchApproved"]);
+                    $route->get("user-kycs/rejected", [UserKycController::class, "fetchRejected"]);
+                    $route->post("user-kycs/{kyc_id}/approve", [UserKycController::class, "approve"]);
+                    $route->post("user-kycs/{kyc_id}/reject", [UserKycController::class, "reject"]);
 
                 });
 

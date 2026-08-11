@@ -90,6 +90,7 @@ export const endpoints = {
   migrateLogs: () => '/v2/logs/migrate',
   migrateCategories: () => '/v2/categories/migrate',
   migrateProducts: () => '/v2/products/migrate',
+  migrateUserKycs: () => '/v2/user-kycs/migrate',
   logs: () => '/v2/logs',
   categories: () => '/v2/categories',
   categoriesAdmin: () => '/v2/categories/admin',
@@ -101,6 +102,14 @@ export const endpoints = {
   product: (productId) => `/v2/products/${encodeURIComponent(productId)}`,
   productBySlug: (slug) => `/v2/products/slug/${encodeURIComponent(slug)}`,
   productByUuid: (uuid) => `/v2/products/uuid/${encodeURIComponent(uuid)}`,
+  userKycsMy: () => '/v2/user-kycs/my',
+  userKycs: () => '/v2/user-kycs',
+  userKyc: (kycId) => `/v2/user-kycs/${encodeURIComponent(kycId)}`,
+  userKycsPending: () => '/v2/user-kycs/pending',
+  userKycsApproved: () => '/v2/user-kycs/approved',
+  userKycsRejected: () => '/v2/user-kycs/rejected',
+  userKycApprove: (kycId) => `/v2/user-kycs/${encodeURIComponent(kycId)}/approve`,
+  userKycReject: (kycId) => `/v2/user-kycs/${encodeURIComponent(kycId)}/reject`,
 };
 
 export function withQuery(path, params = {}) {

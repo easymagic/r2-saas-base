@@ -21,7 +21,8 @@
     { "key": "categorySlug", "value": "electronics" },
     { "key": "productId", "value": "1" },
     { "key": "productSlug", "value": "sample-product" },
-    { "key": "productUuid", "value": "" }
+    { "key": "productUuid", "value": "" },
+    { "key": "kycId", "value": "1" }
   ],
   "auth": {
     "type": "noauth"
@@ -1038,6 +1039,17 @@
             "url": "{{baseUrl}}/v2/products/migrate",
             "description": "GET /v2/products/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `ProductController::migrate`."
           }
+        },
+        {
+          "name": "Migrate User KYCs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/migrate",
+            "description": "GET /v2/user-kycs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `UserKycController::migrate`.\n\n`approved`: `-1` pending, `1` approved, `0` rejected."
+          }
         }
       ]
     },
@@ -1352,6 +1364,140 @@
             ],
             "url": "{{baseUrl}}/v2/products/{{productId}}",
             "description": "Admin only. Calls `ProductService::remove`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User KYCs",
+      "description": "Requires `x-token` + `x-user-token`. Admin list/approve/reject routes need an admin role.\n\n`approved` values: `-1` pending, `1` approved, `0` rejected.",
+      "item": [
+        {
+          "name": "My KYC",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/my",
+            "description": "GET /v2/user-kycs/my\n\nCalls `UserKycService::fetchForUser` for the authenticated user."
+          }
+        },
+        {
+          "name": "Submit KYC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nin", "value": "12345678901", "type": "text" },
+                { "key": "store_name", "value": "My Store", "type": "text" },
+                { "key": "description", "value": "Store KYC description", "type": "text" },
+                { "key": "document1", "type": "file", "src": "", "disabled": true },
+                { "key": "document2", "type": "file", "src": "", "disabled": true },
+                { "key": "document3", "type": "file", "src": "", "disabled": true },
+                { "key": "document4", "type": "file", "src": "", "disabled": true },
+                { "key": "document5", "type": "file", "src": "", "disabled": true }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/user-kycs",
+            "description": "POST /v2/user-kycs\n\nCreates a pending KYC (`approved=-1`) for the auth user. Optional document uploads via `FileUploadServiceInterface` into `/uploads/user_kycs`."
+          }
+        },
+        {
+          "name": "Update KYC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nin", "value": "12345678901", "type": "text" },
+                { "key": "store_name", "value": "My Store", "type": "text" },
+                { "key": "description", "value": "Updated KYC description", "type": "text" },
+                { "key": "document1", "type": "file", "src": "", "disabled": true },
+                { "key": "document2", "type": "file", "src": "", "disabled": true },
+                { "key": "document3", "type": "file", "src": "", "disabled": true },
+                { "key": "document4", "type": "file", "src": "", "disabled": true },
+                { "key": "document5", "type": "file", "src": "", "disabled": true }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}",
+            "description": "POST /v2/user-kycs/{{kycId}}\n\nOwner only. Cannot update an approved KYC. Resubmits as pending (`approved=-1`). Omit documents to keep existing files."
+          }
+        },
+        {
+          "name": "List Pending KYCs (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/pending",
+            "description": "GET /v2/user-kycs/pending\n\nAdmin only. `fetchForApproval` (`approved=-1`)."
+          }
+        },
+        {
+          "name": "List Approved KYCs (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/approved",
+            "description": "GET /v2/user-kycs/approved\n\nAdmin only. `fetchApproved` (`approved=1`)."
+          }
+        },
+        {
+          "name": "List Rejected KYCs (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/rejected",
+            "description": "GET /v2/user-kycs/rejected\n\nAdmin only. `fetchRejected` (`approved=0`)."
+          }
+        },
+        {
+          "name": "Approve KYC (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}/approve",
+            "description": "POST /v2/user-kycs/{{kycId}}/approve\n\nAdmin only. Sets `approved=1`, `approved_by` = auth admin. Sends in-app + email via `UserKycNotificationService`."
+          }
+        },
+        {
+          "name": "Reject KYC (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "reject_reason", "value": "Documents are unclear", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}/reject",
+            "description": "POST /v2/user-kycs/{{kycId}}/reject\n\nAdmin only. Body: required `reject_reason`. Sets `approved=0`. Sends reject notification."
           }
         }
       ]

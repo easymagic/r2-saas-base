@@ -135,6 +135,8 @@ use Product\Data\ProductRepositoryInterface;
  */
 use UserKyc\Business\UserKycService;
 use UserKyc\Business\UserKycServiceInterface;
+use UserKyc\Business\UserKycNotificationService;
+use UserKyc\Business\UserKycNotificationServiceInterface;
 use UserKyc\Data\UserKycMigrationRepository;
 use UserKyc\Data\UserKycMigrationRepositoryInterface;
 use UserKyc\Data\UserKycRepository;
@@ -205,6 +207,7 @@ $appServiceContainer->container()->map(ProductMigrationRepositoryInterface::clas
 $appServiceContainer->container()->map(ProductRepositoryInterface::class, ProductRepository::class);
 
 $appServiceContainer->container()->map(UserKycServiceInterface::class, UserKycService::class);
+$appServiceContainer->container()->map(UserKycNotificationServiceInterface::class, UserKycNotificationService::class);
 $appServiceContainer->container()->map(UserKycMigrationRepositoryInterface::class, UserKycMigrationRepository::class);
 $appServiceContainer->container()->map(UserKycRepositoryInterface::class, UserKycRepository::class);
 
