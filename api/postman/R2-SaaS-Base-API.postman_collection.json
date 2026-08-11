@@ -18,7 +18,10 @@
     { "key": "agentId", "value": "1" },
     { "key": "platformConfigId", "value": "1" },
     { "key": "categoryId", "value": "1" },
-    { "key": "categorySlug", "value": "electronics" }
+    { "key": "categorySlug", "value": "electronics" },
+    { "key": "productId", "value": "1" },
+    { "key": "productSlug", "value": "sample-product" },
+    { "key": "productUuid", "value": "" }
   ],
   "auth": {
     "type": "noauth"
@@ -1024,6 +1027,17 @@
             "url": "{{baseUrl}}/v2/categories/migrate",
             "description": "GET /v2/categories/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `CategoryController::migrate`."
           }
+        },
+        {
+          "name": "Migrate Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/products/migrate",
+            "description": "GET /v2/products/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `ProductController::migrate`."
+          }
         }
       ]
     },
@@ -1152,6 +1166,180 @@
             ],
             "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
             "description": "Admin only. Fails if the category has child categories."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Requires `x-token` + `x-user-token`. Admin write routes also need an admin role.",
+      "item": [
+        {
+          "name": "List Products (Frontend)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/products?search=&category_id=&price_min=&sort_a_z=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "products"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "category_id", "value": "", "disabled": true },
+                { "key": "price_min", "value": "", "disabled": true },
+                { "key": "sort_a_z", "value": "1", "disabled": true },
+                { "key": "sort_z_a", "value": "1", "disabled": true },
+                { "key": "sort_price_asc", "value": "1", "disabled": true },
+                { "key": "sort_price_desc", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/products\n\nActive products only (`fetchForFrontend`).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"products\": [],\n    \"count\": 0,\n    \"message\": \"Products fetched successfully\"\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "List Products (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/products/admin?search=&category_id=&active=&user_id=",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "products", "admin"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "category_id", "value": "", "disabled": true },
+                { "key": "active", "value": "", "description": "0 | 1", "disabled": true },
+                { "key": "user_id", "value": "", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/products/admin\n\nAdmin only. Includes inactive products."
+          }
+        },
+        {
+          "name": "List Products (Merchant)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v2/products/merchant?search=&category_id=&active=",
+              "host": ["{{baseUrl}}"],
+              "path": ["v2", "products", "merchant"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "category_id", "value": "", "disabled": true },
+                { "key": "active", "value": "", "description": "0 | 1", "disabled": true }
+              ]
+            },
+            "description": "GET /v2/products/merchant\n\nCalls `ProductService::fetchForMerchant` for the authenticated user (`user_id` = auth user).\n\nIncludes inactive products owned by the merchant."
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/products/{{productId}}",
+            "description": "GET /v2/products/{{productId}}\n\nCalls `ProductService::findById`."
+          }
+        },
+        {
+          "name": "Get Product By Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/products/slug/{{productSlug}}",
+            "description": "GET /v2/products/slug/{{productSlug}}\n\nCalls `ProductService::findBySlug`."
+          }
+        },
+        {
+          "name": "Get Product By UUID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/products/uuid/{{productUuid}}",
+            "description": "GET /v2/products/uuid/{{productUuid}}\n\nCalls `ProductService::findByUuid`."
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Sample Product", "type": "text" },
+                { "key": "description", "value": "Product description", "type": "text" },
+                { "key": "price", "value": "19.99", "type": "text" },
+                { "key": "old_price", "value": "24.99", "type": "text" },
+                { "key": "stock_qty", "value": "10", "type": "text" },
+                { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
+                { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
+                { "key": "slug", "value": "sample-product", "type": "text" },
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/products",
+            "description": "Admin only. Form-data: `name`, `description`, `price`, `old_price`, `stock_qty`, `category_id`, optional `slug`, optional `user_id` (defaults to auth user), required `image`.\n\nUpload uses `FileUploadServiceInterface` into `/uploads/products`. UUID is generated server-side."
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Sample Product", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" },
+                { "key": "price", "value": "18.99", "type": "text" },
+                { "key": "old_price", "value": "24.99", "type": "text" },
+                { "key": "stock_qty", "value": "8", "type": "text" },
+                { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
+                { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
+                { "key": "slug", "value": "sample-product", "type": "text" },
+                { "key": "image", "type": "file", "src": "", "disabled": true }
+              ]
+            },
+            "url": "{{baseUrl}}/v2/products/{{productId}}",
+            "description": "Admin only. POST /v2/products/{{productId}}.\n\nOmit `image` to keep the existing image."
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/products/{{productId}}",
+            "description": "Admin only. Calls `ProductService::remove`."
           }
         }
       ]

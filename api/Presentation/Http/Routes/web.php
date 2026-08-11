@@ -12,6 +12,7 @@ use User\Presentation\UserController;
 use Wallet\Presentation\WalletController;
 use Log\Presentation\LogController;
 use Category\Presentation\CategoryController;
+use Product\Presentation\ProductController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
 use Presentation\Http\Middlewares\GlobalApiMiddleware;
@@ -40,6 +41,7 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->get("proxy-order-change-logs/migrate", [ProxyOrderChangeLogController::class, "migrate"]);
             $route->get("logs/migrate", [LogController::class, "migrate"]);
             $route->get("categories/migrate", [CategoryController::class, "migrate"]);
+            $route->get("products/migrate", [ProductController::class, "migrate"]);
 
 
             $route->get('/test', function () {
@@ -144,6 +146,12 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                 $route->get("categories", [CategoryController::class, "fetchForFrontend"]);
                 $route->get("categories/slug/{slug}", [CategoryController::class, "findBySlug"]);
 
+                // Product routes
+                $route->get("products", [ProductController::class, "fetchForFrontend"]);
+                $route->get("products/merchant", [ProductController::class, "fetchForMerchant"]);
+                $route->get("products/slug/{slug}", [ProductController::class, "findBySlug"]);
+                $route->get("products/uuid/{uuid}", [ProductController::class, "findByUuid"]);
+
                 // Thread routes
                 $route->post("threads", [ThreadController::class, "createThread"]);
                 $route->get("threads/{order_id}", [ThreadController::class, "getThreadListForOrder"]);
@@ -164,10 +172,17 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->post("categories/{category_id}", [CategoryController::class, "update"]);
                     $route->delete("categories/{category_id}", [CategoryController::class, "remove"]);
 
+                    $route->get("products/admin", [ProductController::class, "fetchForAdmin"]);
+                    $route->post("products", [ProductController::class, "create"]);
+                    $route->post("products/{product_id}", [ProductController::class, "update"]);
+                    $route->delete("products/{product_id}", [ProductController::class, "remove"]);
+
                 });
 
                 // After static `categories/admin` so `{category_id}` does not capture "admin"
                 $route->get("categories/{category_id}", [CategoryController::class, "findById"]);
+                // After static `products/admin|slug|uuid` so `{product_id}` does not capture those
+                $route->get("products/{product_id}", [ProductController::class, "findById"]);
             });
 
             $route->get("wallet/migrate", [WalletController::class, "migrate"]);

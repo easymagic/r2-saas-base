@@ -89,11 +89,18 @@ export const endpoints = {
   migrateProxyOrderChangeLogs: () => '/v2/proxy-order-change-logs/migrate',
   migrateLogs: () => '/v2/logs/migrate',
   migrateCategories: () => '/v2/categories/migrate',
+  migrateProducts: () => '/v2/products/migrate',
   logs: () => '/v2/logs',
   categories: () => '/v2/categories',
   categoriesAdmin: () => '/v2/categories/admin',
   category: (categoryId) => `/v2/categories/${encodeURIComponent(categoryId)}`,
   categoryBySlug: (slug) => `/v2/categories/slug/${encodeURIComponent(slug)}`,
+  products: () => '/v2/products',
+  productsAdmin: () => '/v2/products/admin',
+  productsMerchant: () => '/v2/products/merchant',
+  product: (productId) => `/v2/products/${encodeURIComponent(productId)}`,
+  productBySlug: (slug) => `/v2/products/slug/${encodeURIComponent(slug)}`,
+  productByUuid: (uuid) => `/v2/products/uuid/${encodeURIComponent(uuid)}`,
 };
 
 export function withQuery(path, params = {}) {

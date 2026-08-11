@@ -120,6 +120,16 @@ use Category\Data\CategoryMigrationRepositoryInterface;
 use Category\Data\CategoryRepository;
 use Category\Data\CategoryRepositoryInterface;
 
+/*
+ * Product
+ */
+use Product\Business\ProductService;
+use Product\Business\ProductServiceInterface;
+use Product\Data\ProductMigrationRepository;
+use Product\Data\ProductMigrationRepositoryInterface;
+use Product\Data\ProductRepository;
+use Product\Data\ProductRepositoryInterface;
+
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
@@ -179,6 +189,10 @@ $appServiceContainer->container()->map(LogRepositoryInterface::class, LogReposit
 $appServiceContainer->container()->map(CategoryServiceInterface::class, CategoryService::class);
 $appServiceContainer->container()->map(CategoryMigrationRepositoryInterface::class, CategoryMigrationRepository::class);
 $appServiceContainer->container()->map(CategoryRepositoryInterface::class, CategoryRepository::class);
+
+$appServiceContainer->container()->map(ProductServiceInterface::class, ProductService::class);
+$appServiceContainer->container()->map(ProductMigrationRepositoryInterface::class, ProductMigrationRepository::class);
+$appServiceContainer->container()->map(ProductRepositoryInterface::class, ProductRepository::class);
 
 $appServiceContainer->container()->singleton(BaseMailThemeInterface::class, BaseMailTheme::class);
 
