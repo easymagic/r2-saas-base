@@ -21,50 +21,50 @@ class ProductRepository extends AbstractBaseRepository implements ProductReposit
         parent::__construct($db);
 
         $this->addFilter("search", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND (products.name LIKE :search OR products.description LIKE :search OR products.slug LIKE :search OR categories.name LIKE :search OR categories.slug LIKE :search)";
+            $sql .= " AND (products.name LIKE :search OR products.description LIKE :search OR products.slug LIKE :search OR categories.name LIKE :search OR categories.slug LIKE :search)";
             $params['search'] = "%$value%";
         });
 
         $this->addFilter("category_id", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND products.category_id = :category_id";
+            $sql .= " AND products.category_id = :category_id";
             $params['category_id'] = $value;
         });
 
         $this->addFilter("user_id", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND products.user_id = :user_id";
+            $sql .= " AND products.user_id = :user_id";
             $params['user_id'] = $value;
         });
 
         $this->addFilter("active", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND products.active = :active";
+            $sql .= " AND products.active = :active";
             $params['active'] = $value;
         });
 
         $this->addFilter("price", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND products.price = :price";
+            $sql .= " AND products.price = :price";
             $params['price'] = $value;
         });
 
         $this->addFilter("price_min", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " AND products.price >= :price_min";
+            $sql .= " AND products.price >= :price_min";
             $params['price_min'] = $value;
         });
 
         // sorting (a-z)
         $this->addFilter("sort_a_z", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " ORDER BY products.name ASC";
+            $sql .= " ORDER BY products.name ASC";
         });
 
         $this->addFilter("sort_z_a", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " ORDER BY products.name DESC";
+            $sql .= " ORDER BY products.name DESC";
         });
 
         $this->addFilter("sort_price_asc", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " ORDER BY products.price ASC";
+            $sql .= " ORDER BY products.price ASC";
         });
 
         $this->addFilter("sort_price_desc", function (mixed $value, string &$sql, array &$params) {
-            $this->sql .= " ORDER BY products.price DESC";
+            $sql .= " ORDER BY products.price DESC";
         });
     }
 
