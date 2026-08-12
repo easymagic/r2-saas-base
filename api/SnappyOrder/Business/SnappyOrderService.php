@@ -2,6 +2,7 @@
 
 namespace SnappyOrder\Business;
 
+use App\Shared\Contracts\Contracts;
 use Batch\Data\BatchRepositoryInterface;
 use Exception;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
@@ -81,26 +82,16 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         array $screen_shot3,
         float $total_amount_usd
     ) {
-        if (empty($user_id)) {
-            throw new Exception('User ID is required');
-        }
-        if (empty($link)) {
-            throw new Exception('Link is required');
-        }
-        if (empty($description)) {
-            throw new Exception('Description is required');
-        }
-        if (empty($total_amount_usd)) {
-            throw new Exception('Total amount is required');
-        }
-        if (empty($screen_shot1)) {
-            throw new Exception('Screen shot 1 is required');
-        }
+        Contracts::requiresNotNullOrEmpty($user_id, 'user id');
+        Contracts::requiresNotNullOrEmpty($link, 'link url');
+        Contracts::requiresNotNullOrEmpty($description, 'description');
+        Contracts::requiresNotNullOrEmpty($total_amount_usd, 'total amount in USD');
+        Contracts::requiresNotNullOrEmpty($screen_shot1, 'screen shot 1');
+        // Contracts::requiresNotNullOrEmpty($screen_shot2, 'screen shot 2');
+        // Contracts::requiresNotNullOrEmpty($screen_shot3, 'screen shot 3');
 
         $user = $this->userRepository->find($user_id);
-        if ($user->isEmpty()) {
-            throw new Exception('User not found');
-        }
+        Contracts::requireEntityFound($user, 'user');
 
         $path = '/uploads/snappy_orders';
         $full_path = __DIR__ . '/../../';
@@ -109,9 +100,9 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         $screen_shot2_path = $this->fileUploadService->uploadFile($screen_shot2, $path, $full_path);
         $screen_shot3_path = $this->fileUploadService->uploadFile($screen_shot3, $path, $full_path);
 
-        if (!$screen_shot1_path) {
-            throw new Exception('Failed to upload screen shot 1');
-        }
+        // if (!$screen_shot1_path) {
+        //     throw new Exception('Failed to upload screen shot 1');
+        // }
 
         $order = $this->snappyOrderRepository->save(0, [
             'user_id' => $user->id,
@@ -120,9 +111,9 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
             'link' => $link,
             'description' => $description,
             'total_amount_usd' => $total_amount_usd,
-            'screen_shot1' => $screen_shot1_path,
-            'screen_shot2' => $screen_shot2_path,
-            'screen_shot3' => $screen_shot3_path,
+            'screen_shot1' => $screen_shot1_path? $screen_shot1_path : '',
+            'screen_shot2' => $screen_shot2_path? $screen_shot2_path : '',
+            'screen_shot3' => $screen_shot3_path? $screen_shot3_path : '',
             'status' => 'pending',
             'service_charge_usd' => $this->getServiceCharge(),
             'shipping_cost_usd' => $this->getShippingCost(),
@@ -144,32 +135,18 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
      */
     public function changeStatus(int $order_id, string $status, string $pickup_otp_code = "")
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($status)) {
-            throw new Exception('Status is required');
-        }
-        if (!in_array($status, SnappyOrderRepositoryInterface::ALLOWED_STATUSES, true)) {
-            throw new Exception(
-                'Invalid status. Allowed: ' . implode(', ', SnappyOrderRepositoryInterface::ALLOWED_STATUSES)
-            );
-        }
+        Contracts::requiresNotNullOrEmpty($order_id, 'order id');
+        Contracts::requiresNotNullOrEmpty($status, 'status');
+        Contracts::requiresInArray($status, SnappyOrderRepositoryInterface::ALLOWED_STATUSES, 'status');
 
         $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
+        Contracts::requireEntityFound($order, 'order');
 
         $previousStatus = $order->status;
 
-        if ($status === 'pending' && $previousStatus !== 'pending') {
-            throw new Exception('Status cannot be changed back to pending');
-        }
+        Contracts::requires($status === 'pending' && $previousStatus !== 'pending', 'Status cannot be changed back to pending');
 
-        if ($status === 'cancelled' && $previousStatus !== 'pending') {
-            throw new Exception('Can only cancel pending orders');
-        }
+        Contracts::requires($status === 'cancelled' && $previousStatus !== 'pending', 'Can only cancel pending orders');
 
         // Pickup OTP is issued when the order becomes ready for pickup.
         if ($status === 'ready-for-pickup') {
