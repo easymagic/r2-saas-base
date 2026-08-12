@@ -28,7 +28,7 @@ class Contracts{
     */
    public static function requiresNotNullOrEmpty(mixed $value, string $argumentName){
     if (is_null($value) || empty($value)){
-        throw new Exception("The argument $argumentName is required and cannot be empty");
+        throw new Exception(ucfirst($argumentName) . " is required and cannot be empty!");
     }
    }
 
