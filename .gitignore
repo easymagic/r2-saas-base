@@ -2,6 +2,7 @@
 composer.lock
 .env
 .env.local
+ftp-config.md
 *.log
 .DS_Store
 .idea/
