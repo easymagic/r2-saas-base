@@ -184,25 +184,15 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
      */
     public function assignToAgent(int $order_id, int $agent_id)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($agent_id)) {
-            throw new Exception('Agent ID is required');
-        }
+        Contracts::requiresNotNullOrEmpty($order_id, 'order id');
+        Contracts::requiresNotNullOrEmpty($agent_id, 'agent id');
 
         $agent = $this->userRepository->find($agent_id);
-        if ($agent->isEmpty()) {
-            throw new Exception('Agent not found');
-        }
-        if ($agent->role !== 'agent') {
-            throw new Exception($agent->name . ' is not an agent');
-        }
+        Contracts::requireEntityFound($agent, 'agent');
+        Contracts::requires($agent->role === 'agent', $agent->name . ' is not an agent');
 
         $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
+        Contracts::requireEntityFound($order, 'order');
 
         $previousAgentId = $order->agent_id;
         $order = $this->snappyOrderRepository->save($order->id, [
