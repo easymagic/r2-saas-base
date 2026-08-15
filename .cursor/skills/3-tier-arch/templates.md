@@ -163,6 +163,7 @@ interface {Module}ServiceInterface extends AbstractBaseServiceInterface
 
 namespace {Module}\Business;
 
+use App\Shared\Contracts\Contracts;
 use Shared\AbstractBaseService;
 use {Module}\Data\{Module}RepositoryInterface;
 use {Module}\Data\{Module}Entity;
@@ -189,10 +190,23 @@ class {Module}Service extends AbstractBaseService implements {Module}ServiceInte
     {
         return $this->{module}MigrationRepositoryInterface->migrate();
     }
+
+    // Domain methods: normalize inputs → Contracts::* → repository.
+    // Example:
+    // public function create(string $name)
+    // {
+    //     $name = trim($name);
+    //     Contracts::requiresNotNullOrEmpty($name, 'name');
+    //     return $this->{module}Repository->save(0, [
+    //         'name' => $name,
+    //     ]);
+    // }
 }
 ```
 
 `{module}` = camelCase of module name (`User` → `user`).
+
+Always `use App\Shared\Contracts\Contracts` when adding domain methods. Prefer `Contracts::requires*`, `requiresInArray`, and `requireEntityFound` over inline `throw new Exception(...)`.
 
 ---
 
@@ -247,7 +261,55 @@ class {Module}Controller
 
 Inject `Presentation\ApiCredential\ApiCredentialServiceInterface` only when auth is required (see `UserController::me`).
 
-Do not register the controller in `boot.php`. Wire routes in `api/Presentation/Http/Routes/web.php` only if the user asks.
+Do not register the controller in `boot.php`. Wire HTTP endpoints in a **module-specific** route file (next section), not in another module’s routes and not in a shared `web.php`.
+
+---
+
+## `api/Presentation/Http/Routes/{kebab}-routes.php`
+
+One file per module. Name: kebab-case module + `-routes.php` (e.g. `Cart` → `cart-routes.php`, `UserKyc` → `user-kyc-routes.php`). See existing files in `api/Presentation/Http/Routes/`.
+
+`{resource}` = plural URL segment (e.g. `carts`, `products`, `notifications`).
+
+```php
+<?php
+
+use {Module}\Presentation\{Module}Controller;
+use Presentation\Http\Middlewares\GlobalApiMiddleware;
+use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
+use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
+
+/**
+ * @var AppServiceContainer $appServiceContainer
+ */
+$appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
+
+    $route->middleware([GlobalApiMiddleware::class], function (RouteServiceInterface $route) {
+
+        $route->prefix("v2", function (RouteServiceInterface $route) {
+
+            $route->get("{resource}/migrate", [{Module}Controller::class, "migrate"]);
+
+            // Add domain routes only when requested (see cart-routes.php / notification-routes.php):
+            // $route->post("{resource}", [{Module}Controller::class, "create"]);
+            //
+            // Auth-gated example (see product-routes.php / notification-routes.php):
+            // $route->middleware([
+            //     GlobalApiAuthMiddleware::class
+            // ], function (RouteServiceInterface $route) {
+            //     $route->get("{resource}", [{Module}Controller::class, "fetch"]);
+            // });
+        });
+    });
+});
+```
+
+Import extra middlewares only when needed:
+
+- `Presentation\Http\Middlewares\GlobalApiAuthMiddleware`
+- `Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware`
+
+Place static path segments (e.g. `{resource}/admin`, `{resource}/slug/{slug}`) **before** parameterized `{resource}/{id}` routes so IDs do not capture those labels (see `product-routes.php` / `category-routes.php`).
 
 ---
 
@@ -274,7 +336,7 @@ $appServiceContainer->container()->map({Module}RepositoryInterface::class, {Modu
 
 ---
 
-## Concrete reference: `api/User`
+## Concrete references
 
 | File | Role |
 |------|------|
@@ -287,3 +349,8 @@ $appServiceContainer->container()->map({Module}RepositoryInterface::class, {Modu
 | `api/User/Business/UserService.php` | DI + `migrate()` delegation |
 | `api/User/Presentation/UserController.php` | HTTP actions + JSON responses |
 | `api/Kernel/boot.php` | Interface → class maps |
+| `api/Shared/Contracts.php` | Shared business-rule helpers |
+| `api/Cart/Business/CartService.php` | Domain methods using `Contracts` |
+| `api/Presentation/Http/Routes/cart-routes.php` | Simple per-module routes |
+| `api/Presentation/Http/Routes/notification-routes.php` | Auth-gated per-module routes |
+| `api/Presentation/Http/Routes/product-routes.php` | Nested auth/admin + route order |

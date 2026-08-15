@@ -123,7 +123,7 @@ class CartService extends AbstractBaseService implements CartServiceInterface
      */
     public function generateCartUuid()
     {
-        return uniqid('cart_', true);
+        return uniqid('cart_' . time() . '_' . date('Y-m-d-H-i-s'), true);
     }
 
     /**
