@@ -131,6 +131,16 @@ use Product\Data\ProductRepository;
 use Product\Data\ProductRepositoryInterface;
 
 /*
+ * Cart
+ */
+use Cart\Business\CartService;
+use Cart\Business\CartServiceInterface;
+use Cart\Data\CartMigrationRepository;
+use Cart\Data\CartMigrationRepositoryInterface;
+use Cart\Data\CartRepository;
+use Cart\Data\CartRepositoryInterface;
+
+/*
  * UserKyc
  */
 use UserKyc\Business\UserKycService;
@@ -205,6 +215,10 @@ $appServiceContainer->container()->map(CategoryRepositoryInterface::class, Categ
 $appServiceContainer->container()->map(ProductServiceInterface::class, ProductService::class);
 $appServiceContainer->container()->map(ProductMigrationRepositoryInterface::class, ProductMigrationRepository::class);
 $appServiceContainer->container()->map(ProductRepositoryInterface::class, ProductRepository::class);
+
+$appServiceContainer->container()->map(CartServiceInterface::class, CartService::class);
+$appServiceContainer->container()->map(CartMigrationRepositoryInterface::class, CartMigrationRepository::class);
+$appServiceContainer->container()->map(CartRepositoryInterface::class, CartRepository::class);
 
 $appServiceContainer->container()->map(UserKycServiceInterface::class, UserKycService::class);
 $appServiceContainer->container()->map(UserKycNotificationServiceInterface::class, UserKycNotificationService::class);

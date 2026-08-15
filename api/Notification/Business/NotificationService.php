@@ -2,6 +2,7 @@
 
 namespace Notification\Business;
 
+use App\Shared\Contracts\Contracts;
 use Notification\Data\NotificationMigrationRepositoryInterface;
 use Notification\Data\NotificationRepositoryInterface;
 use Exception;
@@ -35,15 +36,10 @@ class NotificationService extends AbstractBaseService implements NotificationSer
 
     public function create(int $userId, string $title, string $message)
     {
-        if (empty($userId)) {
-            throw new \Exception('User ID is required');
-        }
-        if (empty($title)) {
-            throw new \Exception('Title is required');
-        }
-        if (empty($message)) {
-            throw new Exception('Message is required');
-        }
+        Contracts::requiresNotNullOrEmpty($userId, 'User ID');
+        Contracts::requiresNotNullOrEmpty($title, 'Title');
+        Contracts::requiresNotNullOrEmpty($message, 'Message');
+        
         $notification = $this->notificationRepository->save(0, [
             "user_id" => $userId,
             "title" => $title,

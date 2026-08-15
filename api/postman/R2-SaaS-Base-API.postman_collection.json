@@ -22,6 +22,7 @@
     { "key": "productId", "value": "1" },
     { "key": "productSlug", "value": "sample-product" },
     { "key": "productUuid", "value": "" },
+    { "key": "cartSessUuid", "value": "cart_sess_demo" },
     { "key": "kycId", "value": "1" }
   ],
   "auth": {
@@ -1041,6 +1042,17 @@
           }
         },
         {
+          "name": "Migrate Carts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/carts/migrate",
+            "description": "GET /v2/carts/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `CartController::migrate`."
+          }
+        },
+        {
           "name": "Migrate User KYCs",
           "request": {
             "method": "GET",
@@ -1365,6 +1377,89 @@
             ],
             "url": "{{baseUrl}}/v2/products/{{productId}}",
             "description": "Admin only. Calls `ProductService::remove`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Carts",
+      "description": "Session cart via `cart_sess_uuid`. Requires `x-token` only (`GlobalApiMiddleware`).",
+      "item": [
+        {
+          "name": "Generate Cart UUID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var uuid = json.data && json.data.uuid ? json.data.uuid : null;",
+                  "  if (uuid) {",
+                  "    pm.collectionVariables.set('cartSessUuid', uuid);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/carts/uuid",
+            "description": "GET /v2/carts/uuid\n\nCalls `CartService::generateCartUuid`.\n\nSaves `uuid` into collection variable `cartSessUuid`."
+          }
+        },
+        {
+          "name": "Add To Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uuid\": \"{{cartSessUuid}}\",\n  \"product_id\": {{productId}},\n  \"qty\": 1\n}"
+            },
+            "url": "{{baseUrl}}/v2/carts",
+            "description": "POST /v2/carts\n\nCalls `CartService::addToCart`.\n\nBody: `uuid` (cart session), `product_id`, `qty`.\n\nIf the product is already in the cart, qty is increased and `price_total` recalculated from product price."
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}",
+            "description": "GET /v2/carts/{{cartSessUuid}}\n\nCalls `CartService::getCart`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"cart\": [],\n    \"count\": 0,\n    \"price_total\": 0,\n    \"message\": \"Cart fetched successfully\"\n  }\n}\n```"
+          }
+        },
+        {
+          "name": "Remove From Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}/products/{{productId}}",
+            "description": "DELETE /v2/carts/{{cartSessUuid}}/products/{{productId}}\n\nCalls `CartService::removeFromCart`."
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}",
+            "description": "DELETE /v2/carts/{{cartSessUuid}}\n\nCalls `CartService::clearCart`."
           }
         }
       ]
