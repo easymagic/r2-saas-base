@@ -141,6 +141,36 @@ use Cart\Data\CartRepository;
 use Cart\Data\CartRepositoryInterface;
 
 /*
+ * EcomOrder
+ */
+use EcomOrder\Business\EcomOrderService;
+use EcomOrder\Business\EcomOrderServiceInterface;
+use EcomOrder\Data\EcomOrderMigrationRepository;
+use EcomOrder\Data\EcomOrderMigrationRepositoryInterface;
+use EcomOrder\Data\EcomOrderRepository;
+use EcomOrder\Data\EcomOrderRepositoryInterface;
+
+/*
+ * OrderItem
+ */
+use OrderItem\Business\OrderItemService;
+use OrderItem\Business\OrderItemServiceInterface;
+use OrderItem\Data\OrderItemMigrationRepository;
+use OrderItem\Data\OrderItemMigrationRepositoryInterface;
+use OrderItem\Data\OrderItemRepository;
+use OrderItem\Data\OrderItemRepositoryInterface;
+
+/*
+ * BnplPaymentSchedule
+ */
+use BnplPaymentSchedule\Business\BnplPaymentScheduleService;
+use BnplPaymentSchedule\Business\BnplPaymentScheduleServiceInterface;
+use BnplPaymentSchedule\Data\BnplPaymentScheduleMigrationRepository;
+use BnplPaymentSchedule\Data\BnplPaymentScheduleMigrationRepositoryInterface;
+use BnplPaymentSchedule\Data\BnplPaymentScheduleRepository;
+use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
+
+/*
  * UserKyc
  */
 use UserKyc\Business\UserKycService;
@@ -219,6 +249,18 @@ $appServiceContainer->container()->map(ProductRepositoryInterface::class, Produc
 $appServiceContainer->container()->map(CartServiceInterface::class, CartService::class);
 $appServiceContainer->container()->map(CartMigrationRepositoryInterface::class, CartMigrationRepository::class);
 $appServiceContainer->container()->map(CartRepositoryInterface::class, CartRepository::class);
+
+$appServiceContainer->container()->map(EcomOrderServiceInterface::class, EcomOrderService::class);
+$appServiceContainer->container()->map(EcomOrderMigrationRepositoryInterface::class, EcomOrderMigrationRepository::class);
+$appServiceContainer->container()->map(EcomOrderRepositoryInterface::class, EcomOrderRepository::class);
+
+$appServiceContainer->container()->map(OrderItemServiceInterface::class, OrderItemService::class);
+$appServiceContainer->container()->map(OrderItemMigrationRepositoryInterface::class, OrderItemMigrationRepository::class);
+$appServiceContainer->container()->map(OrderItemRepositoryInterface::class, OrderItemRepository::class);
+
+$appServiceContainer->container()->map(BnplPaymentScheduleServiceInterface::class, BnplPaymentScheduleService::class);
+$appServiceContainer->container()->map(BnplPaymentScheduleMigrationRepositoryInterface::class, BnplPaymentScheduleMigrationRepository::class);
+$appServiceContainer->container()->map(BnplPaymentScheduleRepositoryInterface::class, BnplPaymentScheduleRepository::class);
 
 $appServiceContainer->container()->map(UserKycServiceInterface::class, UserKycService::class);
 $appServiceContainer->container()->map(UserKycNotificationServiceInterface::class, UserKycNotificationService::class);

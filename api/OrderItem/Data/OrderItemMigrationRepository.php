@@ -1,11 +1,11 @@
 <?php
 
-namespace Cart\Data;
+namespace OrderItem\Data;
 
-use Cart\Data\CartMigrationRepositoryInterface;
+use OrderItem\Data\OrderItemMigrationRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\Migration;
 
-class CartMigrationRepository implements CartMigrationRepositoryInterface
+class OrderItemMigrationRepository implements OrderItemMigrationRepositoryInterface
 {
    private Migration $migration;
 
@@ -14,12 +14,14 @@ class CartMigrationRepository implements CartMigrationRepositoryInterface
     }
 
     public function migrate(){
-        $this->migration->withTable('carts')
-            ->field('cart_sess_uuid')->definition('VARCHAR(255) DEFAULT NULL')->run()
+        $this->migration->withTable('order_items')
+            ->field('order_id')->definition('INT NOT NULL')->run()
+            ->field('merchant_id')->definition('INT NOT NULL')->run()
             ->field('product_id')->definition('INT NOT NULL')->run()
             ->field('qty')->definition('INT NOT NULL DEFAULT 0')->run()
-            ->field('merchant_id')->definition('INT NOT NULL')->run()
-            ->field('price_total')->definition('FLOAT NOT NULL DEFAULT 0')->run()
+            ->field('total_line_amount')->definition('FLOAT NOT NULL DEFAULT 0')->run()
+            ->field('settled')->definition('TINYINT(1) NOT NULL DEFAULT 0')->run()
+            ->field('percentage_to_platform')->definition('FLOAT NOT NULL DEFAULT 0')->run()
             ->field('created_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP')->run()
             ->field('updated_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')->run();
 
