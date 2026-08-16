@@ -60,7 +60,9 @@ class OrderItemController
         $query = $this->orderItemService->fetchForMerchant(
             (int) $user->id,
             (int) $this->request->get('settled', 0),
-            (int) $this->request->get('product_id', 0)
+            (int) $this->request->get('product_id', 0),
+            (string) $this->request->get('date_from', ''),
+            (string) $this->request->get('date_to', '')
         );
         $this->jsonResponseService->success([
             'order_items' => $query->fetch(),

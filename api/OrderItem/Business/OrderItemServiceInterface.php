@@ -37,8 +37,12 @@ interface OrderItemServiceInterface extends AbstractBaseServiceInterface
 
     /**
      * @param int $merchant_id
+     * @param int $settled
+     * @param int $product_id
+     * @param string $date_from
+     * @param string $date_to
      * @return QueryObject
      */
-    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0);
+    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0, string $date_from = '', string $date_to = '');
 
 }

@@ -139,9 +139,11 @@ class OrderItemService extends AbstractBaseService implements OrderItemServiceIn
      * @param int $merchant_id
      * @param int $settled
      * @param int $product_id
+     * @param string $date_from
+     * @param string $date_to
      * @return QueryObject<OrderItemEntity>
      */
-    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0)
+    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0, string $date_from = '', string $date_to = '')
     {
         if (empty($merchant_id)) {
             throw new Exception('Merchant ID is required');
@@ -156,6 +158,40 @@ class OrderItemService extends AbstractBaseService implements OrderItemServiceIn
             $filters['product_id'] = $product_id;
         }
 
+        $date_from = trim($date_from);
+        $date_to = trim($date_to);
+
+        if ($date_from !== '') {
+            $filters['date_from'] = $this->normalizeDateBound($date_from, false);
+        }
+
+        if ($date_to !== '') {
+            $filters['date_to'] = $this->normalizeDateBound($date_to, true);
+        }
+
+        if (isset($filters['date_from'], $filters['date_to']) && $filters['date_from'] > $filters['date_to']) {
+            throw new Exception('date_from cannot be after date_to');
+        }
+
         return $this->orderItemRepository->query($filters);
+    }
+
+    /**
+     * @param string $value
+     * @param bool $endOfDay
+     * @return string
+     */
+    private function normalizeDateBound(string $value, bool $endOfDay)
+    {
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            throw new Exception($endOfDay ? 'date_to is invalid' : 'date_from is invalid');
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return date('Y-m-d', $timestamp) . ($endOfDay ? ' 23:59:59' : ' 00:00:00');
+        }
+
+        return date('Y-m-d H:i:s', $timestamp);
     }
 }

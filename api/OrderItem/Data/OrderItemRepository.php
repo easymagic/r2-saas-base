@@ -41,6 +41,14 @@ class OrderItemRepository extends AbstractBaseRepository implements OrderItemRep
          $sql .= " AND percentage_to_platform = :percentage_to_platform ";
          $params['percentage_to_platform'] = $value;
       });
+      $this->addFilter("date_from",function(string $value, string &$sql, array &$params){
+         $sql .= " AND created_at >= :date_from ";
+         $params['date_from'] = $value;
+      });
+      $this->addFilter("date_to",function(string $value, string &$sql, array &$params){
+         $sql .= " AND created_at <= :date_to ";
+         $params['date_to'] = $value;
+      });
    }
 
    public function query(array $params = [])
