@@ -5,6 +5,7 @@ namespace OrderItem\Data;
 use Shared\AbstractBaseRepository;
 use OrderItem\Data\OrderItemEntity;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * @extends AbstractBaseRepository<OrderItemEntity>
@@ -19,5 +20,39 @@ class OrderItemRepository extends AbstractBaseRepository implements OrderItemRep
    public function __construct(DbServiceInterface $db)
    {
       parent::__construct($db);
+
+      $this->addFilter("order_id",function(int $value, string &$sql, array &$params){
+         $sql .= " AND order_id = :order_id ";
+         $params['order_id'] = $value;
+      });
+      $this->addFilter("merchant_id",function(int $value, string &$sql, array &$params){
+         $sql .= " AND merchant_id = :merchant_id ";
+         $params['merchant_id'] = $value;
+      });
+      $this->addFilter("product_id",function(int $value, string &$sql, array &$params){
+         $sql .= " AND product_id = :product_id ";
+         $params['product_id'] = $value;
+      });
+      $this->addFilter("settled",function(int $value, string &$sql, array &$params){
+         $sql .= " AND settled = :settled ";
+         $params['settled'] = $value;
+      });
+      $this->addFilter("percentage_to_platform",function(float $value, string &$sql, array &$params){
+         $sql .= " AND percentage_to_platform = :percentage_to_platform ";
+         $params['percentage_to_platform'] = $value;
+      });
+   }
+
+   public function query(array $params = [])
+   {
+      $this->sql = "SELECT * FROM order_items WHERE 1=1 ";
+      $this->params = [];
+      $this->filter($params);
+      return new QueryObject(
+         $this->sql,
+         $this->params,
+         $this->db,
+         $this->hydrateClass
+      );
    }
 }

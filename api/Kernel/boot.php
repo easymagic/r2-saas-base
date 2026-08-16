@@ -155,6 +155,8 @@ use EcomOrder\Data\EcomOrderRepositoryInterface;
  */
 use OrderItem\Business\OrderItemService;
 use OrderItem\Business\OrderItemServiceInterface;
+use OrderItem\Business\OrderItemNotificationService;
+use OrderItem\Business\OrderItemNotificationServiceInterface;
 use OrderItem\Data\OrderItemMigrationRepository;
 use OrderItem\Data\OrderItemMigrationRepositoryInterface;
 use OrderItem\Data\OrderItemRepository;
@@ -255,6 +257,7 @@ $appServiceContainer->container()->map(EcomOrderMigrationRepositoryInterface::cl
 $appServiceContainer->container()->map(EcomOrderRepositoryInterface::class, EcomOrderRepository::class);
 
 $appServiceContainer->container()->map(OrderItemServiceInterface::class, OrderItemService::class);
+$appServiceContainer->container()->map(OrderItemNotificationServiceInterface::class, OrderItemNotificationService::class);
 $appServiceContainer->container()->map(OrderItemMigrationRepositoryInterface::class, OrderItemMigrationRepository::class);
 $appServiceContainer->container()->map(OrderItemRepositoryInterface::class, OrderItemRepository::class);
 
