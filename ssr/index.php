@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 $uri = $_SERVER['REQUEST_URI'];
 
 $uri = trim($uri, '/');
 
-$page = 'ssr_pages/'.$uri.'.php';
+$page = 'ssr_pages/' . $uri . '.php';
 
 if (file_exists($page)) {
     include $page;
