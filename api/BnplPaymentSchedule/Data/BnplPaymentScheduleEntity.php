@@ -11,6 +11,9 @@ class BnplPaymentScheduleEntity extends AbstractBaseEntity
     public string $payment_status = '';
     public string $reference = '';
     public string $authorization_code = '';
+    public int $number_of_attempts = 0;
+    public string $expected_payment_date = '';
+    public string $paid_at = '';
     public string $created_at = '';
     public string $updated_at = '';
 }
