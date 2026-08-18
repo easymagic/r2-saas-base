@@ -30,4 +30,31 @@ class BnplPaymentScheduleController
             'result' => $result,
         ]);
     }
+
+    function getFirstSchedule()
+    {
+        $schedule = $this->bnplPaymentScheduleService->getFirstSchedule((int) $this->request->get('order_id'));
+        $this->jsonResponseService->success([
+            'schedule' => $schedule,
+            'message' => 'First BNPL schedule fetched successfully',
+        ]);
+    }
+
+    function getNextSchedule()
+    {
+        $schedule = $this->bnplPaymentScheduleService->getNextSchedule((int) $this->request->get('order_id'));
+        $this->jsonResponseService->success([
+            'schedule' => $schedule,
+            'message' => 'Next BNPL schedule fetched successfully',
+        ]);
+    }
+
+    function chargeSchedule()
+    {
+        $result = $this->bnplPaymentScheduleService->chargeSchedule((int) $this->request->get('schedule_id'));
+        $this->jsonResponseService->success([
+            'result' => $result,
+            'message' => $result ? 'Schedule charged successfully' : 'Schedule charge failed',
+        ]);
+    }
 }

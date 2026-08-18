@@ -145,6 +145,8 @@ use Cart\Data\CartRepositoryInterface;
  */
 use EcomOrder\Business\EcomOrderService;
 use EcomOrder\Business\EcomOrderServiceInterface;
+use EcomOrder\Business\EcomOrderNotificationService;
+use EcomOrder\Business\EcomOrderNotificationServiceInterface;
 use EcomOrder\Data\EcomOrderMigrationRepository;
 use EcomOrder\Data\EcomOrderMigrationRepositoryInterface;
 use EcomOrder\Data\EcomOrderRepository;
@@ -253,6 +255,7 @@ $appServiceContainer->container()->map(CartMigrationRepositoryInterface::class, 
 $appServiceContainer->container()->map(CartRepositoryInterface::class, CartRepository::class);
 
 $appServiceContainer->container()->map(EcomOrderServiceInterface::class, EcomOrderService::class);
+$appServiceContainer->container()->map(EcomOrderNotificationServiceInterface::class, EcomOrderNotificationService::class);
 $appServiceContainer->container()->map(EcomOrderMigrationRepositoryInterface::class, EcomOrderMigrationRepository::class);
 $appServiceContainer->container()->map(EcomOrderRepositoryInterface::class, EcomOrderRepository::class);
 

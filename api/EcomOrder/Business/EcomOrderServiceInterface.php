@@ -40,29 +40,53 @@ interface EcomOrderServiceInterface extends AbstractBaseServiceInterface
      * @param int $user_id
      * @param string $type
      * @param int $number_of_installment
-     * @param float $shipping_fee
-     * @param float $service_charge
-     * @param float $total_amount
      * @param int $is_guest
      * @param string $customer_name
      * @param string $customer_address
      * @param string $customer_email
      * @param string $reference
+     * @param string $cart_uuid
      * @return EcomOrderEntity
      */
     public function checkout(
         int $user_id,
         string $type,
         int $number_of_installment,
-        float $shipping_fee,
-        float $service_charge,
-        float $total_amount,
         int $is_guest,
         string $customer_name,
         string $customer_address,
         string $customer_email,
-        string $reference
+        string $reference,
+        string $cart_uuid
     );
+
+
+    public function updateDeliveryStatus(int $order_id, string $delivery_status);
+
+
+    public function updatePaymentStatusAsPaid(int $order_id);
+
+
+    public function updatePaymentStatusAsPartiallyPaid(int $order_id);
+
+
+    public function updatePaymentStatusAsFailed(int $order_id);
+
+
+    public function assignToAgent(int $order_id, int $agent_id);
+
+    public function paymentFeedback(int $order_id, string $reference);
+
+    /**
+     * Pending card/BNPL orders awaiting Paystack confirmation for a user.
+     * @param int $user_id
+     * @return EcomOrderEntity[]
+     */
+    public function pendingPaymentsForUser(int $user_id);
+
+    public function getPendingPayments();
+
+    public function publishSettings();
 
 
 }

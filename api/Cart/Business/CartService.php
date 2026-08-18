@@ -68,6 +68,7 @@ class CartService extends AbstractBaseService implements CartServiceInterface
         return $this->cartRepository->save(0, [
             'cart_sess_uuid' => $uuid,
             'product_id' => $productId,
+            'merchant_id' => (int) $product->user_id,
             'qty' => $newQty,
             'price_total' => $priceTotal,
         ]);

@@ -1,5 +1,7 @@
 <?php
 
+define("MAIL_TEMPLATE_DIR", __DIR__ . '/mail_templates');
+
 use R2Packages\Framework\Infrastructure\Framework\Framework;
 use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
 

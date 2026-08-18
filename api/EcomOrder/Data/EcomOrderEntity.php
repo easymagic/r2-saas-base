@@ -22,4 +22,6 @@ class EcomOrderEntity extends AbstractBaseEntity
     public int $agent_id = 0;
     public string $created_at = '';
     public string $updated_at = '';
+    /** Transient Paystack checkout URL; not stored on ecom_orders. */
+    public string $payment_url = '';
 }

@@ -23,7 +23,9 @@
     { "key": "productSlug", "value": "sample-product" },
     { "key": "productUuid", "value": "" },
     { "key": "cartSessUuid", "value": "cart_sess_demo" },
-    { "key": "kycId", "value": "1" }
+    { "key": "kycId", "value": "1" },
+    { "key": "ecomOrderId", "value": "1" },
+    { "key": "bnplScheduleId", "value": "1" }
   ],
   "auth": {
     "type": "noauth"
@@ -1460,6 +1462,222 @@
             ],
             "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}",
             "description": "DELETE /v2/carts/{{cartSessUuid}}\n\nCalls `CartService::clearCart`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ecom Orders",
+      "description": "Ecommerce checkout from a cart session. Guest checkout uses `x-token` only. Logged-in checkout also sends `x-user-token`.\n\n`type`: `card` | `wallet` | `bnpl`.\nCard/BNPL return `payment_url` (Paystack). Wallet pays immediately.\n`shipping_fee`, `service_charge`, and platform percentage come from platform config (`ECOM_SHIPPING_FEE`, `ECOM_SERVICE_CHARGE`, `ECOM_PERCENTAGE_TO_PLATFORM`). Total is cart lines + those fees.\n\nPaystack confirmation is not a separate endpoint. `EcomOrderFeedbackMiddleware` loads the user's pending card/BNPL orders and runs `paymentFeedback` on each (same pattern as wallet top-up).",
+      "item": [
+        {
+          "name": "Checkout (Card)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  var json = pm.response.json();",
+                  "  var order = json.data && json.data.order ? json.data.order : null;",
+                  "  if (order && order.id) {",
+                  "    pm.collectionVariables.set('ecomOrderId', String(order.id));",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uuid\": \"{{cartSessUuid}}\",\n  \"type\": \"card\",\n  \"number_of_installment\": 0,\n  \"customer_name\": \"Jane Doe\",\n  \"customer_address\": \"12 Example Street\",\n  \"customer_email\": \"jane@example.com\",\n  \"reference\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/ecom-orders/checkout",
+            "description": "POST /v2/ecom-orders/checkout\n\nConverts the cart into an `ecom_orders` row + `order_items`, decrements stock, clears the cart, then starts Paystack for `type=card`.\n\n`shipping_fee` and `service_charge` are read from platform config (`ECOM_SHIPPING_FEE`, `ECOM_SERVICE_CHARGE`). Total = cart + those fees.\n\nOpen `data.payment_url` to pay. After Paystack, call any authenticated ecom-order route (for example My Ecom Orders). `EcomOrderFeedbackMiddleware` loads all pending card/BNPL orders for the user and runs `paymentFeedback` on each."
+          }
+        },
+        {
+          "name": "Checkout (Wallet)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uuid\": \"{{cartSessUuid}}\",\n  \"type\": \"wallet\",\n  \"number_of_installment\": 0,\n  \"customer_name\": \"\",\n  \"customer_address\": \"\",\n  \"customer_email\": \"\",\n  \"reference\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/ecom-orders/checkout",
+            "description": "Wallet checkout requires a logged-in user with sufficient `wallet_balance`. Marks the order paid immediately."
+          }
+        },
+        {
+          "name": "Checkout (BNPL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uuid\": \"{{cartSessUuid}}\",\n  \"type\": \"bnpl\",\n  \"number_of_installment\": 3,\n  \"customer_name\": \"\",\n  \"customer_address\": \"\",\n  \"customer_email\": \"\",\n  \"reference\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/ecom-orders/checkout",
+            "description": "BNPL requires `number_of_installment` >= 2 and a logged-in user. Creates monthly schedules and starts Paystack for the first installment."
+          }
+        },
+        {
+          "name": "My Ecom Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/my",
+            "description": "GET /v2/ecom-orders/my\n\nOptional query: `payment_status`, `delivery_status`, `type`, `search`.\n\nRuns `EcomOrderFeedbackMiddleware` first: pending card/BNPL orders for the user are verified via `paymentFeedback`."
+          }
+        },
+        {
+          "name": "Agent Ecom Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/agent",
+            "description": "GET /v2/ecom-orders/agent\n\nAuth user must have role `agent`."
+          }
+        },
+        {
+          "name": "Get Ecom Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/{{ecomOrderId}}"
+          }
+        },
+        {
+          "name": "Admin Ecom Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/admin"
+          }
+        },
+        {
+          "name": "Process Pending Payments (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/pending-payments",
+            "description": "Charges due BNPL schedules (Paystack authorization) then lists remaining pending/part-paid orders. Also available as CLI: `charge-bnpl`."
+          }
+        },
+        {
+          "name": "Publish Settings (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/ecom-orders/publish-settings",
+            "description": "Admin only. Seeds/updates platform config keys used at checkout:\n- ECOM_SHIPPING_FEE (default 100)\n- ECOM_SERVICE_CHARGE (default 100)\n- ECOM_PERCENTAGE_TO_PLATFORM (default 10)\n\nChange values later via POST /v2/platform-configs/update."
+          }
+        },
+        {
+          "name": "Update Delivery Status (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delivery_status\": \"on-the-way\"\n}"
+            },
+            "url": "{{baseUrl}}/v2/ecom-orders/{{ecomOrderId}}/delivery-status",
+            "description": "Allowed: `pending`, `picked-up`, `on-the-way`, `delivered`."
+          }
+        },
+        {
+          "name": "Assign To Agent (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": {{agentId}}\n}"
+            },
+            "url": "{{baseUrl}}/v2/ecom-orders/{{ecomOrderId}}/assign-to-agent"
+          }
+        }
+      ]
+    },
+    {
+      "name": "BNPL Payment Schedules",
+      "description": "Admin endpoints for installment schedules created at BNPL checkout.",
+      "item": [
+        {
+          "name": "First Schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/bnpl-payment-schedules/order/{{ecomOrderId}}/first"
+          }
+        },
+        {
+          "name": "Next Pending Schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/bnpl-payment-schedules/order/{{ecomOrderId}}/next"
+          }
+        },
+        {
+          "name": "Charge Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-token", "value": "{{xToken}}" },
+              { "key": "x-user-token", "value": "{{xUserToken}}" }
+            ],
+            "url": "{{baseUrl}}/v2/bnpl-payment-schedules/{{bnplScheduleId}}/charge"
           }
         }
       ]
