@@ -1,5 +1,5 @@
 <?php 
-namespace App\Shared\Contracts;
+namespace Shared;
 
 use Exception;
 use Shared\AbstractBaseEntity;

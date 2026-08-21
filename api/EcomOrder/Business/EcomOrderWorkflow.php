@@ -2,21 +2,18 @@
 
 namespace EcomOrder\Business;
 
-use App\Domain\Order\OrderRepositoryInterface;
-use App\Shared\Contracts\Contracts;
+use Shared\Contracts;
 use Cart\Business\CartServiceInterface;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use Exception;
 use OrderItem\Business\OrderItemServiceInterface;
 use Product\Business\ProductServiceInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
+use Shared\Workflow;
 use User\Business\UserServiceInterface;
-use User\Data\UserRepositoryInterface;
 
-class EcomOrderWorkflow
+class EcomOrderWorkflow extends Workflow
 {
-
-    private bool $continueFlow = false;
 
     private int $user_id = 0;
     private string $type = '';
@@ -89,15 +86,14 @@ class EcomOrderWorkflow
 
         Contracts::requiresNotNullOrEmpty($this->cart_uuid, 'Cart UUID');
 
-        $this->continueFlow = true;
-
         return $this;
     }
 
     function cartIsValid()
     {
+        
         $cartSumTotal = $this->cartService->getCartTotal($this->cart_uuid);
-        $this->continueFlow = $this->continueFlow && $cartSumTotal > 0;
+        $this->flowShouldContinue($cartSumTotal > 0);
         return $this;
     }
 
@@ -116,68 +112,57 @@ class EcomOrderWorkflow
 
     function isPaymentMethodWallet()
     {
-        $this->continueFlow = $this->continueFlow && $this->type == 'wallet';
+        $this->flowShouldContinue($this->type == 'wallet');
         return $this;
     }
 
     function isPaymentMethodCard()
     {
-        $this->continueFlow = $this->continueFlow && $this->type == 'card';
+        $this->flowShouldContinue($this->type == 'card');
         return $this;
     }
 
     function isPaymentMethodBnpl()
     {
-        $this->continueFlow = $this->continueFlow && $this->type == 'bnpl';
+        $this->flowShouldContinue($this->type == 'bnpl');
         return $this;
     }
 
-    function reject(string $errorMessage)
-    {
-        if ($this->continueFlow) {
-            throw new Exception($errorMessage);
-        }
-        return $this;
-    }
 
     function isGuest()
     {
-        $this->continueFlow = $this->continueFlow && empty($this->user_id);
-        if ($this->continueFlow) {
-            $this->is_guest = 1;
-        }
+        $this->flowShouldContinue(empty($this->user_id));
         return $this;
     }
 
     function isNotGuest()
     {
-        $this->isValid = $this->isValid && !empty($this->user_id);
+        $this->flowShouldContinue(!empty($this->user_id));
         return $this;
     }
 
     function isNumberOfInstallmentValid()
     {
-        $this->isValid = $this->isValid && $this->number_of_installment > 0 && $this->number_of_installment <= 12;
+        $this->flowShouldContinue($this->number_of_installment > 0 && $this->number_of_installment <= 12);
         return $this;
     }
 
     function isCustomerWalletNotSufficient()
     {
         $balance = $this->userService->getWalletBalance($this->user_id);
-        $this->isValid = $this->isValid && $balance < $this->total_amount;
+        $this->flowShouldContinue($balance < $this->total_amount);
         return $this;
     }
 
     function deductWalletBalance()
     {
         $this->userService->withdrawWallet($this->user_id, $this->total_amount);
-        $this->isValid = false;
         return $this;
     }
 
     function createOrder(int &$order_id)
     {
-        if(!$this->isValid){
+        if(!$this->pass()){
             return $this;
         }
         $order = $this->orderRepository->save(0, [
@@ -194,7 +179,7 @@ class EcomOrderWorkflow
 
     function createOrderItems(int $order_id)
     {
-        if(!$this->isValid){
+        if(!$this->pass()){
             return $this;
         }
 
@@ -221,7 +206,7 @@ class EcomOrderWorkflow
     }
 
     function debitWalletBalance(){
-        if (!$this->isValid){
+        if (!$this->pass()){
             return $this;
         }
         $this->userService->withdrawWallet($this->user_id, $this->total_amount);
@@ -229,7 +214,7 @@ class EcomOrderWorkflow
     }
 
     function markOrderAsPaid(int $order_id){
-        if (!$this->isValid){
+        if (!$this->pass()){
             return $this;
         }
         $this->orderRepository->save($order_id, ['status' => 'paid']);
@@ -237,7 +222,7 @@ class EcomOrderWorkflow
     }
 
     function markOrderAsPartiallyPaid(int $order_id){
-        if (!$this->isValid){
+        if (!$this->pass()){
             return $this;
         }
         $this->orderRepository->save($order_id, ['status' => 'part-paid']);
@@ -246,7 +231,7 @@ class EcomOrderWorkflow
 
     function notifyCustomerOfOrderCreationReceipt(int $order_id)
     {
-        if(!$this->isValid){
+        if(!$this->pass()){
             return $this;
         }
         $order = $this->orderRepository->find($order_id);
@@ -264,7 +249,7 @@ class EcomOrderWorkflow
 
     function notifyPlatformOfOrderCreation(int $order_id)
     {
-        if(!$this->isValid){
+        if(!$this->pass()){
             return $this;
         }
         $order = $this->orderRepository->find($order_id);
@@ -281,7 +266,7 @@ class EcomOrderWorkflow
     }
 
     function notifyMerchantOfProductSold(int $order_id){
-        if(!$this->isValid){
+        if(!$this->pass()){
             return $this;
         }
         $orderItems = $this->orderItemService->fetchForOrder($order_id)->fetchAll();

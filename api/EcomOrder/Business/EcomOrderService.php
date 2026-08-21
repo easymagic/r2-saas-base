@@ -2,7 +2,7 @@
 
 namespace EcomOrder\Business;
 
-use App\Shared\Contracts\Contracts;
+use Shared\Contracts;
 use BnplPaymentSchedule\Business\BnplPaymentScheduleServiceInterface;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
 use Cart\Business\CartServiceInterface;
@@ -119,7 +119,6 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
      * @param int $user_id
      * @param string $type
      * @param int $number_of_installment
-     * @param int $is_guest
      * @param string $customer_name
      * @param string $customer_address
      * @param string $customer_email
@@ -147,12 +146,17 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
             $customer_address,
             $customer_email,
             $cart_uuid
-        )->isPaymentMethodWallet()
+        )
+        ->isPaymentMethodWallet()
+        ->and()
         ->isCustomerWalletNotSufficient()
         ->reject("Insufficient wallet balance")
-        ->loadTotalAmount()
-        
-        ;
+        ->end()
+        ->isPaymentMethodBnpl()
+        ->and()
+        ->isNumberOfInstallmentValid()
+        ->loadTotalAmount();
+
 
 
 
