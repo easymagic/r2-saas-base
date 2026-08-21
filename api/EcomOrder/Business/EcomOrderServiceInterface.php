@@ -40,7 +40,6 @@ interface EcomOrderServiceInterface extends AbstractBaseServiceInterface
      * @param int $user_id
      * @param string $type
      * @param int $number_of_installment
-     * @param int $is_guest
      * @param string $customer_name
      * @param string $customer_address
      * @param string $customer_email
@@ -52,7 +51,6 @@ interface EcomOrderServiceInterface extends AbstractBaseServiceInterface
         int $user_id,
         string $type,
         int $number_of_installment,
-        int $is_guest,
         string $customer_name,
         string $customer_address,
         string $customer_email,

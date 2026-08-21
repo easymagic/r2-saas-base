@@ -2,6 +2,7 @@
 
 namespace App\Domain\Order;
 
+
 interface OrderRepositoryInterface
 {
     public function fetchAll();
@@ -16,6 +17,11 @@ interface OrderRepositoryInterface
 
 
     public function find(int $id);
+    /**
+     * @param int $id
+     * @param array $data
+     * @return OrderEntity
+     */
     public function save(int $id, array $data);
     public function delete(int $id);
 }

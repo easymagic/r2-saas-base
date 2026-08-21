@@ -98,6 +98,13 @@ interface ProductServiceInterface extends AbstractBaseServiceInterface
     public function fetchForAdmin(array $filters = []);
 
     /**
+     * @param int $id
+     * @param int $qty
+     * @return ProductEntity
+     */
+    public function deductStockQty(int $id, int $qty);
+
+    /**
      * @param array $filters
      * @return QueryObject<ProductEntity>
      */

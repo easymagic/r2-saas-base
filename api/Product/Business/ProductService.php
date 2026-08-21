@@ -205,6 +205,24 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
 
     /**
      * @param int $id
+     * @param int $qty
+     * @return ProductEntity
+     */
+    public function deductStockQty(int $id, int $qty)
+    {
+        $product = $this->productRepository->find($id);
+        if ($product->isEmpty()) {
+            throw new Exception('Product not found');
+        }
+
+        $product->stock_qty -= $qty;
+        return $this->productRepository->save($product->id, [
+            'stock_qty' => $product->stock_qty,
+        ]);
+    }
+
+    /**
+     * @param int $id
      * @return bool
      */
     public function remove(int $id)

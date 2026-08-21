@@ -34,6 +34,15 @@ class CartService extends AbstractBaseService implements CartServiceInterface
         return $this->cartMigrationRepositoryInterface->migrate();
     }
 
+    
+    public function getCartTotal(string $uuid)
+    {
+        $uuid = trim($uuid);
+        Contracts::requiresNotNullOrEmpty($uuid, 'cart session uuid');
+        $query = $this->cartRepository->query(['uuid' => $uuid]);
+        return $query->sum('price_total');
+    }
+
     /**
      * @param string $uuid
      * @param int $productId

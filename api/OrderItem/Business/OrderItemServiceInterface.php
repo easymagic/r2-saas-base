@@ -31,7 +31,7 @@ interface OrderItemServiceInterface extends AbstractBaseServiceInterface
 
     /**
      * @param int $order_id
-     * @return QueryObject
+     * @return QueryObject<OrderItemEntity>
      */
     public function fetchForOrder(int $order_id);
 
