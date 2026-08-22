@@ -13,7 +13,10 @@ class CheckoutDto
     public string $customer_address;
     public string $customer_email;
     public string $reference;
+    public string $payment_url = '';
     public string $cart_uuid;
+    public int $is_guest = 0;
+    public int $order_id = 0;
 
     public function __construct(
         int $user_id,
@@ -26,12 +29,16 @@ class CheckoutDto
         string $cart_uuid
     ) {
         // Guest checkout allowed when user_id is 0
-        Contracts::requires($user_id >= 0, 'User ID is invalid');
+        // Contracts::requires($user_id >= 0, 'User ID is invalid');
         Contracts::requiresNotNullOrEmpty($type, 'Type');
         Contracts::requiresNotNullOrEmpty($customer_name, 'Customer Name');
         Contracts::requiresNotNullOrEmpty($customer_address, 'Customer Address');
         Contracts::requiresNotNullOrEmpty($customer_email, 'Customer Email');
-        Contracts::requiresNotNullOrEmpty($reference, 'Reference');
+        // Contracts::requiresNotNullOrEmpty($reference, 'Reference');
+        if (empty($user_id)){
+            $this->is_guest = 1;
+        }
+        $this->reference = uniqid("ref_");
         Contracts::requiresNotNullOrEmpty($cart_uuid, 'Cart UUID');
 
         $this->user_id = $user_id;

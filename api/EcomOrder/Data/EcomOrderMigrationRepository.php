@@ -29,6 +29,7 @@ class EcomOrderMigrationRepository implements EcomOrderMigrationRepositoryInterf
             ->field('payment_status')->definition("ENUM('pending','paid','failed','part-paid') NOT NULL DEFAULT 'pending'")->run()
             ->field('delivery_status')->definition("ENUM('pending','picked-up','on-the-way','delivered') NOT NULL DEFAULT 'pending'")->run()
             ->field('agent_id')->definition('INT DEFAULT NULL')->run()
+            ->field('payment_url')->definition('VARCHAR(255) DEFAULT NULL')->run()
             ->field('created_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP')->run()
             ->field('updated_at')->definition('TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')->run();
 

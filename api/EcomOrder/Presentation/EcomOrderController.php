@@ -2,28 +2,64 @@
 
 namespace EcomOrder\Presentation;
 
-use Presentation\ApiCredential\ApiCredentialServiceInterface;
-use R2Packages\Framework\Infrastructure\Framework\Container\Request;
-use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 use EcomOrder\Business\Dtos\AssignToAgentDto;
 use EcomOrder\Business\Dtos\CheckoutDto;
 use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
-use EcomOrder\Business\EcomOrderServiceInterface;
+use EcomOrder\Business\Usecases\AssignToAgentService;
+use EcomOrder\Business\Usecases\CheckoutService;
+use EcomOrder\Business\Usecases\FetchForAdminService;
+use EcomOrder\Business\Usecases\FetchForAgentService;
+use EcomOrder\Business\Usecases\FetchForUserService;
+use EcomOrder\Business\Usecases\FindByIdService;
+use EcomOrder\Business\Usecases\GetPendingPaymentsService;
+use EcomOrder\Business\Usecases\MigrateService;
+use EcomOrder\Business\Usecases\PublishSettingsService;
+use EcomOrder\Business\Usecases\UpdateDeliveryStatusService;
+use Presentation\ApiCredential\ApiCredentialServiceInterface;
+use R2Packages\Framework\Infrastructure\Framework\Container\Request;
+use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
 class EcomOrderController
 {
-    private EcomOrderServiceInterface $ecomOrderService;
+    private MigrateService $migrateService;
+    private CheckoutService $checkoutService;
+    private FetchForUserService $fetchForUserService;
+    private FetchForAdminService $fetchForAdminService;
+    private FetchForAgentService $fetchForAgentService;
+    private FindByIdService $findByIdService;
+    private UpdateDeliveryStatusService $updateDeliveryStatusService;
+    private AssignToAgentService $assignToAgentService;
+    private GetPendingPaymentsService $getPendingPaymentsService;
+    private PublishSettingsService $publishSettingsService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
-        EcomOrderServiceInterface $ecomOrderService,
+        MigrateService $migrateService,
+        CheckoutService $checkoutService,
+        FetchForUserService $fetchForUserService,
+        FetchForAdminService $fetchForAdminService,
+        FetchForAgentService $fetchForAgentService,
+        FindByIdService $findByIdService,
+        UpdateDeliveryStatusService $updateDeliveryStatusService,
+        AssignToAgentService $assignToAgentService,
+        GetPendingPaymentsService $getPendingPaymentsService,
+        PublishSettingsService $publishSettingsService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
-        $this->ecomOrderService = $ecomOrderService;
+        $this->migrateService = $migrateService;
+        $this->checkoutService = $checkoutService;
+        $this->fetchForUserService = $fetchForUserService;
+        $this->fetchForAdminService = $fetchForAdminService;
+        $this->fetchForAgentService = $fetchForAgentService;
+        $this->findByIdService = $findByIdService;
+        $this->updateDeliveryStatusService = $updateDeliveryStatusService;
+        $this->assignToAgentService = $assignToAgentService;
+        $this->getPendingPaymentsService = $getPendingPaymentsService;
+        $this->publishSettingsService = $publishSettingsService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
@@ -31,7 +67,7 @@ class EcomOrderController
 
     function migrate()
     {
-        $result = $this->ecomOrderService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -41,16 +77,14 @@ class EcomOrderController
     function checkout()
     {
         $userId = 0;
-        $isGuest = 1;
         $xUserToken = (string) $this->request->get('x-user-token', '');
         if ($xUserToken !== '') {
             $this->apiCredentialService->validateUserToken($xUserToken);
             $user = $this->apiCredentialService->getAuthUser();
             $userId = (int) $user->id;
-            $isGuest = 0;
         }
 
-        $order = $this->ecomOrderService->checkout(new CheckoutDto(
+        $order = $this->checkoutService->execute(new CheckoutDto(
             $userId,
             (string) $this->request->get('type', ''),
             (int) $this->request->get('number_of_installment', 0),
@@ -65,7 +99,7 @@ class EcomOrderController
             'order' => $order,
             'message' => 'Order checked out successfully',
         ];
-        if (!empty($order->payment_url)) {
+        if ($order !== null && !empty($order->payment_url)) {
             $payload['payment_url'] = $order->payment_url;
         }
         $this->jsonResponseService->success($payload);
@@ -74,7 +108,7 @@ class EcomOrderController
     function fetchForUser()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->ecomOrderService->fetchForUser((int) $user->id, $this->request->all());
+        $query = $this->fetchForUserService->query((int) $user->id, $this->request->all());
         $this->jsonResponseService->success([
             'orders' => $query->fetch(),
             'count' => $query->count(),
@@ -84,7 +118,7 @@ class EcomOrderController
 
     function fetchForAdmin()
     {
-        $query = $this->ecomOrderService->fetchForAdmin($this->request->all());
+        $query = $this->fetchForAdminService->query($this->request->all());
         $this->jsonResponseService->success([
             'orders' => $query->fetch(),
             'count' => $query->count(),
@@ -95,7 +129,7 @@ class EcomOrderController
     function fetchForAgent()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->ecomOrderService->fetchForAgent((int) $user->id, $this->request->all());
+        $query = $this->fetchForAgentService->query((int) $user->id, $this->request->all());
         $this->jsonResponseService->success([
             'orders' => $query->fetch(),
             'count' => $query->count(),
@@ -106,7 +140,7 @@ class EcomOrderController
     function getById()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $order = $this->ecomOrderService->find((int) $this->request->get('order_id'));
+        $order = $this->findByIdService->query((int) $this->request->get('order_id'));
 
         $role = strtolower((string) $user->role);
         $isAdmin = strpos($role, 'admin') !== false;
@@ -125,7 +159,7 @@ class EcomOrderController
 
     function updateDeliveryStatus()
     {
-        $order = $this->ecomOrderService->updateDeliveryStatus(new UpdateDeliveryStatusDto(
+        $order = $this->updateDeliveryStatusService->execute(new UpdateDeliveryStatusDto(
             (int) $this->request->get('order_id'),
             (string) $this->request->get('delivery_status', '')
         ));
@@ -137,7 +171,7 @@ class EcomOrderController
 
     function assignToAgent()
     {
-        $order = $this->ecomOrderService->assignToAgent(new AssignToAgentDto(
+        $order = $this->assignToAgentService->execute(new AssignToAgentDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('agent_id')
         ));
@@ -149,7 +183,7 @@ class EcomOrderController
 
     function getPendingPayments()
     {
-        $query = $this->ecomOrderService->getPendingPayments();
+        $query = $this->getPendingPaymentsService->execute();
         $this->jsonResponseService->success([
             'orders' => $query->fetch(),
             'count' => $query->count(),
@@ -159,7 +193,7 @@ class EcomOrderController
 
     function publishSettings()
     {
-        $this->ecomOrderService->publishSettings();
+        $this->publishSettingsService->execute();
         $this->jsonResponseService->success([
             'message' => 'Settings published successfully',
         ]);

@@ -2,7 +2,9 @@
 namespace BnplPaymentSchedule\Business\Usecases;
 
 use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
-use EcomOrder\Business\EcomOrderNotificationServiceInterface;
+use EcomOrder\Business\Usecases\Mail\SendOrderPaidNotificationToCustomerService;
+use EcomOrder\Business\Usecases\Mail\SendOrderPaidNotificationToMerchantService;
+use EcomOrder\Business\Usecases\Mail\SendOrderPaidNotificationToPlatformService;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use Shared\Contracts;
 
@@ -10,16 +12,22 @@ class BnplPaymentScheduleSupport
 {
     private BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository;
     private EcomOrderRepositoryInterface $ecomOrderRepository;
-    private EcomOrderNotificationServiceInterface $ecomOrderNotificationService;
+    private SendOrderPaidNotificationToCustomerService $sendOrderPaidNotificationToCustomerService;
+    private SendOrderPaidNotificationToMerchantService $sendOrderPaidNotificationToMerchantService;
+    private SendOrderPaidNotificationToPlatformService $sendOrderPaidNotificationToPlatformService;
 
     public function __construct(
         BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository,
         EcomOrderRepositoryInterface $ecomOrderRepository,
-        EcomOrderNotificationServiceInterface $ecomOrderNotificationService
+        SendOrderPaidNotificationToCustomerService $sendOrderPaidNotificationToCustomerService,
+        SendOrderPaidNotificationToMerchantService $sendOrderPaidNotificationToMerchantService,
+        SendOrderPaidNotificationToPlatformService $sendOrderPaidNotificationToPlatformService
     ) {
         $this->bnplPaymentScheduleRepository = $bnplPaymentScheduleRepository;
         $this->ecomOrderRepository = $ecomOrderRepository;
-        $this->ecomOrderNotificationService = $ecomOrderNotificationService;
+        $this->sendOrderPaidNotificationToCustomerService = $sendOrderPaidNotificationToCustomerService;
+        $this->sendOrderPaidNotificationToMerchantService = $sendOrderPaidNotificationToMerchantService;
+        $this->sendOrderPaidNotificationToPlatformService = $sendOrderPaidNotificationToPlatformService;
     }
 
     public function requireSchedule(int $schedule_id)
@@ -54,9 +62,9 @@ class BnplPaymentScheduleSupport
         if (empty($pending)) {
             $order->payment_status = 'paid';
             $this->ecomOrderRepository->save($order);
-            $this->ecomOrderNotificationService->sendOrderPaidNotificationToCustomer($order_id);
-            $this->ecomOrderNotificationService->sendOrderPaidNotificationToMerchant($order_id);
-            $this->ecomOrderNotificationService->sendOrderPaidNotificationToPlatform($order_id);
+            $this->sendOrderPaidNotificationToCustomerService->execute($order_id);
+            $this->sendOrderPaidNotificationToMerchantService->execute($order_id);
+            $this->sendOrderPaidNotificationToPlatformService->execute($order_id);
             return;
         }
 

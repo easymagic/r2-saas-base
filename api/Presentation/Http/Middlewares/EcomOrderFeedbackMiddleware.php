@@ -3,7 +3,8 @@
 namespace Presentation\Http\Middlewares;
 
 use EcomOrder\Business\Dtos\PaymentFeedbackDto;
-use EcomOrder\Business\EcomOrderServiceInterface;
+use EcomOrder\Business\Usecases\PaymentFeedbackService;
+use EcomOrder\Business\Usecases\PendingPaymentsForUserService;
 use EcomOrder\Data\EcomOrderEntity;
 use Log\Business\Dtos\CreateLogDto;
 use Log\Business\LogServiceInterface;
@@ -14,18 +15,21 @@ use R2Packages\Framework\Infrastructure\Framework\Middlewares\MiddlewareServiceI
 class EcomOrderFeedbackMiddleware implements MiddlewareServiceInterface
 {
     private ApiCredentialServiceInterface $apiCredentialService;
-    private EcomOrderServiceInterface $ecomOrderService;
+    private PendingPaymentsForUserService $pendingPaymentsForUserService;
+    private PaymentFeedbackService $paymentFeedbackService;
     private LogServiceInterface $logService;
     private Request $request;
 
     public function __construct(
         ApiCredentialServiceInterface $apiCredentialService,
-        EcomOrderServiceInterface $ecomOrderService,
+        PendingPaymentsForUserService $pendingPaymentsForUserService,
+        PaymentFeedbackService $paymentFeedbackService,
         LogServiceInterface $logService,
         Request $request
     ) {
         $this->apiCredentialService = $apiCredentialService;
-        $this->ecomOrderService = $ecomOrderService;
+        $this->pendingPaymentsForUserService = $pendingPaymentsForUserService;
+        $this->paymentFeedbackService = $paymentFeedbackService;
         $this->logService = $logService;
         $this->request = $request;
     }
@@ -37,7 +41,7 @@ class EcomOrderFeedbackMiddleware implements MiddlewareServiceInterface
             return;
         }
 
-        $orders = $this->ecomOrderService->pendingPaymentsForUser((int) $user->id);
+        $orders = $this->pendingPaymentsForUserService->query((int) $user->id);
         /** @var EcomOrderEntity $order */
         foreach ($orders as $order) {
             $this->logService->createLog(new CreateLogDto('ecom_order_feedback', json_encode($order), json_encode([
@@ -45,7 +49,7 @@ class EcomOrderFeedbackMiddleware implements MiddlewareServiceInterface
             ]), 'info'));
 
             try {
-                $updated = $this->ecomOrderService->paymentFeedback(new PaymentFeedbackDto(
+                $updated = $this->paymentFeedbackService->execute(new PaymentFeedbackDto(
                     (int) $order->id,
                     (string) $order->reference
                 ));

@@ -1,6 +1,6 @@
 <?php
 
-use EcomOrder\Business\EcomOrderServiceInterface;
+use EcomOrder\Business\Usecases\GetPendingPaymentsService;
 use R2Packages\Framework\Infrastructure\Framework\Container\AppServiceContainer;
 use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
 use Scafolder\Business\ScafolderServiceInterface;
@@ -18,8 +18,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) use ($a
      });
 
      $route->command("charge-bnpl", function () use ($appServiceContainer) {
-        $ecomOrderService = $appServiceContainer->container()->get(EcomOrderServiceInterface::class);
-        $query = $ecomOrderService->getPendingPayments();
+        $getPendingPaymentsService = $appServiceContainer->container()->get(GetPendingPaymentsService::class);
+        $query = $getPendingPaymentsService->execute();
         echo "Pending ecom payments: " . $query->count() . "\n";
      });
 
