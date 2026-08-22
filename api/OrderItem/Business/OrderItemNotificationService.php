@@ -5,7 +5,7 @@ namespace OrderItem\Business;
 use Business\MailTheme\BaseMailThemeInterface;
 use Exception;
 use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
-use Notification\Business\NotificationServiceInterface;
+use Notification\Business\Usecases\CreateService as NotificationCreateService;
 use OrderItem\Data\OrderItemEntity;
 use OrderItem\Data\OrderItemRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
@@ -17,7 +17,7 @@ class OrderItemNotificationService implements OrderItemNotificationServiceInterf
     private MailServiceInterface $mailService;
     private OrderItemRepositoryInterface $orderItemRepository;
     private UserRepositoryInterface $userRepository;
-    private NotificationServiceInterface $notificationService;
+    private NotificationCreateService $notificationCreateService;
     private EnvServiceInterface $envService;
     private BaseMailThemeInterface $baseMailTheme;
     private string $fromEmail = 'noreply@example.com';
@@ -26,14 +26,14 @@ class OrderItemNotificationService implements OrderItemNotificationServiceInterf
         MailServiceInterface $mailService,
         OrderItemRepositoryInterface $orderItemRepository,
         UserRepositoryInterface $userRepository,
-        NotificationServiceInterface $notificationService,
+        NotificationCreateService $notificationCreateService,
         EnvServiceInterface $envService,
         BaseMailThemeInterface $baseMailTheme
     ) {
         $this->mailService = $mailService;
         $this->orderItemRepository = $orderItemRepository;
         $this->userRepository = $userRepository;
-        $this->notificationService = $notificationService;
+        $this->notificationCreateService = $notificationCreateService;
         $this->envService = $envService;
         $this->baseMailTheme = $baseMailTheme;
     }
@@ -52,7 +52,7 @@ class OrderItemNotificationService implements OrderItemNotificationServiceInterf
             . ' for order #' . (int) $orderItem->order_id
             . ' has been settled. Merchant share: ' . number_format($merchantShare, 2) . '.';
 
-        $this->notificationService->create(new NotificationCreateDto((int) $merchant->id, $title, $message));
+        $this->notificationCreateService->execute(new NotificationCreateDto((int) $merchant->id, $title, $message));
 
         $body = $this->baseMailTheme->wrapTemplate(
             '<p style="margin:0 0 16px 0;font-size:18px;font-weight:bold;color:#0f172a;">Hello '

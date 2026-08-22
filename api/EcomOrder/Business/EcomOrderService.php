@@ -7,21 +7,21 @@ use EcomOrder\Business\Dtos\AssignToAgentDto;
 use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
 use EcomOrder\Business\Dtos\CheckoutDto;
 use Shared\Contracts;
-use BnplPaymentSchedule\Business\BnplPaymentScheduleServiceInterface;
+use BnplPaymentSchedule\Business\Usecases\ChargeScheduleService;
+use BnplPaymentSchedule\Business\Usecases\IncreaseNumberOfAttemptsService;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
-use Cart\Business\CartServiceInterface;
 use EcomOrder\Data\EcomOrderEntity;
 use EcomOrder\Data\EcomOrderMigrationRepositoryInterface;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use OrderItem\Business\OrderItemServiceInterface;
 use PlatformConfig\Business\Dtos\SetDto;
-use PlatformConfig\Business\PlatformConfigServiceInterface;
+use PlatformConfig\Business\Usecases\GetService;
+use PlatformConfig\Business\Usecases\SetService;
 use Product\Data\ProductRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
 use User\Data\UserRepositoryInterface;
-use Wallet\Business\WalletServiceInterface;
 
 /**
  * @extends AbstractBaseService<EcomOrderEntity, EcomOrderRepositoryInterface>
@@ -31,45 +31,45 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
     private EcomOrderMigrationRepositoryInterface $ecomOrderMigrationRepositoryInterface;
     private EcomOrderRepositoryInterface $ecomOrderRepository;
     private EcomOrderNotificationServiceInterface $ecomOrderNotificationService;
-    private CartServiceInterface $cartService;
     private OrderItemServiceInterface $orderItemService;
     private ProductRepositoryInterface $productRepository;
     private UserRepositoryInterface $userRepository;
-    private WalletServiceInterface $walletService;
-    private BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService;
+    private ChargeScheduleService $chargeScheduleService;
+    private IncreaseNumberOfAttemptsService $increaseNumberOfAttemptsService;
     private BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository;
     private PaymentServiceInterface $paymentService;
-    private PlatformConfigServiceInterface $platformConfigService;
+    private SetService $setService;
+    private GetService $getService;
     private EcomOrderWorkflow $ecomOrderWorkflow;
 
     public function __construct(
         EcomOrderMigrationRepositoryInterface $ecomOrderMigrationRepositoryInterface,
         EcomOrderRepositoryInterface $ecomOrderRepository,
         EcomOrderNotificationServiceInterface $ecomOrderNotificationService,
-        CartServiceInterface $cartService,
         OrderItemServiceInterface $orderItemService,
         ProductRepositoryInterface $productRepository,
         UserRepositoryInterface $userRepository,
-        WalletServiceInterface $walletService,
-        BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService,
+        ChargeScheduleService $chargeScheduleService,
+        IncreaseNumberOfAttemptsService $increaseNumberOfAttemptsService,
         BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository,
         PaymentServiceInterface $paymentService,
-        PlatformConfigServiceInterface $platformConfigService,
+        SetService $setService,
+        GetService $getService,
         EcomOrderWorkflow $ecomOrderWorkflow
     ) {
         parent::__construct($ecomOrderRepository);
         $this->ecomOrderMigrationRepositoryInterface = $ecomOrderMigrationRepositoryInterface;
         $this->ecomOrderRepository = $ecomOrderRepository;
         $this->ecomOrderNotificationService = $ecomOrderNotificationService;
-        $this->cartService = $cartService;
         $this->orderItemService = $orderItemService;
         $this->productRepository = $productRepository;
         $this->userRepository = $userRepository;
-        $this->walletService = $walletService;
-        $this->bnplPaymentScheduleService = $bnplPaymentScheduleService;
+        $this->chargeScheduleService = $chargeScheduleService;
+        $this->increaseNumberOfAttemptsService = $increaseNumberOfAttemptsService;
         $this->bnplPaymentScheduleRepository = $bnplPaymentScheduleRepository;
         $this->paymentService = $paymentService;
-        $this->platformConfigService = $platformConfigService;
+        $this->setService = $setService;
+        $this->getService = $getService;
         $this->ecomOrderWorkflow = $ecomOrderWorkflow;
     }
 
@@ -196,7 +196,7 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         // Contracts::requiresNotNullOrEmpty($customer_email, 'customer email');
         // Contracts::requires(filter_var($customer_email, FILTER_VALIDATE_EMAIL) !== false, 'Customer email is invalid');
 
-        // $cartItems = $this->cartService->getCart($cart_uuid);
+        // $cartItems = $this->getCartService->query($cart_uuid);
         // Contracts::requires(!empty($cartItems), 'Cart is empty');
 
         // $lines = [];
@@ -269,14 +269,14 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         //     ]);
         // }
 
-        // $this->cartService->clearCart($cart_uuid);
+        // $this->clearCartService->execute($cart_uuid);
 
         // $this->ecomOrderNotificationService->sendOrderInvoiceToCustomer((int) $order->id);
         // $this->ecomOrderNotificationService->sendOrderInvoiceToPlatform((int) $order->id);
 
         // if ($type === 'wallet') {
         //     $this->withdrawWalletService->execute(new WithdrawWalletDto($user_id, $computedTotal));
-        //     $this->walletService->log(
+        //     $this->walletLogService->execute(
         //         $user_id,
         //         $computedTotal,
         //         uniqid('WALLET_WITHDRAWAL_'),
@@ -308,9 +308,9 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
 
     public function publishSettings()
     {
-        $this->platformConfigService->set(new SetDto('ECOM_SHIPPING_FEE', (string) $this->getShippingFee()));
-        $this->platformConfigService->set(new SetDto('ECOM_SERVICE_CHARGE', (string) $this->getServiceCharge()));
-        $this->platformConfigService->set(new SetDto('ECOM_PERCENTAGE_TO_PLATFORM', (string) $this->getPercentageToPlatform()));
+        $this->setService->execute(new SetDto('ECOM_SHIPPING_FEE', (string) $this->getShippingFee()));
+        $this->setService->execute(new SetDto('ECOM_SERVICE_CHARGE', (string) $this->getServiceCharge()));
+        $this->setService->execute(new SetDto('ECOM_PERCENTAGE_TO_PLATFORM', (string) $this->getPercentageToPlatform()));
     }
 
     public function updateDeliveryStatus(UpdateDeliveryStatusDto $updateDeliveryStatusDto) {
@@ -465,9 +465,9 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
                 continue;
             }
             try {
-                $this->bnplPaymentScheduleService->chargeSchedule((int) $schedule->id);
+                $this->chargeScheduleService->execute((int) $schedule->id);
             } catch (\Exception $e) {
-                $this->bnplPaymentScheduleService->increaseNumberOfAttempts((int) $schedule->id);
+                $this->increaseNumberOfAttemptsService->execute((int) $schedule->id);
             }
         }
 
@@ -552,16 +552,16 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
 
     private function getShippingFee()
     {
-        return (float) $this->platformConfigService->get('ECOM_SHIPPING_FEE', 100);
+        return (float) $this->getService->query('ECOM_SHIPPING_FEE', 100);
     }
 
     private function getServiceCharge()
     {
-        return (float) $this->platformConfigService->get('ECOM_SERVICE_CHARGE', 100);
+        return (float) $this->getService->query('ECOM_SERVICE_CHARGE', 100);
     }
 
     private function getPercentageToPlatform()
     {
-        return (float) $this->platformConfigService->get('ECOM_PERCENTAGE_TO_PLATFORM', 10);
+        return (float) $this->getService->query('ECOM_PERCENTAGE_TO_PLATFORM', 10);
     }
 }

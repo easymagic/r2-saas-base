@@ -2,30 +2,42 @@
 
 namespace Batch\Presentation;
 
+use Batch\Business\Dtos\CreateDto;
+use Batch\Business\Usecases\CreateService;
+use Batch\Business\Usecases\GetBatchListService;
+use Batch\Business\Usecases\MigrateService;
+use Batch\Business\Usecases\RemoveService;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-use Batch\Business\Dtos\CreateDto;
-use Batch\Business\BatchServiceInterface;
 
 class BatchController
 {
-    private BatchServiceInterface $batchService;
+    private MigrateService $migrateService;
+    private CreateService $createService;
+    private GetBatchListService $getBatchListService;
+    private RemoveService $removeService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
 
     public function __construct(
-        BatchServiceInterface $batchService,
+        MigrateService $migrateService,
+        CreateService $createService,
+        GetBatchListService $getBatchListService,
+        RemoveService $removeService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService
     ) {
-        $this->batchService = $batchService;
+        $this->migrateService = $migrateService;
+        $this->createService = $createService;
+        $this->getBatchListService = $getBatchListService;
+        $this->removeService = $removeService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
     }
 
     function migrate()
     {
-        $result = $this->batchService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -34,7 +46,7 @@ class BatchController
 
     function create()
     {
-        $batch = $this->batchService->create(new CreateDto(
+        $batch = $this->createService->execute(new CreateDto(
             (string) $this->request->get('name'),
             (string) $this->request->get('description')
         ));
@@ -46,7 +58,7 @@ class BatchController
 
     function getBatchList()
     {
-        $query = $this->batchService->getBatchList($this->request->all());
+        $query = $this->getBatchListService->query($this->request->all());
         $this->jsonResponseService->success([
             'batches' => $query->fetch(),
             'count' => $query->count(),
@@ -56,7 +68,7 @@ class BatchController
 
     function remove()
     {
-        $this->batchService->remove((int) $this->request->get('batch_id'));
+        $this->removeService->execute((int) $this->request->get('batch_id'));
         $this->jsonResponseService->success([
             'message' => 'Batch removed successfully',
         ]);

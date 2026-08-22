@@ -2,31 +2,51 @@
 
 namespace Cart\Presentation;
 
-use R2Packages\Framework\Infrastructure\Framework\Container\Request;
-use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 use Cart\Business\Dtos\AddToCartDto;
 use Cart\Business\Dtos\RemoveFromCartDto;
-use Cart\Business\CartServiceInterface;
+use Cart\Business\Usecases\AddToCartService;
+use Cart\Business\Usecases\ClearCartService;
+use Cart\Business\Usecases\GenerateCartUuidService;
+use Cart\Business\Usecases\GetCartService;
+use Cart\Business\Usecases\MigrateService;
+use Cart\Business\Usecases\RemoveFromCartService;
+use R2Packages\Framework\Infrastructure\Framework\Container\Request;
+use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
 class CartController
 {
-    private CartServiceInterface $cartService;
+    private MigrateService $migrateService;
+    private AddToCartService $addToCartService;
+    private GetCartService $getCartService;
+    private RemoveFromCartService $removeFromCartService;
+    private ClearCartService $clearCartService;
+    private GenerateCartUuidService $generateCartUuidService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
 
     public function __construct(
-        CartServiceInterface $cartService,
+        MigrateService $migrateService,
+        AddToCartService $addToCartService,
+        GetCartService $getCartService,
+        RemoveFromCartService $removeFromCartService,
+        ClearCartService $clearCartService,
+        GenerateCartUuidService $generateCartUuidService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService
     ) {
-        $this->cartService = $cartService;
+        $this->migrateService = $migrateService;
+        $this->addToCartService = $addToCartService;
+        $this->getCartService = $getCartService;
+        $this->removeFromCartService = $removeFromCartService;
+        $this->clearCartService = $clearCartService;
+        $this->generateCartUuidService = $generateCartUuidService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
     }
 
     function migrate()
     {
-        $result = $this->cartService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -35,7 +55,7 @@ class CartController
 
     function addToCart()
     {
-        $item = $this->cartService->addToCart(new AddToCartDto(
+        $item = $this->addToCartService->execute(new AddToCartDto(
             (string) $this->request->get('uuid', ''),
             (int) $this->request->get('product_id', 0),
             (int) $this->request->get('qty', 0)
@@ -48,7 +68,7 @@ class CartController
 
     function getCart()
     {
-        $items = $this->cartService->getCart((string) $this->request->get('uuid', ''));
+        $items = $this->getCartService->query((string) $this->request->get('uuid', ''));
         $total = 0.0;
         foreach ($items as $item) {
             $total += (float) $item->price_total;
@@ -63,7 +83,7 @@ class CartController
 
     function removeFromCart()
     {
-        $this->cartService->removeFromCart(new RemoveFromCartDto(
+        $this->removeFromCartService->execute(new RemoveFromCartDto(
             (string) $this->request->get('uuid', ''),
             (int) $this->request->get('product_id', 0)
         ));
@@ -74,7 +94,7 @@ class CartController
 
     function clearCart()
     {
-        $this->cartService->clearCart((string) $this->request->get('uuid', ''));
+        $this->clearCartService->execute((string) $this->request->get('uuid', ''));
         $this->jsonResponseService->success([
             'message' => 'Cart cleared successfully',
         ]);
@@ -82,7 +102,7 @@ class CartController
 
     function generateCartUuid()
     {
-        $uuid = $this->cartService->generateCartUuid();
+        $uuid = $this->generateCartUuidService->execute();
         $this->jsonResponseService->success([
             'uuid' => $uuid,
             'message' => 'Cart UUID generated successfully',

@@ -7,7 +7,7 @@ use EcomOrder\Data\EcomOrderEntity;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use Exception;
 use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
-use Notification\Business\NotificationServiceInterface;
+use Notification\Business\Usecases\CreateService as NotificationCreateService;
 use OrderItem\Data\OrderItemRepositoryInterface;
 use Product\Data\ProductRepositoryInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
@@ -21,7 +21,7 @@ class EcomOrderNotificationService implements EcomOrderNotificationServiceInterf
     private OrderItemRepositoryInterface $orderItemRepository;
     private ProductRepositoryInterface $productRepository;
     private UserRepositoryInterface $userRepository;
-    private NotificationServiceInterface $notificationService;
+    private NotificationCreateService $notificationCreateService;
     private EnvServiceInterface $envService;
     private BaseMailThemeInterface $baseMailTheme;
 
@@ -31,7 +31,7 @@ class EcomOrderNotificationService implements EcomOrderNotificationServiceInterf
         OrderItemRepositoryInterface $orderItemRepository,
         ProductRepositoryInterface $productRepository,
         UserRepositoryInterface $userRepository,
-        NotificationServiceInterface $notificationService,
+        NotificationCreateService $notificationCreateService,
         EnvServiceInterface $envService,
         BaseMailThemeInterface $baseMailTheme
     ) {
@@ -40,7 +40,7 @@ class EcomOrderNotificationService implements EcomOrderNotificationServiceInterf
         $this->orderItemRepository = $orderItemRepository;
         $this->productRepository = $productRepository;
         $this->userRepository = $userRepository;
-        $this->notificationService = $notificationService;
+        $this->notificationCreateService = $notificationCreateService;
         $this->envService = $envService;
         $this->baseMailTheme = $baseMailTheme;
     }
@@ -328,7 +328,7 @@ class EcomOrderNotificationService implements EcomOrderNotificationServiceInterf
         if ($user_id <= 0) {
             return;
         }
-        $this->notificationService->create(new NotificationCreateDto($user_id, $title, $message));
+        $this->notificationCreateService->execute(new NotificationCreateDto($user_id, $title, $message));
     }
 
     private function e($value)

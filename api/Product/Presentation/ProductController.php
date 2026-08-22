@@ -5,24 +5,60 @@ namespace Product\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use Product\Business\Dtos\CreateDto;
 use Product\Business\Dtos\UpdateDto;
-use Product\Business\ProductServiceInterface;
+use Product\Business\Usecases\CreateService;
+use Product\Business\Usecases\FetchForAdminService;
+use Product\Business\Usecases\FetchForFrontendService;
+use Product\Business\Usecases\FetchForMerchantService;
+use Product\Business\Usecases\FindByIdService;
+use Product\Business\Usecases\FindBySlugService;
+use Product\Business\Usecases\FindByUuidService;
+use Product\Business\Usecases\MigrateService;
+use Product\Business\Usecases\RemoveService;
+use Product\Business\Usecases\UpdateService;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
 class ProductController
 {
-    private ProductServiceInterface $productService;
+    private MigrateService $migrateService;
+    private CreateService $createService;
+    private UpdateService $updateService;
+    private RemoveService $removeService;
+    private FetchForAdminService $fetchForAdminService;
+    private FetchForFrontendService $fetchForFrontendService;
+    private FetchForMerchantService $fetchForMerchantService;
+    private FindByIdService $findByIdService;
+    private FindBySlugService $findBySlugService;
+    private FindByUuidService $findByUuidService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
-        ProductServiceInterface $productService,
+        MigrateService $migrateService,
+        CreateService $createService,
+        UpdateService $updateService,
+        RemoveService $removeService,
+        FetchForAdminService $fetchForAdminService,
+        FetchForFrontendService $fetchForFrontendService,
+        FetchForMerchantService $fetchForMerchantService,
+        FindByIdService $findByIdService,
+        FindBySlugService $findBySlugService,
+        FindByUuidService $findByUuidService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
-        $this->productService = $productService;
+        $this->migrateService = $migrateService;
+        $this->createService = $createService;
+        $this->updateService = $updateService;
+        $this->removeService = $removeService;
+        $this->fetchForAdminService = $fetchForAdminService;
+        $this->fetchForFrontendService = $fetchForFrontendService;
+        $this->fetchForMerchantService = $fetchForMerchantService;
+        $this->findByIdService = $findByIdService;
+        $this->findBySlugService = $findBySlugService;
+        $this->findByUuidService = $findByUuidService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
@@ -30,7 +66,7 @@ class ProductController
 
     function migrate()
     {
-        $result = $this->productService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -45,7 +81,7 @@ class ProductController
             $userId = (int) $user->id;
         }
 
-        $product = $this->productService->create(new CreateDto(
+        $product = $this->createService->execute(new CreateDto(
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
             (float) $this->request->get('price', 0),
@@ -76,7 +112,7 @@ class ProductController
             $userId = (int) $user->id;
         }
 
-        $product = $this->productService->update(new UpdateDto(
+        $product = $this->updateService->execute(new UpdateDto(
             (int) $this->request->get('product_id'),
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
@@ -103,7 +139,7 @@ class ProductController
 
     function remove()
     {
-        $this->productService->remove((int) $this->request->get('product_id'));
+        $this->removeService->execute((int) $this->request->get('product_id'));
         $this->jsonResponseService->success([
             'message' => 'Product removed successfully',
         ]);
@@ -111,7 +147,7 @@ class ProductController
 
     function fetchForAdmin()
     {
-        $query = $this->productService->fetchForAdmin($this->request->all());
+        $query = $this->fetchForAdminService->query($this->request->all());
         $this->jsonResponseService->success([
             'products' => $query->fetch(),
             'count' => $query->count(),
@@ -121,7 +157,7 @@ class ProductController
 
     function fetchForFrontend()
     {
-        $query = $this->productService->fetchForFrontend($this->request->all());
+        $query = $this->fetchForFrontendService->query($this->request->all());
         $this->jsonResponseService->success([
             'products' => $query->fetch(),
             'count' => $query->count(),
@@ -132,7 +168,7 @@ class ProductController
     function fetchForMerchant()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->productService->fetchForMerchant(
+        $query = $this->fetchForMerchantService->query(
             (int) $user->id,
             $this->request->all()
         );
@@ -145,7 +181,7 @@ class ProductController
 
     function findById()
     {
-        $product = $this->productService->findById((int) $this->request->get('product_id'));
+        $product = $this->findByIdService->query((int) $this->request->get('product_id'));
         $this->jsonResponseService->success([
             'product' => $product,
             'message' => 'Product fetched successfully',
@@ -154,7 +190,7 @@ class ProductController
 
     function findBySlug()
     {
-        $product = $this->productService->findBySlug((string) $this->request->get('slug', ''));
+        $product = $this->findBySlugService->query((string) $this->request->get('slug', ''));
         $this->jsonResponseService->success([
             'product' => $product,
             'message' => 'Product fetched successfully',
@@ -163,7 +199,7 @@ class ProductController
 
     function findByUuid()
     {
-        $product = $this->productService->findByUuid((string) $this->request->get('uuid', ''));
+        $product = $this->findByUuidService->query((string) $this->request->get('uuid', ''));
         $this->jsonResponseService->success([
             'product' => $product,
             'message' => 'Product fetched successfully',

@@ -4,27 +4,27 @@ namespace ProxyOrderChangeLog\Presentation;
 
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-use ProxyOrderChangeLog\Business\ProxyOrderChangeLogServiceInterface;
+use ProxyOrderChangeLog\Business\Usecases\MigrateService;
 
 class ProxyOrderChangeLogController
 {
-    private ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService;
+    private MigrateService $migrateService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
 
     public function __construct(
-        ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService,
+        MigrateService $migrateService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService
     ) {
-        $this->proxyOrderChangeLogService = $proxyOrderChangeLogService;
+        $this->migrateService = $migrateService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
     }
 
     function migrate()
     {
-        $result = $this->proxyOrderChangeLogService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,

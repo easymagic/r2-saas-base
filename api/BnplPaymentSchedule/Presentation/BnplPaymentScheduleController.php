@@ -2,29 +2,41 @@
 
 namespace BnplPaymentSchedule\Presentation;
 
+use BnplPaymentSchedule\Business\Usecases\ChargeScheduleService;
+use BnplPaymentSchedule\Business\Usecases\GetFirstScheduleService;
+use BnplPaymentSchedule\Business\Usecases\GetNextScheduleService;
+use BnplPaymentSchedule\Business\Usecases\MigrateService;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-use BnplPaymentSchedule\Business\BnplPaymentScheduleServiceInterface;
 
 class BnplPaymentScheduleController
 {
-    private BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService;
+    private MigrateService $migrateService;
+    private GetFirstScheduleService $getFirstScheduleService;
+    private GetNextScheduleService $getNextScheduleService;
+    private ChargeScheduleService $chargeScheduleService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
 
     public function __construct(
-        BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService,
+        MigrateService $migrateService,
+        GetFirstScheduleService $getFirstScheduleService,
+        GetNextScheduleService $getNextScheduleService,
+        ChargeScheduleService $chargeScheduleService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService
     ) {
-        $this->bnplPaymentScheduleService = $bnplPaymentScheduleService;
+        $this->migrateService = $migrateService;
+        $this->getFirstScheduleService = $getFirstScheduleService;
+        $this->getNextScheduleService = $getNextScheduleService;
+        $this->chargeScheduleService = $chargeScheduleService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
     }
 
     function migrate()
     {
-        $result = $this->bnplPaymentScheduleService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -33,7 +45,7 @@ class BnplPaymentScheduleController
 
     function getFirstSchedule()
     {
-        $schedule = $this->bnplPaymentScheduleService->getFirstSchedule((int) $this->request->get('order_id'));
+        $schedule = $this->getFirstScheduleService->query((int) $this->request->get('order_id'));
         $this->jsonResponseService->success([
             'schedule' => $schedule,
             'message' => 'First BNPL schedule fetched successfully',
@@ -42,7 +54,7 @@ class BnplPaymentScheduleController
 
     function getNextSchedule()
     {
-        $schedule = $this->bnplPaymentScheduleService->getNextSchedule((int) $this->request->get('order_id'));
+        $schedule = $this->getNextScheduleService->query((int) $this->request->get('order_id'));
         $this->jsonResponseService->success([
             'schedule' => $schedule,
             'message' => 'Next BNPL schedule fetched successfully',
@@ -51,7 +63,7 @@ class BnplPaymentScheduleController
 
     function chargeSchedule()
     {
-        $result = $this->bnplPaymentScheduleService->chargeSchedule((int) $this->request->get('schedule_id'));
+        $result = $this->chargeScheduleService->execute((int) $this->request->get('schedule_id'));
         $this->jsonResponseService->success([
             'result' => $result,
             'message' => $result ? 'Schedule charged successfully' : 'Schedule charge failed',

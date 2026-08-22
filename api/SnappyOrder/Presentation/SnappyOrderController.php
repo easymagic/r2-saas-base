@@ -5,28 +5,77 @@ namespace SnappyOrder\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use Shared\Contracts;
 use SnappyOrder\Business\Dtos\AssignToAgentDto;
 use SnappyOrder\Business\Dtos\AssignToBatchDto;
 use SnappyOrder\Business\Dtos\ChangePriceDto;
 use SnappyOrder\Business\Dtos\ChangeStatusDto;
 use SnappyOrder\Business\Dtos\CreateDto;
 use SnappyOrder\Business\Dtos\PayOrderFromWalletDto;
-use SnappyOrder\Business\SnappyOrderServiceInterface;
+use SnappyOrder\Business\Usecases\AssignToAgentService;
+use SnappyOrder\Business\Usecases\AssignToBatchService;
+use SnappyOrder\Business\Usecases\ChangePriceService;
+use SnappyOrder\Business\Usecases\ChangeStatusService;
+use SnappyOrder\Business\Usecases\CreateService;
+use SnappyOrder\Business\Usecases\GetByIdService;
+use SnappyOrder\Business\Usecases\GetMyOrderAsAdminService;
+use SnappyOrder\Business\Usecases\GetMyOrdersAsAgentService;
+use SnappyOrder\Business\Usecases\GetMyOrdersAsCustomerService;
+use SnappyOrder\Business\Usecases\MigrateService;
+use SnappyOrder\Business\Usecases\PayOrderFromWalletService;
+use SnappyOrder\Business\Usecases\PublishSettingsService;
+use SnappyOrder\Business\Usecases\UnassignFromBatchService;
 
 class SnappyOrderController
 {
-    private SnappyOrderServiceInterface $snappyOrderService;
+    private MigrateService $migrateService;
+    private CreateService $createService;
+    private ChangeStatusService $changeStatusService;
+    private ChangePriceService $changePriceService;
+    private AssignToAgentService $assignToAgentService;
+    private AssignToBatchService $assignToBatchService;
+    private UnassignFromBatchService $unassignFromBatchService;
+    private GetMyOrdersAsAgentService $getMyOrdersAsAgentService;
+    private GetMyOrdersAsCustomerService $getMyOrdersAsCustomerService;
+    private GetMyOrderAsAdminService $getMyOrderAsAdminService;
+    private GetByIdService $getByIdService;
+    private PublishSettingsService $publishSettingsService;
+    private PayOrderFromWalletService $payOrderFromWalletService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
-        SnappyOrderServiceInterface $snappyOrderService,
+        MigrateService $migrateService,
+        CreateService $createService,
+        ChangeStatusService $changeStatusService,
+        ChangePriceService $changePriceService,
+        AssignToAgentService $assignToAgentService,
+        AssignToBatchService $assignToBatchService,
+        UnassignFromBatchService $unassignFromBatchService,
+        GetMyOrdersAsAgentService $getMyOrdersAsAgentService,
+        GetMyOrdersAsCustomerService $getMyOrdersAsCustomerService,
+        GetMyOrderAsAdminService $getMyOrderAsAdminService,
+        GetByIdService $getByIdService,
+        PublishSettingsService $publishSettingsService,
+        PayOrderFromWalletService $payOrderFromWalletService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
-        $this->snappyOrderService = $snappyOrderService;
+        $this->migrateService = $migrateService;
+        $this->createService = $createService;
+        $this->changeStatusService = $changeStatusService;
+        $this->changePriceService = $changePriceService;
+        $this->assignToAgentService = $assignToAgentService;
+        $this->assignToBatchService = $assignToBatchService;
+        $this->unassignFromBatchService = $unassignFromBatchService;
+        $this->getMyOrdersAsAgentService = $getMyOrdersAsAgentService;
+        $this->getMyOrdersAsCustomerService = $getMyOrdersAsCustomerService;
+        $this->getMyOrderAsAdminService = $getMyOrderAsAdminService;
+        $this->getByIdService = $getByIdService;
+        $this->publishSettingsService = $publishSettingsService;
+        $this->payOrderFromWalletService = $payOrderFromWalletService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
@@ -34,7 +83,7 @@ class SnappyOrderController
 
     function migrate()
     {
-        $this->snappyOrderService->migrate();
+        $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => true,
@@ -44,7 +93,7 @@ class SnappyOrderController
     function create()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $order = $this->snappyOrderService->create(new CreateDto(
+        $order = $this->createService->execute(new CreateDto(
             (int) $user->id,
             (string) $this->request->get('link'),
             (string) $this->request->get('description'),
@@ -61,7 +110,7 @@ class SnappyOrderController
 
     function changeStatus()
     {
-        $order = $this->snappyOrderService->changeStatus(new ChangeStatusDto(
+        $order = $this->changeStatusService->execute(new ChangeStatusDto(
             (int) $this->request->get('order_id'),
             (string) $this->request->get('status'),
             (string) $this->request->get('pickup_otp_code', '')
@@ -78,7 +127,7 @@ class SnappyOrderController
         if ($price === null || $price === '') {
             $price = $this->request->get('total_amount_usd');
         }
-        $order = $this->snappyOrderService->changePrice(new ChangePriceDto(
+        $order = $this->changePriceService->execute(new ChangePriceDto(
             (int) $this->request->get('order_id'),
             (float) $price
         ));
@@ -90,7 +139,7 @@ class SnappyOrderController
 
     function assignToAgent()
     {
-        $order = $this->snappyOrderService->assignToAgent(new AssignToAgentDto(
+        $order = $this->assignToAgentService->execute(new AssignToAgentDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('agent_id')
         ));
@@ -102,7 +151,7 @@ class SnappyOrderController
 
     function assignToBatch()
     {
-        $order = $this->snappyOrderService->assignToBatch(new AssignToBatchDto(
+        $order = $this->assignToBatchService->execute(new AssignToBatchDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('batch_id')
         ));
@@ -114,7 +163,7 @@ class SnappyOrderController
 
     function unassignFromBatch()
     {
-        $order = $this->snappyOrderService->unassignFromBatch(
+        $order = $this->unassignFromBatchService->execute(
             (int) $this->request->get('order_id')
         );
         $this->jsonResponseService->success([
@@ -126,7 +175,7 @@ class SnappyOrderController
     function getMyOrdersAsAgent()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->snappyOrderService->getMyOrdersAsAgent(
+        $query = $this->getMyOrdersAsAgentService->query(
             $user->id,
             $this->request->all()
         );
@@ -140,7 +189,7 @@ class SnappyOrderController
     function getMyOrdersAsCustomer()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->snappyOrderService->getMyOrdersAsCustomer(
+        $query = $this->getMyOrdersAsCustomerService->query(
             $user->id,
             $this->request->all()
         );
@@ -154,7 +203,7 @@ class SnappyOrderController
     function getMyOrderAsAdmin()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->snappyOrderService->getMyOrderAsAdmin(
+        $query = $this->getMyOrderAsAdminService->query(
             $user->id,
             $this->request->all()
         );
@@ -169,16 +218,14 @@ class SnappyOrderController
     {
         $user = $this->apiCredentialService->getAuthUser();
         $orderId = (int) $this->request->get('order_id');
-        $order = $this->snappyOrderService->getById($orderId);
+        $order = $this->getByIdService->query($orderId);
 
         $role = strtolower((string) $user->role);
         $isAdmin = strpos($role, 'admin') !== false;
         $isOwner = (int) $order->user_id === (int) $user->id;
         $isAssignedAgent = $role === 'agent' && (int) $order->agent_id === (int) $user->id;
 
-        if (!$isAdmin && !$isOwner && !$isAssignedAgent) {
-            throw new \Exception('You are not authorized to view this order');
-        }
+        Contracts::requires($isAdmin || $isOwner || $isAssignedAgent, 'You are not authorized to view this order');
 
         $this->jsonResponseService->success([
             'order' => $order,
@@ -188,7 +235,7 @@ class SnappyOrderController
 
     function publishSettings()
     {
-        $this->snappyOrderService->publishSettings();
+        $this->publishSettingsService->execute();
         $this->jsonResponseService->success([
             'message' => 'Settings published successfully',
         ]);
@@ -197,7 +244,7 @@ class SnappyOrderController
     function payOrderFromWallet()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $order = $this->snappyOrderService->payOrderFromWallet(new PayOrderFromWalletDto(
+        $order = $this->payOrderFromWalletService->execute(new PayOrderFromWalletDto(
             (int) $this->request->get('order_id'),
             (int) $user->id
         ));

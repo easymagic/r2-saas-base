@@ -41,7 +41,7 @@ class CategoryRepository extends AbstractBaseRepository implements CategoryRepos
         });
     }
 
-    public function query(array $filters = [])
+    public function query(array $filters)
     {
         $this->sql = "SELECT * FROM categories WHERE 1=1 ";
         $this->params = [];

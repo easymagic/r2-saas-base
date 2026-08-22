@@ -6,7 +6,11 @@ use Wallet\Business\Dtos\ApproveManualTopUpDto;
 use Wallet\Business\Dtos\RejectManualTopUpDto;
 use Wallet\Business\Dtos\TopUpManualDto;
 use Wallet\Business\Dtos\TopUpOnlineDto;
-use Wallet\Business\WalletServiceInterface;
+use Wallet\Business\Usecases\ApproveManualTopUpService;
+use Wallet\Business\Usecases\MigrateService;
+use Wallet\Business\Usecases\RejectManualTopUpService;
+use Wallet\Business\Usecases\TopUpManualService;
+use Wallet\Business\Usecases\TopUpOnlineService;
 use Wallet\Data\WalletRepositoryInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
@@ -14,20 +18,32 @@ use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterf
 
 class WalletController
 {
-    private WalletServiceInterface $walletService;
+    private TopUpOnlineService $topUpOnlineService;
+    private TopUpManualService $topUpManualService;
+    private ApproveManualTopUpService $approveManualTopUpService;
+    private RejectManualTopUpService $rejectManualTopUpService;
+    private MigrateService $migrateService;
     private Request $request;
     private JsonResponseServiceInterface $response;
     private ApiCredentialServiceInterface $apiCredentialService;
     private WalletRepositoryInterface $walletRepository;
 
     public function __construct(
-        WalletServiceInterface $walletService,
+        TopUpOnlineService $topUpOnlineService,
+        TopUpManualService $topUpManualService,
+        ApproveManualTopUpService $approveManualTopUpService,
+        RejectManualTopUpService $rejectManualTopUpService,
+        MigrateService $migrateService,
         Request $request,
         JsonResponseServiceInterface $response,
         ApiCredentialServiceInterface $apiCredentialService,
         WalletRepositoryInterface $walletRepository
     ) {
-        $this->walletService = $walletService;
+        $this->topUpOnlineService = $topUpOnlineService;
+        $this->topUpManualService = $topUpManualService;
+        $this->approveManualTopUpService = $approveManualTopUpService;
+        $this->rejectManualTopUpService = $rejectManualTopUpService;
+        $this->migrateService = $migrateService;
         $this->request = $request;
         $this->response = $response;
         $this->apiCredentialService = $apiCredentialService;
@@ -37,7 +53,7 @@ class WalletController
     public function topUpOnline()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $wallet = $this->walletService->topUpOnline(new TopUpOnlineDto(
+        $wallet = $this->topUpOnlineService->execute(new TopUpOnlineDto(
             (int) $user->id,
             (float) $this->request->get('amount'),
             uniqid('TOPUP-') . '-' . time(),
@@ -54,7 +70,7 @@ class WalletController
     public function topUpManual()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $wallet = $this->walletService->topUpManual(new TopUpManualDto(
+        $wallet = $this->topUpManualService->execute(new TopUpManualDto(
             (int) $user->id,
             (float) $this->request->get('amount'),
             uniqid('TOPUP-') . '-' . time(),
@@ -73,7 +89,7 @@ class WalletController
 
     public function approveManualTopUp()
     {
-        $wallet = $this->walletService->approveManualTopUp(new ApproveManualTopUpDto(
+        $wallet = $this->approveManualTopUpService->execute(new ApproveManualTopUpDto(
             (int) $this->request->get('wallet_id'),
             'approved'
         ));
@@ -86,7 +102,7 @@ class WalletController
 
     public function rejectManualTopUp()
     {
-        $wallet = $this->walletService->rejectManualTopUp(new RejectManualTopUpDto(
+        $wallet = $this->rejectManualTopUpService->execute(new RejectManualTopUpDto(
             (int) $this->request->get('wallet_id'),
             'rejected',
             (string) $this->request->get('reason')
@@ -101,12 +117,12 @@ class WalletController
     public function myPendingWalletTransactions()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $user_id = $user->id;
-        $wallets = $this->walletService
-            ->filterBy('user_id', $user_id)
-            ->filterBy('status', 'pending')
-            ->filterBy('type', 'online')
-            ->filter($this->request->all())->fetch();
+        $filters = array_merge($this->request->all(), [
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'type' => 'online',
+        ]);
+        $wallets = $this->walletRepository->query($filters)->fetch();
 
         return $this->response->success([
             'wallets' => $wallets,
@@ -117,12 +133,12 @@ class WalletController
     public function myApprovedWalletTransactions()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $user_id = $user->id;
-        $wallets = $this->walletService
-            ->filterBy('user_id', $user_id)
-            ->filterBy('status', 'approved')
-            ->filterBy('type', 'online')
-            ->filter($this->request->all())->fetch();
+        $filters = array_merge($this->request->all(), [
+            'user_id' => $user->id,
+            'status' => 'approved',
+            'type' => 'online',
+        ]);
+        $wallets = $this->walletRepository->query($filters)->fetch();
 
         return $this->response->success([
             'wallets' => $wallets,
@@ -132,10 +148,11 @@ class WalletController
 
     public function manualPendingWalletTransactions()
     {
-        $wallets = $this->walletService
-            ->filterBy('status', 'pending')
-            ->filterBy('type', 'manual')
-            ->filter($this->request->all())->fetch();
+        $filters = array_merge($this->request->all(), [
+            'status' => 'pending',
+            'type' => 'manual',
+        ]);
+        $wallets = $this->walletRepository->query($filters)->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual pending wallet transactions fetched successfully'
@@ -144,10 +161,11 @@ class WalletController
 
     public function manualApprovedWalletTransactions()
     {
-        $wallets = $this->walletService
-            ->filterBy('status', 'approved')
-            ->filterBy('type', 'manual')
-            ->filter($this->request->all())->fetch();
+        $filters = array_merge($this->request->all(), [
+            'status' => 'approved',
+            'type' => 'manual',
+        ]);
+        $wallets = $this->walletRepository->query($filters)->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual approved wallet transactions fetched successfully'
@@ -156,10 +174,11 @@ class WalletController
 
     public function manualRejectedWalletTransactions()
     {
-        $wallets = $this->walletService
-            ->filterBy('status', 'rejected')
-            ->filterBy('type', 'manual')
-            ->filter($this->request->all())->fetch();
+        $filters = array_merge($this->request->all(), [
+            'status' => 'rejected',
+            'type' => 'manual',
+        ]);
+        $wallets = $this->walletRepository->query($filters)->fetch();
         return $this->response->success([
             'wallets' => $wallets,
             'message' => 'Manual rejected wallet transactions fetched successfully'
@@ -168,7 +187,7 @@ class WalletController
 
     public function migrate()
     {
-        $migration = $this->walletService->migrate();
+        $migration = $this->migrateService->execute();
         return $this->response->success([
             'migration' => $migration,
             'message' => 'Wallet migration successful'

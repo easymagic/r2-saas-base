@@ -40,6 +40,16 @@ class ProductRepository extends AbstractBaseRepository implements ProductReposit
             $params['active'] = $value;
         });
 
+        $this->addFilter("slug", function (mixed $value, string &$sql, array &$params) {
+            $sql .= " AND products.slug = :slug";
+            $params['slug'] = $value;
+        });
+
+        $this->addFilter("uuid", function (mixed $value, string &$sql, array &$params) {
+            $sql .= " AND products.uuid = :uuid";
+            $params['uuid'] = $value;
+        });
+
         $this->addFilter("price", function (mixed $value, string &$sql, array &$params) {
             $sql .= " AND products.price = :price";
             $params['price'] = $value;

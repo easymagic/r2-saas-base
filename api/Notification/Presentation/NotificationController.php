@@ -6,7 +6,11 @@ use Notification\Business\Dtos\MarkAsReadDto;
 use Notification\Business\Dtos\MarkAsUnreadDto;
 use Notification\Business\Dtos\MyNotificationsDto;
 use Notification\Business\Dtos\RemoveDto;
-use Notification\Business\NotificationServiceInterface;
+use Notification\Business\Usecases\MarkAsReadService;
+use Notification\Business\Usecases\MarkAsUnreadService;
+use Notification\Business\Usecases\MigrateService;
+use Notification\Business\Usecases\MyNotificationsService;
+use Notification\Business\Usecases\RemoveService;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
@@ -16,18 +20,30 @@ use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterf
  */
 class NotificationController
 {
-    private NotificationServiceInterface $notificationService;
+    private MyNotificationsService $myNotificationsService;
+    private MarkAsReadService $markAsReadService;
+    private MarkAsUnreadService $markAsUnreadService;
+    private RemoveService $removeService;
+    private MigrateService $migrateService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
     private JsonResponseServiceInterface $jsonResponseService;
 
     public function __construct(
-        NotificationServiceInterface $notificationService,
+        MyNotificationsService $myNotificationsService,
+        MarkAsReadService $markAsReadService,
+        MarkAsUnreadService $markAsUnreadService,
+        RemoveService $removeService,
+        MigrateService $migrateService,
         Request $request,
         ApiCredentialServiceInterface $apiCredentialService,
         JsonResponseServiceInterface $jsonResponseService
     ) {
-        $this->notificationService = $notificationService;
+        $this->myNotificationsService = $myNotificationsService;
+        $this->markAsReadService = $markAsReadService;
+        $this->markAsUnreadService = $markAsUnreadService;
+        $this->removeService = $removeService;
+        $this->migrateService = $migrateService;
         $this->request = $request;
         $this->apiCredentialService = $apiCredentialService;
         $this->jsonResponseService = $jsonResponseService;
@@ -36,7 +52,7 @@ class NotificationController
     public function myNotifications()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $notifications = $this->notificationService->myNotifications(new MyNotificationsDto(
+        $notifications = $this->myNotificationsService->query(new MyNotificationsDto(
             (int) $user->id
         ));
         $count = $notifications->count();
@@ -50,7 +66,7 @@ class NotificationController
     public function markAsRead()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $notification = $this->notificationService->markAsRead(new MarkAsReadDto(
+        $notification = $this->markAsReadService->execute(new MarkAsReadDto(
             (int) $this->request->get('notification_id'),
             (int) $user->id
         ));
@@ -63,7 +79,7 @@ class NotificationController
     public function markAsUnread()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $notification = $this->notificationService->markAsUnread(new MarkAsUnreadDto(
+        $notification = $this->markAsUnreadService->execute(new MarkAsUnreadDto(
             (int) $this->request->get('notification_id'),
             (int) $user->id
         ));
@@ -76,7 +92,7 @@ class NotificationController
     public function delete()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $notification = $this->notificationService->remove(new RemoveDto(
+        $notification = $this->removeService->execute(new RemoveDto(
             (int) $this->request->get('notification_id'),
             (int) $user->id
         ));
@@ -88,7 +104,7 @@ class NotificationController
 
     public function migrate()
     {
-        $result = $this->notificationService->migrate();
+        $result = $this->migrateService->execute();
         return $this->jsonResponseService->success([
             'result' => $result,
             'message' => 'Notifications migrated successfully'

@@ -3,10 +3,10 @@
 namespace Wallet\Data;
 
 use Shared\AbstractBaseRepository;
-use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
 use Wallet\Data\WalletEntity;
 use Wallet\Data\WalletRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * Wallet Repository
@@ -53,6 +53,14 @@ class WalletRepository extends AbstractBaseRepository implements WalletRepositor
             $params['type'] = 'manual';
         });
 
+    }
+
+    public function query(array $filters = [])
+    {
+        $this->sql = "SELECT * FROM wallets WHERE 1=1 ";
+        $this->params = [];
+        $this->filter($filters);
+        return new QueryObject($this->sql, $this->params, $this->db, $this->hydrateClass);
     }
 
 }
