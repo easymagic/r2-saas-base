@@ -11,7 +11,7 @@ use Wallet\Business\Dtos\TopUpManualDto;
 use Wallet\Business\Dtos\TopUpOnlineDto;
 use Wallet\Business\WalletNotificationServiceInterface;
 use User\Business\Dtos\TopUpWalletDto;
-use User\Business\UserServiceInterface;
+use User\Business\Usecases\TopUpWalletService;
 use User\Data\UserRepositoryInterface;
 use Wallet\Data\WalletRepositoryInterface;
 use Exception;
@@ -33,7 +33,7 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
     private UserRepositoryInterface $userRepository;
     private FileUploadServiceInterface $fileUploadService;
     private WalletMigrationRepositoryInterface $walletMigrationRepository;
-    private UserServiceInterface $userService;
+    private TopUpWalletService $topUpWalletService;
 
     public function __construct(
         WalletRepositoryInterface $walletRepository,
@@ -43,7 +43,7 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
         UserRepositoryInterface $userRepository,
         FileUploadServiceInterface $fileUploadService,
         WalletMigrationRepositoryInterface $walletMigrationRepository,
-        UserServiceInterface $userService
+        TopUpWalletService $topUpWalletService
     ) {
         parent::__construct($walletRepository);
         $this->walletRepository = $walletRepository;
@@ -53,7 +53,7 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
         $this->userRepository = $userRepository;
         $this->fileUploadService = $fileUploadService;
         $this->walletMigrationRepository = $walletMigrationRepository;
-        $this->userService = $userService;
+        $this->topUpWalletService = $topUpWalletService;
     }
 
     public function topUpOnline(TopUpOnlineDto $topUpOnlineDto)
@@ -122,7 +122,7 @@ class WalletService extends AbstractBaseService implements WalletServiceInterfac
         $wallet->status = $approveManualTopUpDto->status;
         $this->walletRepository->save($wallet);
 
-        $this->userService->topUpWallet(new TopUpWalletDto(
+        $this->topUpWalletService->execute(new TopUpWalletDto(
             (int) $wallet->user_id,
             (float) $wallet->amount
         ));

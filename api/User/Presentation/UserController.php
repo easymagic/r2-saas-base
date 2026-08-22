@@ -5,6 +5,7 @@ namespace User\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use Shared\Contracts;
 use User\Business\Dtos\ChangePasswordDto;
 use User\Business\Dtos\CreateDto;
 use User\Business\Dtos\LoginDto;
@@ -14,26 +15,77 @@ use User\Business\Dtos\ResetPasswordDto;
 use User\Business\Dtos\UpdateProfileDto;
 use User\Business\Dtos\UpdateUserDto;
 use User\Business\Dtos\VerifyEmailDto;
-use User\Business\UserServiceInterface;
+use User\Business\Usecases\ChangePasswordService;
+use User\Business\Usecases\CreateService;
+use User\Business\Usecases\DeleteService;
+use User\Business\Usecases\FetchUsersAsAdminService;
+use User\Business\Usecases\GetWalletBalanceService;
+use User\Business\Usecases\LoginService;
+use User\Business\Usecases\LogoutService;
+use User\Business\Usecases\MigrateService;
+use User\Business\Usecases\RegisterService;
+use User\Business\Usecases\RequestForgotPasswordService;
+use User\Business\Usecases\ResetPasswordService;
+use User\Business\Usecases\UpdateProfileService;
+use User\Business\Usecases\UpdateUserService;
+use User\Business\Usecases\VerifyEmailService;
 use User\Data\UserRepositoryInterface;
 
 class UserController
 {
-    private UserServiceInterface $userService;
-
+    private LoginService $loginService;
+    private RegisterService $registerService;
+    private CreateService $createService;
+    private UpdateUserService $updateUserService;
+    private DeleteService $deleteService;
+    private UpdateProfileService $updateProfileService;
+    private ChangePasswordService $changePasswordService;
+    private GetWalletBalanceService $getWalletBalanceService;
+    private LogoutService $logoutService;
+    private RequestForgotPasswordService $requestForgotPasswordService;
+    private ResetPasswordService $resetPasswordService;
+    private VerifyEmailService $verifyEmailService;
+    private FetchUsersAsAdminService $fetchUsersAsAdminService;
+    private MigrateService $migrateService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
     private UserRepositoryInterface $userRepository;
 
     public function __construct(
-        UserServiceInterface $userService,
+        LoginService $loginService,
+        RegisterService $registerService,
+        CreateService $createService,
+        UpdateUserService $updateUserService,
+        DeleteService $deleteService,
+        UpdateProfileService $updateProfileService,
+        ChangePasswordService $changePasswordService,
+        GetWalletBalanceService $getWalletBalanceService,
+        LogoutService $logoutService,
+        RequestForgotPasswordService $requestForgotPasswordService,
+        ResetPasswordService $resetPasswordService,
+        VerifyEmailService $verifyEmailService,
+        FetchUsersAsAdminService $fetchUsersAsAdminService,
+        MigrateService $migrateService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
         ApiCredentialServiceInterface $apiCredentialService,
         UserRepositoryInterface $userRepository
     ) {
-        $this->userService = $userService;
+        $this->loginService = $loginService;
+        $this->registerService = $registerService;
+        $this->createService = $createService;
+        $this->updateUserService = $updateUserService;
+        $this->deleteService = $deleteService;
+        $this->updateProfileService = $updateProfileService;
+        $this->changePasswordService = $changePasswordService;
+        $this->getWalletBalanceService = $getWalletBalanceService;
+        $this->logoutService = $logoutService;
+        $this->requestForgotPasswordService = $requestForgotPasswordService;
+        $this->resetPasswordService = $resetPasswordService;
+        $this->verifyEmailService = $verifyEmailService;
+        $this->fetchUsersAsAdminService = $fetchUsersAsAdminService;
+        $this->migrateService = $migrateService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
@@ -42,7 +94,7 @@ class UserController
 
     public function login()
     {
-        $user = $this->userService->login(new LoginDto(
+        $user = $this->loginService->execute(new LoginDto(
             (string) $this->request->get('email'),
             (string) $this->request->get('password')
         ));
@@ -65,7 +117,7 @@ class UserController
         );
         $registerDto->country_code = (string) $this->request->get('country_code');
 
-        $user = $this->userService->register($registerDto);
+        $user = $this->registerService->execute($registerDto);
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User registered successfully , please check your email for verification"
@@ -74,7 +126,7 @@ class UserController
 
     function create()
     {
-        $user = $this->userService->create(new CreateDto(
+        $user = $this->createService->execute(new CreateDto(
             (string) $this->request->get('email'),
             (string) $this->request->get('password'),
             (string) $this->request->get('name'),
@@ -93,7 +145,7 @@ class UserController
 
     function updateUser()
     {
-        $user = $this->userService->updateUser(new UpdateUserDto(
+        $user = $this->updateUserService->execute(new UpdateUserDto(
             (int) $this->request->get('user_id'),
             (string) $this->request->get('name'),
             (string) $this->request->get('phone'),
@@ -112,7 +164,7 @@ class UserController
     function delete()
     {
         $id = (int) $this->request->get('user_id');
-        $user = $this->userService->delete($id);
+        $user = $this->deleteService->execute($id);
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User deleted successfully"
@@ -122,7 +174,7 @@ class UserController
     function updateProfile()
     {
         $authUser = $this->apiCredentialService->getAuthUser();
-        $user = $this->userService->updateProfile(new UpdateProfileDto(
+        $user = $this->updateProfileService->execute(new UpdateProfileDto(
             (int) $authUser->id,
             (string) $this->request->get('name'),
             (string) $this->request->get('phone'),
@@ -138,7 +190,7 @@ class UserController
     function changePassword()
     {
         $authUser = $this->apiCredentialService->getAuthUser();
-        $user = $this->userService->changePassword(new ChangePasswordDto(
+        $user = $this->changePasswordService->execute(new ChangePasswordDto(
             (int) $authUser->id,
             (string) $this->request->get('old_password'),
             (string) $this->request->get('new_password'),
@@ -154,7 +206,8 @@ class UserController
     function find()
     {
         $id = (int) $this->request->get('user_id');
-        $user = $this->userService->find($id);
+        $user = $this->userRepository->find($id);
+        Contracts::requireEntityFound($user, 'User');
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User found successfully"
@@ -164,7 +217,7 @@ class UserController
     function getWalletBalance()
     {
         $authUser = $this->apiCredentialService->getAuthUser();
-        $balance = $this->userService->getWalletBalance((int) $authUser->id);
+        $balance = $this->getWalletBalanceService->query((int) $authUser->id);
         $this->jsonResponseService->success([
             'balance' => $balance,
             "message" => "Wallet balance fetched successfully"
@@ -174,7 +227,7 @@ class UserController
     function logout()
     {
         $authUser = $this->apiCredentialService->getAuthUser();
-        $this->userService->logout((int) $authUser->id);
+        $this->logoutService->execute((int) $authUser->id);
         $this->jsonResponseService->success([
             'message' => 'Logged out successfully',
             "status" => "success",
@@ -183,7 +236,7 @@ class UserController
 
     function requestForgotPassword()
     {
-        $user = $this->userService->requestForgotPassword(new RequestForgotPasswordDto(
+        $user = $this->requestForgotPasswordService->execute(new RequestForgotPasswordDto(
             (string) $this->request->get('email')
         ));
         $this->jsonResponseService->success([
@@ -194,7 +247,7 @@ class UserController
 
     function resetPassword()
     {
-        $user = $this->userService->resetPassword(new ResetPasswordDto(
+        $user = $this->resetPasswordService->execute(new ResetPasswordDto(
             (string) $this->request->get('email'),
             (string) $this->request->get('otp'),
             (string) $this->request->get('password'),
@@ -208,7 +261,7 @@ class UserController
 
     function verifyEmail()
     {
-        $user = $this->userService->verifyEmail(new VerifyEmailDto(
+        $user = $this->verifyEmailService->execute(new VerifyEmailDto(
             (string) $this->request->get('email'),
             (string) $this->request->get('otp')
         ));
@@ -222,7 +275,7 @@ class UserController
     function fetch()
     {
         $data = $this->request->all();
-        $users = $this->userService->fetchUsersAsAdmin($data);
+        $users = $this->fetchUsersAsAdminService->query($data);
         $this->jsonResponseService->success([
             'users' => $users->fetch(),
             'count' => $users->count(),
@@ -232,7 +285,7 @@ class UserController
 
     function migrate()
     {
-        $result = $this->userService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,

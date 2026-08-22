@@ -20,7 +20,6 @@ use Product\Data\ProductRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
-use User\Business\UserServiceInterface;
 use User\Data\UserRepositoryInterface;
 use Wallet\Business\WalletServiceInterface;
 
@@ -36,7 +35,6 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
     private OrderItemServiceInterface $orderItemService;
     private ProductRepositoryInterface $productRepository;
     private UserRepositoryInterface $userRepository;
-    private UserServiceInterface $userService;
     private WalletServiceInterface $walletService;
     private BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService;
     private BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository;
@@ -52,7 +50,6 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         OrderItemServiceInterface $orderItemService,
         ProductRepositoryInterface $productRepository,
         UserRepositoryInterface $userRepository,
-        UserServiceInterface $userService,
         WalletServiceInterface $walletService,
         BnplPaymentScheduleServiceInterface $bnplPaymentScheduleService,
         BnplPaymentScheduleRepositoryInterface $bnplPaymentScheduleRepository,
@@ -68,7 +65,6 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         $this->orderItemService = $orderItemService;
         $this->productRepository = $productRepository;
         $this->userRepository = $userRepository;
-        $this->userService = $userService;
         $this->walletService = $walletService;
         $this->bnplPaymentScheduleService = $bnplPaymentScheduleService;
         $this->bnplPaymentScheduleRepository = $bnplPaymentScheduleRepository;
@@ -279,7 +275,7 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         // $this->ecomOrderNotificationService->sendOrderInvoiceToPlatform((int) $order->id);
 
         // if ($type === 'wallet') {
-        //     $this->userService->withdrawWallet($user_id, $computedTotal);
+        //     $this->withdrawWalletService->execute(new WithdrawWalletDto($user_id, $computedTotal));
         //     $this->walletService->log(
         //         $user_id,
         //         $computedTotal,

@@ -43,10 +43,6 @@ use PlatformConfig\Data\PlatformConfigMigrationRepository;
 
 use Business\MailTheme\BaseMailThemeInterface;
 use Business\MailTheme\BaseMailTheme;
-use User\Business\AccountMailNotificationService;
-use User\Business\AccountMailNotificationServiceInterface;
-use User\Business\UserService;
-use User\Business\UserServiceInterface;
 use User\Data\UserMigrationRepository;
 use User\Data\UserMigrationRepositoryInterface;
 use User\Data\UserRepository;
@@ -182,13 +178,9 @@ use UserKyc\Data\UserKycMigrationRepositoryInterface;
 use UserKyc\Data\UserKycRepository;
 use UserKyc\Data\UserKycRepositoryInterface;
 
-$appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
-
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
 
 $appServiceContainer->container()->map(UserRepositoryInterface::class, UserRepository::class);
-
-$appServiceContainer->container()->map(AccountMailNotificationServiceInterface::class, AccountMailNotificationService::class);
 
 $appServiceContainer->container()->singleton(ApiCredentialServiceInterface::class, ApiCredentialService::class);
 

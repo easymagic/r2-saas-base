@@ -21,7 +21,7 @@ use SnappyOrder\Data\SnappyOrderEntity;
 use SnappyOrder\Data\SnappyOrderMigrationRepositoryInterface;
 use SnappyOrder\Data\SnappyOrderRepositoryInterface;
 use User\Business\Dtos\WithdrawWalletDto;
-use User\Business\UserServiceInterface;
+use User\Business\Usecases\WithdrawWalletService;
 use User\Data\UserRepositoryInterface;
 use Wallet\Business\Dtos\LogDto as WalletLogDto;
 use Wallet\Business\WalletServiceInterface;
@@ -37,7 +37,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     private FileUploadServiceInterface $fileUploadService;
     private UserRepositoryInterface $userRepository;
     private PlatformConfigServiceInterface $platformConfigService;
-    private UserServiceInterface $userService;
+    private WithdrawWalletService $withdrawWalletService;
     private WalletServiceInterface $walletService;
     private ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService;
     private BatchRepositoryInterface $batchRepository;
@@ -49,7 +49,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         FileUploadServiceInterface $fileUploadService,
         UserRepositoryInterface $userRepository,
         PlatformConfigServiceInterface $platformConfigService,
-        UserServiceInterface $userService,
+        WithdrawWalletService $withdrawWalletService,
         WalletServiceInterface $walletService,
         ProxyOrderChangeLogServiceInterface $proxyOrderChangeLogService,
         BatchRepositoryInterface $batchRepository
@@ -61,7 +61,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         $this->fileUploadService = $fileUploadService;
         $this->userRepository = $userRepository;
         $this->platformConfigService = $platformConfigService;
-        $this->userService = $userService;
+        $this->withdrawWalletService = $withdrawWalletService;
         $this->walletService = $walletService;
         $this->proxyOrderChangeLogService = $proxyOrderChangeLogService;
         $this->batchRepository = $batchRepository;
@@ -291,7 +291,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
         Contracts::requires($order->status === 'pending', 'Order can only be paid when status is pending');
 
         $amount = (float) $order->grand_total_naira;
-        $this->userService->withdrawWallet(new WithdrawWalletDto($payOrderFromWalletDto->user_id, $amount));
+        $this->withdrawWalletService->execute(new WithdrawWalletDto($payOrderFromWalletDto->user_id, $amount));
         $this->walletService->log(new WalletLogDto(
             $payOrderFromWalletDto->user_id,
             $amount,
