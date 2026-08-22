@@ -2,8 +2,10 @@
 
 namespace Presentation\Http\Middlewares;
 
+use EcomOrder\Business\Dtos\PaymentFeedbackDto;
 use EcomOrder\Business\EcomOrderServiceInterface;
 use EcomOrder\Data\EcomOrderEntity;
+use Log\Business\Dtos\CreateLogDto;
 use Log\Business\LogServiceInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
@@ -38,26 +40,26 @@ class EcomOrderFeedbackMiddleware implements MiddlewareServiceInterface
         $orders = $this->ecomOrderService->pendingPaymentsForUser((int) $user->id);
         /** @var EcomOrderEntity $order */
         foreach ($orders as $order) {
-            $this->logService->createLog('ecom_order_feedback', json_encode($order), json_encode([
+            $this->logService->createLog(new CreateLogDto('ecom_order_feedback', json_encode($order), json_encode([
                 'reference' => $order->reference,
-            ]), 'info');
+            ]), 'info'));
 
             try {
-                $updated = $this->ecomOrderService->paymentFeedback(
+                $updated = $this->ecomOrderService->paymentFeedback(new PaymentFeedbackDto(
                     (int) $order->id,
                     (string) $order->reference
-                );
+                ));
                 $level = $updated->payment_status === 'failed' ? 'error' : 'success';
-                $this->logService->createLog('ecom_order_feedback', json_encode($order), json_encode([
+                $this->logService->createLog(new CreateLogDto('ecom_order_feedback', json_encode($order), json_encode([
                     'payment_status' => $updated->payment_status,
-                ]), $level);
+                ]), $level));
             } catch (\Exception $e) {
-                $this->logService->createLog(
+                $this->logService->createLog(new CreateLogDto(
                     'ecom_order_feedback',
                     json_encode($order),
                     json_encode(['error' => $e->getMessage()]),
                     'error'
-                );
+                ));
             }
         }
     }

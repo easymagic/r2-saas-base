@@ -3,7 +3,10 @@
 namespace Category\Business;
 
 use Exception;
+use Category\Business\Dtos\CreateDto;
+use Category\Business\Dtos\UpdateDto;
 use Shared\AbstractBaseService;
+use Shared\Contracts;
 use Shared\Query\QueryObject;
 use Category\Data\CategoryRepositoryInterface;
 use Category\Data\CategoryEntity;
@@ -43,46 +46,22 @@ class CategoryService extends AbstractBaseService implements CategoryServiceInte
      * @param string $slug
      * @return CategoryEntity
      */
-    public function create(
-        string $name,
-        int $parent_id,
-        string $description,
-        array $image,
-        string $slug
-    ) {
-        if (trim($name) === '') {
-            throw new Exception('Name is required');
-        }
-
-        // name should be less than 100 characters
-        if (strlen($name) > 100) {
-            throw new Exception('Name should be less than 100 characters');
-        }
-
-        // description should not be empty
-        if (trim($description) === '') {
-            throw new Exception('Description is required');
-        }
-
-        // description should be less than 1000 characters
-        if (strlen($description) > 1000) {
-            throw new Exception('Description should be less than 1000 characters');
-        }
-
-        $slug = $this->normalizeSlug($slug !== '' ? $slug : $name);
+    public function create(CreateDto $createDto)
+    {
+        $slug = $this->normalizeSlug($createDto->slug !== '' ? $createDto->slug : $createDto->name);
         $this->assertSlugAvailable($slug);
-        $this->assertParentExists($parent_id);
+        $this->assertParentExists($createDto->parent_id);
 
-        $image_path = $this->uploadImage($image, true);
+        $image_path = $this->uploadImage($createDto->image, true);
 
-        return $this->categoryRepository->save(0, [
-            'name' => trim($name),
-            'parent_id' => $parent_id > 0 ? $parent_id : null,
-            'description' => $description,
+        return $this->categoryRepository->save(new CategoryEntity([
+            'name' => $createDto->name,
+            'parent_id' => $createDto->parent_id > 0 ? $createDto->parent_id : 0,
+            'description' => $createDto->description,
             'image' => $image_path,
             'slug' => $slug,
             'active' => 1,
-        ]);
+        ]));
     }
 
     /**
@@ -94,53 +73,33 @@ class CategoryService extends AbstractBaseService implements CategoryServiceInte
      * @param string $slug
      * @return CategoryEntity
      */
-    public function update(
-        int $id,
-        string $name,
-        int $parent_id,
-        string $description,
-        array $image,
-        string $slug,
-        int $active
-    ) {
-        if (empty($id)) {
-            throw new Exception('Category ID is required');
-        }
-        if (trim($name) === '') {
-            throw new Exception('Name is required');
-        }
+    public function update(UpdateDto $updateDto)
+    {
+        $category = $this->categoryRepository->find($updateDto->id);
+        Contracts::requireEntityFound($category, 'Category');
 
-        $category = $this->categoryRepository->find($id);
-        if ($category->isEmpty()) {
-            throw new Exception('Category not found');
-        }
-
-        if ($parent_id > 0 && $parent_id === $id) {
+        if ($updateDto->parent_id > 0 && $updateDto->parent_id === $updateDto->id) {
             throw new Exception('Category cannot be its own parent');
         }
 
-        if (empty($active)) {
-            $active = 0;
-        }
+        $active = empty($updateDto->active) ? 0 : $updateDto->active;
 
-        $slug = $this->normalizeSlug($slug !== '' ? $slug : $name);
-        $this->assertSlugAvailable($slug, $id);
-        $this->assertParentExists($parent_id);
+        $slug = $this->normalizeSlug($updateDto->slug !== '' ? $updateDto->slug : $updateDto->name);
+        $this->assertSlugAvailable($slug, $updateDto->id);
+        $this->assertParentExists($updateDto->parent_id);
 
-        $payload = [
-            'name' => trim($name),
-            'parent_id' => $parent_id > 0 ? $parent_id : null,
-            'description' => $description,
-            'slug' => $slug,
-            'active' => $active,
-        ];
+        $category->name = $updateDto->name;
+        $category->parent_id = $updateDto->parent_id > 0 ? $updateDto->parent_id : 0;
+        $category->description = $updateDto->description;
+        $category->slug = $slug;
+        $category->active = $active;
 
-        $image_path = $this->uploadImage($image, false);
+        $image_path = $this->uploadImage($updateDto->image, false);
         if ($image_path !== '') {
-            $payload['image'] = $image_path;
+            $category->image = $image_path;
         }
 
-        return $this->categoryRepository->save($category->id, $payload);
+        return $this->categoryRepository->save($category);
     }
 
     /**

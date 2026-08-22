@@ -3,6 +3,7 @@
 namespace BnplPaymentSchedule\Business;
 
 use App\Shared\Contracts\Contracts;
+use BnplPaymentSchedule\Business\Dtos\CreateSchedulesDto;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleEntity;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleMigrationRepositoryInterface;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
@@ -52,33 +53,22 @@ class BnplPaymentScheduleService extends AbstractBaseService implements BnplPaym
      * @param string $authorization_code
      * @return BnplPaymentScheduleEntity
      */
-    public function createSchedules(
-        int $order_id,
-        int $number_of_installment,
-        float $installment_amount,
-        string $reference,
-        string $authorization_code
-    ) {
-        Contracts::requires($order_id > 0, 'Order ID is required');
-        Contracts::requires($number_of_installment > 0, 'Number of installment must be greater than 0');
-        Contracts::requires($installment_amount > 0, 'Installment amount must be greater than 0');
-        $reference = trim($reference);
-        Contracts::requiresNotNullOrEmpty($reference, 'reference');
-
-        $order = $this->ecomOrderRepository->find($order_id);
+    public function createSchedules(CreateSchedulesDto $createSchedulesDto)
+    {
+        $order = $this->ecomOrderRepository->find($createSchedulesDto->order_id);
         Contracts::requireEntityFound($order, 'Order');
 
         $first = null;
-        for ($i = 0; $i < $number_of_installment; $i++) {
-            $schedule = $this->bnplPaymentScheduleRepository->save(0, [
-                'order_id' => $order_id,
-                'installment_amount' => $installment_amount,
+        for ($i = 0; $i < $createSchedulesDto->number_of_installment; $i++) {
+            $schedule = $this->bnplPaymentScheduleRepository->save(new BnplPaymentScheduleEntity([
+                'order_id' => $createSchedulesDto->order_id,
+                'installment_amount' => $createSchedulesDto->installment_amount,
                 'payment_status' => 'pending',
-                'reference' => $reference,
-                'authorization_code' => $authorization_code,
+                'reference' => $createSchedulesDto->reference,
+                'authorization_code' => $createSchedulesDto->authorization_code,
                 'number_of_attempts' => 0,
                 'expected_payment_date' => date('Y-m-d', strtotime('+' . $i . ' month')),
-            ]);
+            ]));
             if ($first === null) {
                 $first = $schedule;
             }

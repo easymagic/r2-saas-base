@@ -4,6 +4,8 @@ namespace Cart\Presentation;
 
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use Cart\Business\Dtos\AddToCartDto;
+use Cart\Business\Dtos\RemoveFromCartDto;
 use Cart\Business\CartServiceInterface;
 
 class CartController
@@ -33,11 +35,11 @@ class CartController
 
     function addToCart()
     {
-        $item = $this->cartService->addToCart(
+        $item = $this->cartService->addToCart(new AddToCartDto(
             (string) $this->request->get('uuid', ''),
             (int) $this->request->get('product_id', 0),
             (int) $this->request->get('qty', 0)
-        );
+        ));
         $this->jsonResponseService->success([
             'cart_item' => $item,
             'message' => 'Item added to cart successfully',
@@ -61,10 +63,10 @@ class CartController
 
     function removeFromCart()
     {
-        $this->cartService->removeFromCart(
+        $this->cartService->removeFromCart(new RemoveFromCartDto(
             (string) $this->request->get('uuid', ''),
             (int) $this->request->get('product_id', 0)
-        );
+        ));
         $this->jsonResponseService->success([
             'message' => 'Item removed from cart successfully',
         ]);

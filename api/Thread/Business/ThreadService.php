@@ -7,8 +7,10 @@ use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
 use Notification\Business\NotificationServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
 use Shared\AbstractBaseService;
+use Shared\Contracts;
 use Shared\Query\QueryObject;
 use SnappyOrder\Data\SnappyOrderRepositoryInterface;
+use Thread\Business\Dtos\CreateThreadDto;
 use Thread\Data\ThreadRepositoryInterface;
 use Thread\Data\ThreadEntity;
 use Thread\Data\ThreadMigrationRepositoryInterface;
@@ -26,7 +28,6 @@ class ThreadService extends AbstractBaseService implements ThreadServiceInterfac
     private ThreadNotificationServiceInterface $threadNotificationService;
     private NotificationServiceInterface $notificationService;
     private UserRepositoryInterface $userRepository;
-
 
     public function __construct(
         ThreadMigrationRepositoryInterface $threadMigrationRepositoryInterface,
@@ -52,54 +53,33 @@ class ThreadService extends AbstractBaseService implements ThreadServiceInterfac
         return $this->threadMigrationRepositoryInterface->migrate();
     }
 
-    /**
-     * @param int $order_id
-     * @param int $sender_id
-     * @param string $message
-     * @param array $attachment_url
-     * @return ThreadEntity
-     */
-    public function createThread(int $order_id, int $sender_id, string $message, array $attachment_url = [])
+    public function createThread(CreateThreadDto $createThreadDto)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($sender_id)) {
-            throw new Exception('Sender ID is required');
-        }
-        if (empty($message)) {
-            throw new Exception('Message is required');
-        }
+        $order = $this->snappyOrderRepository->find($createThreadDto->order_id);
+        Contracts::requireEntityFound($order, 'Order');
 
-        $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
-
-        $sender = $this->userRepository->find($sender_id);
-        if ($sender->isEmpty()) {
-            throw new Exception('Sender not found');
-        }
+        $sender = $this->userRepository->find($createThreadDto->sender_id);
+        Contracts::requireEntityFound($sender, 'Sender');
 
         $path = '/uploads/threads';
         $full_path = __DIR__ . '/../../';
         $attachment_path = '';
 
-        if (!empty($attachment_url)) {
-            $uploaded = $this->fileUploadService->uploadFile($attachment_url, $path, $full_path);
+        if (!empty($createThreadDto->attachment_url)) {
+            $uploaded = $this->fileUploadService->uploadFile($createThreadDto->attachment_url, $path, $full_path);
             if ($uploaded) {
                 $attachment_path = $uploaded;
             }
         }
 
-         $thread = $this->threadRepository->save(0, [
-            'order_id' => $order_id,
-            'sender_id' => $sender_id,
-            'message' => $message,
+        $thread = $this->threadRepository->save(new ThreadEntity([
+            'order_id' => $createThreadDto->order_id,
+            'sender_id' => $createThreadDto->sender_id,
+            'message' => $createThreadDto->message,
             'attachment_url' => $attachment_path,
-        ]);
+        ]));
 
-        if ($order->user_id != $sender_id) {
+        if ($order->user_id != $createThreadDto->sender_id) {
             $this->threadNotificationService->sendNotificationToUser($thread->id);
         }
 
@@ -112,21 +92,11 @@ class ThreadService extends AbstractBaseService implements ThreadServiceInterfac
         return $thread;
     }
 
-    /**
-     * @param int $order_id
-     * @param array $filters
-     * @return QueryObject
-     */
     public function getThreadListForOrder(int $order_id, array $filters = [])
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-
+        Contracts::requires($order_id > 0, 'Order ID is required');
         $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
+        Contracts::requireEntityFound($order, 'Order');
 
         $filters['order_id'] = $order_id;
         return $this->threadRepository->query($filters);

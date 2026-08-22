@@ -2,7 +2,10 @@
 
 namespace Presentation\Http\Middlewares;
 
+use Log\Business\Dtos\CreateLogDto;
 use Log\Business\LogServiceInterface;
+use Wallet\Business\Dtos\ApproveManualTopUpDto;
+use Wallet\Business\Dtos\RejectManualTopUpDto;
 use Wallet\Business\WalletServiceInterface;
 use Wallet\Data\WalletEntity;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
@@ -44,28 +47,28 @@ class WalletFeedbackMiddleware implements MiddlewareServiceInterface
             // echo $status;
 
             // if (empty($status)){
-            $this->logService->createLog('wallet_feedback', json_encode($wallet), json_encode([
+            $this->logService->createLog(new CreateLogDto('wallet_feedback', json_encode($wallet), json_encode([
                 "status" => $status,
-            ]), 'info');
+            ]), 'info'));
             // }
 
             if ($status == 'success') {
                 $status = [
                     'status' => $status
                 ];
-                $this->logService->createLog('wallet_feedback', json_encode($wallet), json_encode([
+                $this->logService->createLog(new CreateLogDto('wallet_feedback', json_encode($wallet), json_encode([
                     "status" => $status,
-                ]), 'success');
-                $this->walletService->approveManualTopUp($wallet->id, 'approved');
+                ]), 'success'));
+                $this->walletService->approveManualTopUp(new ApproveManualTopUpDto((int) $wallet->id, 'approved'));
             } else if ($status !== 'abandoned') {
                 $status = [
                     'status' => $status
                 ];
-                $this->logService->createLog('wallet_feedback', json_encode($wallet), json_encode([
+                $this->logService->createLog(new CreateLogDto('wallet_feedback', json_encode($wallet), json_encode([
                     "status" => $status,
                     "error" => $error,
-                ]), 'error');
-                $this->walletService->rejectManualTopUp($wallet->id, 'failed', 'Payment failed');
+                ]), 'error'));
+                $this->walletService->rejectManualTopUp(new RejectManualTopUpDto((int) $wallet->id, 'failed', 'Payment failed'));
             }
         }
     }

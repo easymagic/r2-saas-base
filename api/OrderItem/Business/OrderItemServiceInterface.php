@@ -3,6 +3,8 @@
 namespace OrderItem\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use OrderItem\Business\Dtos\CreateDto;
+use OrderItem\Business\Dtos\FetchForMerchantDto;
 use OrderItem\Data\OrderItemEntity;
 use Shared\Query\QueryObject;
 
@@ -13,20 +15,12 @@ interface OrderItemServiceInterface extends AbstractBaseServiceInterface
 {
     public function migrate();
 
-    public function create(
-        int $order_id,
-        int $merchant_id,
-        int $product_id,
-        int $qty,
-        float $total_line_amount,
-        int $settled,
-        float $percentage_to_platform
-    );
-
     /**
-     * @param int $order_item_id
-     * @return bool
+     * @param CreateDto $createDto
+     * @return OrderItemEntity
      */
+    public function create(CreateDto $createDto);
+
     public function settle(int $order_item_id);
 
     /**
@@ -36,13 +30,8 @@ interface OrderItemServiceInterface extends AbstractBaseServiceInterface
     public function fetchForOrder(int $order_id);
 
     /**
-     * @param int $merchant_id
-     * @param int $settled
-     * @param int $product_id
-     * @param string $date_from
-     * @param string $date_to
+     * @param FetchForMerchantDto $fetchForMerchantDto
      * @return QueryObject
      */
-    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0, string $date_from = '', string $date_to = '');
-
+    public function fetchForMerchant(FetchForMerchantDto $fetchForMerchantDto);
 }

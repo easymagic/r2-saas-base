@@ -2,6 +2,9 @@
 
 namespace Product\Business;
 
+use Product\Business\Dtos\DeductStockQtyDto;
+use Product\Business\Dtos\UpdateDto;
+use Product\Business\Dtos\CreateDto;
 use Exception;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
@@ -57,23 +60,23 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
      * @param array $image_7
      * @return ProductEntity
      */
-    public function create(
-        string $name,
-        string $description,
-        float $price,
-        float $old_price,
-        int $stock_qty,
-        int $category_id,
-        int $user_id,
-        string $slug,
-        array $image_1,
-        array $image_2 = [],
-        array $image_3 = [],
-        array $image_4 = [],
-        array $image_5 = [],
-        array $image_6 = [],
-        array $image_7 = []
-    ) {
+    public function create(CreateDto $createDto) {
+        $name = $createDto->name;
+        $description = $createDto->description;
+        $price = $createDto->price;
+        $old_price = $createDto->old_price;
+        $stock_qty = $createDto->stock_qty;
+        $category_id = $createDto->category_id;
+        $user_id = $createDto->user_id;
+        $slug = $createDto->slug;
+        $image_1 = $createDto->image_1;
+        $image_2 = $createDto->image_2;
+        $image_3 = $createDto->image_3;
+        $image_4 = $createDto->image_4;
+        $image_5 = $createDto->image_5;
+        $image_6 = $createDto->image_6;
+        $image_7 = $createDto->image_7;
+
         $this->assertProductPayload($name, $description, $price, $old_price, $stock_qty, $category_id, $user_id);
 
         $slug = $this->normalizeSlug($slug !== '' ? $slug : $name);
@@ -130,25 +133,25 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
      * @param array $image_7
      * @return ProductEntity
      */
-    public function update(
-        int $id,
-        string $name,
-        string $description,
-        float $price,
-        float $old_price,
-        int $stock_qty,
-        int $category_id,
-        int $user_id,
-        string $slug,
-        int $active,
-        array $image_1 = [],
-        array $image_2 = [],
-        array $image_3 = [],
-        array $image_4 = [],
-        array $image_5 = [],
-        array $image_6 = [],
-        array $image_7 = []
-    ) {
+    public function update(UpdateDto $updateDto) {
+        $id = $updateDto->id;
+        $name = $updateDto->name;
+        $description = $updateDto->description;
+        $price = $updateDto->price;
+        $old_price = $updateDto->old_price;
+        $stock_qty = $updateDto->stock_qty;
+        $category_id = $updateDto->category_id;
+        $user_id = $updateDto->user_id;
+        $slug = $updateDto->slug;
+        $active = $updateDto->active;
+        $image_1 = $updateDto->image_1;
+        $image_2 = $updateDto->image_2;
+        $image_3 = $updateDto->image_3;
+        $image_4 = $updateDto->image_4;
+        $image_5 = $updateDto->image_5;
+        $image_6 = $updateDto->image_6;
+        $image_7 = $updateDto->image_7;
+
         if (empty($id)) {
             throw new Exception('Product ID is required');
         }
@@ -208,8 +211,10 @@ class ProductService extends AbstractBaseService implements ProductServiceInterf
      * @param int $qty
      * @return ProductEntity
      */
-    public function deductStockQty(int $id, int $qty)
-    {
+    public function deductStockQty(DeductStockQtyDto $deductStockQtyDto) {
+        $id = $deductStockQtyDto->id;
+        $qty = $deductStockQtyDto->qty;
+
         $product = $this->productRepository->find($id);
         if ($product->isEmpty()) {
             throw new Exception('Product not found');

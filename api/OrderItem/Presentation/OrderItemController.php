@@ -5,6 +5,7 @@ namespace OrderItem\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use OrderItem\Business\Dtos\FetchForMerchantDto;
 use OrderItem\Business\OrderItemServiceInterface;
 
 class OrderItemController
@@ -57,13 +58,13 @@ class OrderItemController
     function fetchForMerchant()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->orderItemService->fetchForMerchant(
+        $query = $this->orderItemService->fetchForMerchant(new FetchForMerchantDto(
             (int) $user->id,
             (int) $this->request->get('settled', 0),
             (int) $this->request->get('product_id', 0),
             (string) $this->request->get('date_from', ''),
             (string) $this->request->get('date_to', '')
-        );
+        ));
         $this->jsonResponseService->success([
             'order_items' => $query->fetch(),
             'count' => $query->count(),

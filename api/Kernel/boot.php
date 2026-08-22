@@ -14,8 +14,6 @@ use Presentation\ApiCredential\ApiCredentialService;
  */
 use Wallet\Business\WalletServiceInterface;
 use Wallet\Business\WalletService;
-use Wallet\Business\WalletValidationServiceInterface;
-use Wallet\Business\WalletValidationService;
 use Wallet\Business\WalletNotificationServiceInterface;
 use Wallet\Business\WalletNotificationService;
 use Wallet\Data\WalletRepositoryInterface;
@@ -200,7 +198,7 @@ $appServiceContainer->container()->map(WalletRepositoryInterface::class, WalletR
 
 $appServiceContainer->container()->map(WalletNotificationServiceInterface::class, WalletNotificationService::class);
 
-$appServiceContainer->container()->map(WalletValidationServiceInterface::class, WalletValidationService::class);
+$appServiceContainer->container()->map(WalletNotificationServiceInterface::class, WalletNotificationService::class);
 
 $appServiceContainer->container()->map(WalletServiceInterface::class, WalletService::class);
 

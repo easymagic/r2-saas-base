@@ -5,6 +5,7 @@ namespace User\Business;
 use Shared\AbstractBaseService;
 use Shared\Contracts;
 use User\Business\AccountMailNotificationServiceInterface;
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
 use User\Data\UserRepositoryInterface;
 use Exception;
@@ -66,7 +67,7 @@ class UserService extends AbstractBaseService implements UserServiceInterface
                 'Login successful',
                 'You have successfully logged in to your account.'
             ));
-            $this->platformConfigServiceInterface->set('app_version', '1.0.0');
+            $this->platformConfigServiceInterface->set(new SetDto('app_version', '1.0.0'));
             return $user;
         }
         throw new Exception('Invalid credentials!');

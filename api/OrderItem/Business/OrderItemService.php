@@ -8,6 +8,8 @@ use Exception;
 use Product\Data\ProductRepositoryInterface;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
+use OrderItem\Business\Dtos\CreateDto;
+use OrderItem\Business\Dtos\FetchForMerchantDto;
 use OrderItem\Data\OrderItemRepositoryInterface;
 use OrderItem\Data\OrderItemEntity;
 use OrderItem\Data\OrderItemMigrationRepositoryInterface;
@@ -47,48 +49,30 @@ class OrderItemService extends AbstractBaseService implements OrderItemServiceIn
         return $this->orderItemMigrationRepositoryInterface->migrate();
     }
 
-    public function create(
-        int $order_id,
-        int $merchant_id,
-        int $product_id,
-        int $qty,
-        float $total_line_amount,
-        int $settled,
-        float $percentage_to_platform
-    ) {
-        Contracts::requires($order_id > 0, 'Order ID is required');
-        Contracts::requires($merchant_id > 0, 'Merchant ID is required');
-        Contracts::requires($product_id > 0, 'Product ID is required');
-        Contracts::requires($qty > 0, 'Quantity must be greater than 0');
-        Contracts::requires($total_line_amount >= 0, 'Total line amount cannot be negative');
-        Contracts::requires(in_array($settled, [0, 1], true), 'Settled must be 0 or 1');
-        Contracts::requires(
-            $percentage_to_platform >= 0 && $percentage_to_platform <= 100,
-            'Percentage to platform must be between 0 and 100'
-        );
-
-        $order = $this->ecomOrderRepository->find($order_id);
+    public function create(CreateDto $createDto)
+    {
+        $order = $this->ecomOrderRepository->find($createDto->order_id);
         Contracts::requireEntityFound($order, 'Order');
 
-        $merchant = $this->userRepository->find($merchant_id);
+        $merchant = $this->userRepository->find($createDto->merchant_id);
         Contracts::requireEntityFound($merchant, 'Merchant');
 
-        $product = $this->productRepository->find($product_id);
+        $product = $this->productRepository->find($createDto->product_id);
         Contracts::requireEntityFound($product, 'Product');
         Contracts::requires(
-            (int) $product->user_id === $merchant_id,
+            (int) $product->user_id === $createDto->merchant_id,
             'Product does not belong to this merchant'
         );
 
-        return $this->orderItemRepository->save(0, [
-            'order_id' => $order_id,
-            'merchant_id' => $merchant_id,
-            'product_id' => $product_id,
-            'qty' => $qty,
-            'total_line_amount' => $total_line_amount,
-            'settled' => $settled,
-            'percentage_to_platform' => $percentage_to_platform,
-        ]);
+        return $this->orderItemRepository->save(new OrderItemEntity([
+            'order_id' => $createDto->order_id,
+            'merchant_id' => $createDto->merchant_id,
+            'product_id' => $createDto->product_id,
+            'qty' => $createDto->qty,
+            'total_line_amount' => $createDto->total_line_amount,
+            'settled' => $createDto->settled,
+            'percentage_to_platform' => $createDto->percentage_to_platform,
+        ]));
     }
 
     /**
@@ -143,23 +127,19 @@ class OrderItemService extends AbstractBaseService implements OrderItemServiceIn
      * @param string $date_to
      * @return QueryObject<OrderItemEntity>
      */
-    public function fetchForMerchant(int $merchant_id, int $settled = 0, int $product_id = 0, string $date_from = '', string $date_to = '')
+    public function fetchForMerchant(FetchForMerchantDto $fetchForMerchantDto)
     {
-        if (empty($merchant_id)) {
-            throw new Exception('Merchant ID is required');
-        }
-
         $filters = [
-            'merchant_id' => $merchant_id,
-            'settled' => $settled,
+            'merchant_id' => $fetchForMerchantDto->merchant_id,
+            'settled' => $fetchForMerchantDto->settled,
         ];
 
-        if ($product_id > 0) {
-            $filters['product_id'] = $product_id;
+        if ($fetchForMerchantDto->product_id > 0) {
+            $filters['product_id'] = $fetchForMerchantDto->product_id;
         }
 
-        $date_from = trim($date_from);
-        $date_to = trim($date_to);
+        $date_from = trim($fetchForMerchantDto->date_from);
+        $date_to = trim($fetchForMerchantDto->date_to);
 
         if ($date_from !== '') {
             $filters['date_from'] = $this->normalizeDateBound($date_from, false);

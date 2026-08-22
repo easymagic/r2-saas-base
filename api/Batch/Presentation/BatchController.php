@@ -4,6 +4,7 @@ namespace Batch\Presentation;
 
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use Batch\Business\Dtos\CreateDto;
 use Batch\Business\BatchServiceInterface;
 
 class BatchController
@@ -33,10 +34,10 @@ class BatchController
 
     function create()
     {
-        $batch = $this->batchService->create(
-            $this->request->get('name'),
-            $this->request->get('description')
-        );
+        $batch = $this->batchService->create(new CreateDto(
+            (string) $this->request->get('name'),
+            (string) $this->request->get('description')
+        ));
         $this->jsonResponseService->success([
             'batch' => $batch,
             'message' => 'Batch created successfully',

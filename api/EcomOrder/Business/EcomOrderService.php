@@ -2,6 +2,10 @@
 
 namespace EcomOrder\Business;
 
+use EcomOrder\Business\Dtos\PaymentFeedbackDto;
+use EcomOrder\Business\Dtos\AssignToAgentDto;
+use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
+use EcomOrder\Business\Dtos\CheckoutDto;
 use Shared\Contracts;
 use BnplPaymentSchedule\Business\BnplPaymentScheduleServiceInterface;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleRepositoryInterface;
@@ -10,6 +14,7 @@ use EcomOrder\Data\EcomOrderEntity;
 use EcomOrder\Data\EcomOrderMigrationRepositoryInterface;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use OrderItem\Business\OrderItemServiceInterface;
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
 use Product\Data\ProductRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
@@ -126,36 +131,17 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
      * @param string $cart_uuid
      * @return EcomOrderEntity
      */
-    public function checkout(
-        int $user_id,
-        string $type,
-        int $number_of_installment,
-        string $customer_name,
-        string $customer_address,
-        string $customer_email,
-        string $reference,
-        string $cart_uuid
-    ) {
+    public function checkout(CheckoutDto $checkoutDto) {
+        $user_id = $checkoutDto->user_id;
+        $type = $checkoutDto->type;
+        $number_of_installment = $checkoutDto->number_of_installment;
+        $customer_name = $checkoutDto->customer_name;
+        $customer_address = $checkoutDto->customer_address;
+        $customer_email = $checkoutDto->customer_email;
+        $reference = $checkoutDto->reference;
+        $cart_uuid = $checkoutDto->cart_uuid;
 
 
-        $this->ecomOrderWorkflow->validateCheckout(
-            $user_id,
-            $type,
-            $number_of_installment,
-            $customer_name,
-            $customer_address,
-            $customer_email,
-            $cart_uuid
-        )
-        ->isPaymentMethodWallet()
-        ->and()
-        ->isCustomerWalletNotSufficient()
-        ->reject("Insufficient wallet balance")
-        ->end()
-        ->isPaymentMethodBnpl()
-        ->and()
-        ->isNumberOfInstallmentValid()
-        ->loadTotalAmount();
 
 
 
@@ -326,13 +312,15 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
 
     public function publishSettings()
     {
-        $this->platformConfigService->set('ECOM_SHIPPING_FEE', (string) $this->getShippingFee());
-        $this->platformConfigService->set('ECOM_SERVICE_CHARGE', (string) $this->getServiceCharge());
-        $this->platformConfigService->set('ECOM_PERCENTAGE_TO_PLATFORM', (string) $this->getPercentageToPlatform());
+        $this->platformConfigService->set(new SetDto('ECOM_SHIPPING_FEE', (string) $this->getShippingFee()));
+        $this->platformConfigService->set(new SetDto('ECOM_SERVICE_CHARGE', (string) $this->getServiceCharge()));
+        $this->platformConfigService->set(new SetDto('ECOM_PERCENTAGE_TO_PLATFORM', (string) $this->getPercentageToPlatform()));
     }
 
-    public function updateDeliveryStatus(int $order_id, string $delivery_status)
-    {
+    public function updateDeliveryStatus(UpdateDeliveryStatusDto $updateDeliveryStatusDto) {
+        $order_id = $updateDeliveryStatusDto->order_id;
+        $delivery_status = $updateDeliveryStatusDto->delivery_status;
+
         $delivery_status = trim($delivery_status);
         Contracts::requires($order_id > 0, 'Order ID is required');
         Contracts::requiresInArray(
@@ -384,8 +372,10 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         return $order;
     }
 
-    public function assignToAgent(int $order_id, int $agent_id)
-    {
+    public function assignToAgent(AssignToAgentDto $assignToAgentDto) {
+        $order_id = $assignToAgentDto->order_id;
+        $agent_id = $assignToAgentDto->agent_id;
+
         Contracts::requires($order_id > 0, 'Order ID is required');
         Contracts::requires($agent_id > 0, 'Agent ID is required');
 
@@ -404,8 +394,10 @@ class EcomOrderService extends AbstractBaseService implements EcomOrderServiceIn
         return $order;
     }
 
-    public function paymentFeedback(int $order_id, string $reference)
-    {
+    public function paymentFeedback(PaymentFeedbackDto $paymentFeedbackDto) {
+        $order_id = $paymentFeedbackDto->order_id;
+        $reference = $paymentFeedbackDto->reference;
+
         Contracts::requires($order_id > 0, 'Order ID is required');
         $reference = trim($reference);
         Contracts::requiresNotNullOrEmpty($reference, 'reference');

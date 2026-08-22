@@ -6,6 +6,7 @@ use Shared\Contracts;
 use Notification\Data\NotificationMigrationRepositoryInterface;
 use Notification\Data\NotificationRepositoryInterface;
 use Exception;
+use Log\Business\Dtos\CreateLogDto;
 use Log\Business\LogServiceInterface;
 use Shared\AbstractBaseService;
 use Notification\Data\NotificationEntity;
@@ -64,13 +65,13 @@ class NotificationService extends AbstractBaseService implements NotificationSer
         $notification = $this->notificationRepository->find($markAsReadDto->notificationId);
         Contracts::requireEntityFound($notification, 'Notification');
         if ((int) $notification->user_id !== (int) $markAsReadDto->userId) {
-            $this->logService->createLog('notification_mark_as_read', json_encode([
+            $this->logService->createLog(new CreateLogDto('notification_mark_as_read', json_encode([
                 'notification' => $notification,
                 'user_id' => $markAsReadDto->userId,
             ]), json_encode([
                 'status' => 'error',
                 'message' => 'You are not authorized to mark this notification as read',
-            ]), 'error');
+            ]), 'error'));
             throw new Exception('You are not authorized to mark this notification as read');
         }
         $notification->read_at = date('Y-m-d H:i:s');
@@ -84,13 +85,13 @@ class NotificationService extends AbstractBaseService implements NotificationSer
         $notification = $this->notificationRepository->find($markAsUnreadDto->notificationId);
         Contracts::requireEntityFound($notification, 'Notification');
         if ((int) $notification->user_id !== (int) $markAsUnreadDto->userId) {
-            $this->logService->createLog('notification_mark_as_unread', json_encode([
+            $this->logService->createLog(new CreateLogDto('notification_mark_as_unread', json_encode([
                 'notification' => $notification,
                 'user_id' => $markAsUnreadDto->userId,
             ]), json_encode([
                 'status' => 'error',
                 'message' => 'You are not authorized to mark this notification as unread',
-            ]), 'error');
+            ]), 'error'));
             throw new Exception('You are not authorized to mark this notification as unread');
         }
         $notification->is_read = 0;
@@ -103,13 +104,13 @@ class NotificationService extends AbstractBaseService implements NotificationSer
         $notification = $this->notificationRepository->find($removeDto->notificationId);
         Contracts::requireEntityFound($notification, 'Notification');
         if ((int) $notification->user_id !== (int) $removeDto->userId) {
-            $this->logService->createLog('notification_remove', json_encode([
+            $this->logService->createLog(new CreateLogDto('notification_remove', json_encode([
                 'notification' => $notification,
                 'user_id' => $removeDto->userId,
             ]), json_encode([
                 'status' => 'error',
                 'message' => 'You are not authorized to delete this notification',
-            ]), 'error');
+            ]), 'error'));
             throw new Exception('You are not authorized to delete this notification');
         }
 

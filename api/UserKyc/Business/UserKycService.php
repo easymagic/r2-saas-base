@@ -2,6 +2,10 @@
 
 namespace UserKyc\Business;
 
+use UserKyc\Business\Dtos\RejectDto;
+use UserKyc\Business\Dtos\ApproveDto;
+use UserKyc\Business\Dtos\UpdateDto;
+use UserKyc\Business\Dtos\CreateDto;
 use Exception;
 use Shared\AbstractBaseService;
 use Shared\Query\QueryObject;
@@ -42,17 +46,17 @@ class UserKycService extends AbstractBaseService implements UserKycServiceInterf
         return $this->userKycMigrationRepositoryInterface->migrate();
     }
 
-    public function create(
-        int $user_id,
-        string $nin,
-        string $store_name,
-        string $description,
-        array $document1,
-        array $document2,
-        array $document3,
-        array $document4,
-        array $document5
-    ) {
+    public function create(CreateDto $createDto) {
+        $user_id = $createDto->user_id;
+        $nin = $createDto->nin;
+        $store_name = $createDto->store_name;
+        $description = $createDto->description;
+        $document1 = $createDto->document1;
+        $document2 = $createDto->document2;
+        $document3 = $createDto->document3;
+        $document4 = $createDto->document4;
+        $document5 = $createDto->document5;
+
         $this->assertPayload($user_id, $nin, $store_name, $description);
         $this->assertUserExists($user_id);
 
@@ -89,18 +93,18 @@ class UserKycService extends AbstractBaseService implements UserKycServiceInterf
         ]);
     }
 
-    public function update(
-        int $id,
-        int $user_id,
-        string $nin,
-        string $store_name,
-        string $description,
-        array $document1,
-        array $document2,
-        array $document3,
-        array $document4,
-        array $document5
-    ) {
+    public function update(UpdateDto $updateDto) {
+        $id = $updateDto->id;
+        $user_id = $updateDto->user_id;
+        $nin = $updateDto->nin;
+        $store_name = $updateDto->store_name;
+        $description = $updateDto->description;
+        $document1 = $updateDto->document1;
+        $document2 = $updateDto->document2;
+        $document3 = $updateDto->document3;
+        $document4 = $updateDto->document4;
+        $document5 = $updateDto->document5;
+
         if (empty($id)) {
             throw new Exception('KYC ID is required');
         }
@@ -147,8 +151,10 @@ class UserKycService extends AbstractBaseService implements UserKycServiceInterf
         return $this->userKycRepository->save($kyc->id, $payload);
     }
 
-    public function approve(int $id, int $approved_by)
-    {
+    public function approve(ApproveDto $approveDto) {
+        $id = $approveDto->id;
+        $approved_by = $approveDto->approved_by;
+
         if (empty($id)) {
             throw new Exception('KYC ID is required');
         }
@@ -181,8 +187,11 @@ class UserKycService extends AbstractBaseService implements UserKycServiceInterf
         return $kyc;
     }
 
-    public function reject(int $id, int $rejected_by, string $reject_reason)
-    {
+    public function reject(RejectDto $rejectDto) {
+        $id = $rejectDto->id;
+        $rejected_by = $rejectDto->rejected_by;
+        $reject_reason = $rejectDto->reject_reason;
+
         if (empty($id)) {
             throw new Exception('KYC ID is required');
         }

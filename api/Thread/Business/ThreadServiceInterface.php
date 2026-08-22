@@ -3,6 +3,7 @@
 namespace Thread\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use Thread\Business\Dtos\CreateThreadDto;
 use Thread\Data\ThreadEntity;
 use Shared\Query\QueryObject;
 
@@ -14,17 +15,12 @@ interface ThreadServiceInterface extends AbstractBaseServiceInterface
     public function migrate();
 
     /**
-     * Create a thread
-     * @param int $order_id
-     * @param int $sender_id
-     * @param string $message
-     * @param array $attachment_url
+     * @param CreateThreadDto $createThreadDto
      * @return ThreadEntity
      */
-    public function createThread(int $order_id, int $sender_id, string $message, array $attachment_url = []);
+    public function createThread(CreateThreadDto $createThreadDto);
 
     /**
-     * Get the thread list for an order
      * @param int $order_id
      * @param array $filters
      * @return QueryObject

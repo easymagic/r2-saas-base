@@ -1,6 +1,7 @@
 <?php
 namespace PlatformConfig\Presentation;
 
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
@@ -35,7 +36,10 @@ class PlatformConfigController
     function update(){
       $setting_name =  $this->request->get('setting_name');
       $setting_value =  $this->request->get('setting_value');
-      $result = $this->platformConfigService->set($setting_name, $setting_value);
+      $result = $this->platformConfigService->set(new SetDto(
+        (string) $setting_name,
+        (string) $setting_value
+      ));
       return $this->jsonResponseService->success([
         'message' => 'Platform config updated successfully',
         'result' => $result

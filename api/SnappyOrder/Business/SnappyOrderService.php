@@ -2,19 +2,28 @@
 
 namespace SnappyOrder\Business;
 
-use App\Shared\Contracts\Contracts;
 use Batch\Data\BatchRepositoryInterface;
-use Exception;
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Business\PlatformConfigServiceInterface;
+use ProxyOrderChangeLog\Business\Dtos\LogDto as ProxyOrderChangeLogDto;
 use ProxyOrderChangeLog\Business\ProxyOrderChangeLogServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
 use Shared\AbstractBaseService;
+use Shared\Contracts;
 use Shared\Query\QueryObject;
+use SnappyOrder\Business\Dtos\AssignToAgentDto;
+use SnappyOrder\Business\Dtos\AssignToBatchDto;
+use SnappyOrder\Business\Dtos\ChangePriceDto;
+use SnappyOrder\Business\Dtos\ChangeStatusDto;
+use SnappyOrder\Business\Dtos\CreateDto;
+use SnappyOrder\Business\Dtos\PayOrderFromWalletDto;
 use SnappyOrder\Data\SnappyOrderEntity;
 use SnappyOrder\Data\SnappyOrderMigrationRepositoryInterface;
 use SnappyOrder\Data\SnappyOrderRepositoryInterface;
+use User\Business\Dtos\WithdrawWalletDto;
 use User\Business\UserServiceInterface;
 use User\Data\UserRepositoryInterface;
+use Wallet\Business\Dtos\LogDto as WalletLogDto;
 use Wallet\Business\WalletServiceInterface;
 
 /**
@@ -64,63 +73,38 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     }
 
     /**
-     * @param int $user_id
-     * @param string $link
-     * @param string $description
-     * @param array $screen_shot1
-     * @param array $screen_shot2
-     * @param array $screen_shot3
-     * @param float $total_amount_usd
+     * @param CreateDto $createDto
      * @return SnappyOrderEntity
      */
-    public function create(
-        int $user_id,
-        string $link,
-        string $description,
-        array $screen_shot1,
-        array $screen_shot2,
-        array $screen_shot3,
-        float $total_amount_usd
-    ) {
-        Contracts::requiresNotNullOrEmpty($user_id, 'user id');
-        Contracts::requiresNotNullOrEmpty($link, 'link url');
-        Contracts::requiresNotNullOrEmpty($description, 'description');
-        Contracts::requiresNotNullOrEmpty($total_amount_usd, 'total amount in USD');
-        Contracts::requiresNotNullOrEmpty($screen_shot1, 'screen shot 1');
-        // Contracts::requiresNotNullOrEmpty($screen_shot2, 'screen shot 2');
-        // Contracts::requiresNotNullOrEmpty($screen_shot3, 'screen shot 3');
-
-        $user = $this->userRepository->find($user_id);
+    public function create(CreateDto $createDto)
+    {
+        $user = $this->userRepository->find($createDto->user_id);
         Contracts::requireEntityFound($user, 'user');
 
         $path = '/uploads/snappy_orders';
         $full_path = __DIR__ . '/../../';
 
-        $screen_shot1_path = $this->fileUploadService->uploadFile($screen_shot1, $path, $full_path);
-        $screen_shot2_path = $this->fileUploadService->uploadFile($screen_shot2, $path, $full_path);
-        $screen_shot3_path = $this->fileUploadService->uploadFile($screen_shot3, $path, $full_path);
+        $screen_shot1_path = $this->fileUploadService->uploadFile($createDto->screen_shot1, $path, $full_path);
+        $screen_shot2_path = $this->fileUploadService->uploadFile($createDto->screen_shot2, $path, $full_path);
+        $screen_shot3_path = $this->fileUploadService->uploadFile($createDto->screen_shot3, $path, $full_path);
 
-        // if (!$screen_shot1_path) {
-        //     throw new Exception('Failed to upload screen shot 1');
-        // }
-
-        $order = $this->snappyOrderRepository->save(0, [
+        $order = $this->snappyOrderRepository->save(new SnappyOrderEntity([
             'user_id' => $user->id,
             'type' => 'manual',
             'reference' => uniqid('MANUAL_'),
-            'link' => $link,
-            'description' => $description,
-            'total_amount_usd' => $total_amount_usd,
-            'screen_shot1' => $screen_shot1_path? $screen_shot1_path : '',
-            'screen_shot2' => $screen_shot2_path? $screen_shot2_path : '',
-            'screen_shot3' => $screen_shot3_path? $screen_shot3_path : '',
+            'link' => $createDto->link,
+            'description' => $createDto->description,
+            'total_amount_usd' => (string) $createDto->total_amount_usd,
+            'screen_shot1' => $screen_shot1_path ? $screen_shot1_path : '',
+            'screen_shot2' => $screen_shot2_path ? $screen_shot2_path : '',
+            'screen_shot3' => $screen_shot3_path ? $screen_shot3_path : '',
             'status' => 'pending',
-            'service_charge_usd' => $this->getServiceCharge(),
-            'shipping_cost_usd' => $this->getShippingCost(),
-            'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
-            'grand_total_naira' => $this->getTotalAmountNaira($total_amount_usd),
+            'service_charge_usd' => (float) $this->getServiceCharge(),
+            'shipping_cost_usd' => (float) $this->getShippingCost(),
+            'dollar_to_naira_rate' => (float) $this->getDollarToNairaRate(),
+            'grand_total_naira' => (string) $this->getTotalAmountNaira($createDto->total_amount_usd),
             'price_adjustment_sent' => 0,
-        ]);
+        ]));
 
         $this->snappyOrderMailService->notifyCustomerOfOrderCreation($order->id);
         $this->snappyOrderMailService->notifyAdminOfOrderCreation($order->id);
@@ -129,48 +113,47 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     }
 
     /**
-     * @param int $order_id
-     * @param string $status
+     * @param ChangeStatusDto $changeStatusDto
      * @return SnappyOrderEntity
      */
-    public function changeStatus(int $order_id, string $status, string $pickup_otp_code = "")
+    public function changeStatus(ChangeStatusDto $changeStatusDto)
     {
-        Contracts::requiresNotNullOrEmpty($order_id, 'order id');
-        Contracts::requiresNotNullOrEmpty($status, 'status');
-        Contracts::requiresInArray($status, SnappyOrderRepositoryInterface::ALLOWED_STATUSES, 'status');
-
-        $order = $this->snappyOrderRepository->find($order_id);
+        $order = $this->snappyOrderRepository->find($changeStatusDto->order_id);
         Contracts::requireEntityFound($order, 'order');
 
         $previousStatus = $order->status;
+        $status = $changeStatusDto->status;
 
-        Contracts::requires($status === 'pending' && $previousStatus !== 'pending', 'Status cannot be changed back to pending');
+        Contracts::requires($status !== 'pending', 'Status cannot be changed back to pending');
+        Contracts::requires(
+            $status !== 'cancelled' || $previousStatus === 'pending',
+            'Can only cancel pending orders'
+        );
 
-        Contracts::requires($status === 'cancelled' && $previousStatus !== 'pending', 'Can only cancel pending orders');
-
-        // Pickup OTP is issued when the order becomes ready for pickup.
         if ($status === 'ready-for-pickup') {
             $otp_code = rand(100000, 999999);
-            $order = $this->snappyOrderRepository->save($order_id, [
-                'status' => $status,
-                'pickup_otp_code' => $otp_code,
-            ]);
+            $order->status = $status;
+            $order->pickup_otp_code = (int) $otp_code;
+            $order = $this->snappyOrderRepository->save($order);
             $this->snappyOrderMailService->notifyCustomerOfPickupOTP($order->id, (string) $otp_code);
         } else {
-            if ($status === 'delivered'){
-                if (empty($pickup_otp_code)) {
-                    throw new Exception('Pickup OTP code is required when status is delivered');
-                }
-                if ($pickup_otp_code !== $order->pickup_otp_code) {
-                    throw new Exception('Invalid pickup OTP code');
-                }
-            }    
-            $order = $this->snappyOrderRepository->save($order_id, [
-                'status' => $status,
-            ]);
+            if ($status === 'delivered') {
+                Contracts::requiresNotNullOrEmpty($changeStatusDto->pickup_otp_code, 'Pickup OTP code');
+                Contracts::requires(
+                    $changeStatusDto->pickup_otp_code === (string) $order->pickup_otp_code,
+                    'Invalid pickup OTP code'
+                );
+            }
+            $order->status = $status;
+            $order = $this->snappyOrderRepository->save($order);
         }
 
-        $this->proxyOrderChangeLogService->log($order->id, 'status', $previousStatus, $status);
+        $this->proxyOrderChangeLogService->log(new ProxyOrderChangeLogDto(
+            $order->id,
+            'status',
+            (string) $previousStatus,
+            (string) $status
+        ));
 
         $this->snappyOrderMailService->notifyCustomerOfStatusChange($order->id, $status);
 
@@ -178,32 +161,32 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     }
 
     /**
-     * @param int $order_id
-     * @param int $agent_id
+     * @param AssignToAgentDto $assignToAgentDto
      * @return SnappyOrderEntity
      */
-    public function assignToAgent(int $order_id, int $agent_id)
+    public function assignToAgent(AssignToAgentDto $assignToAgentDto)
     {
-        Contracts::requiresNotNullOrEmpty($order_id, 'order id');
-        Contracts::requiresNotNullOrEmpty($agent_id, 'agent id');
-
-        $agent = $this->userRepository->find($agent_id);
+        $agent = $this->userRepository->find($assignToAgentDto->agent_id);
         Contracts::requireEntityFound($agent, 'agent');
         Contracts::requires($agent->role === 'agent', $agent->name . ' is not an agent');
 
-        $order = $this->snappyOrderRepository->find($order_id);
+        $order = $this->snappyOrderRepository->find($assignToAgentDto->order_id);
         Contracts::requireEntityFound($order, 'order');
 
         $previousAgentId = $order->agent_id;
-        $order = $this->snappyOrderRepository->save($order->id, [
-            'agent_id' => $agent_id,
-            'status' => 'placed',
-        ]);
+        $order->agent_id = $assignToAgentDto->agent_id;
+        $order->status = 'placed';
+        $order = $this->snappyOrderRepository->save($order);
 
-        $this->proxyOrderChangeLogService->log($order->id, 'agent_id', $previousAgentId, $agent_id);
+        $this->proxyOrderChangeLogService->log(new ProxyOrderChangeLogDto(
+            $order->id,
+            'agent_id',
+            (string) $previousAgentId,
+            (string) $assignToAgentDto->agent_id
+        ));
 
-        $this->snappyOrderMailService->notifyAgenOfOrderAssignment($order->id, $agent_id);
-        $this->snappyOrderMailService->notifyCustomerOfAgentAssignment($order->id, $agent_id);
+        $this->snappyOrderMailService->notifyAgenOfOrderAssignment($order->id, $assignToAgentDto->agent_id);
+        $this->snappyOrderMailService->notifyCustomerOfAgentAssignment($order->id, $assignToAgentDto->agent_id);
 
         return $order;
     }
@@ -216,12 +199,8 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     public function getMyOrdersAsAgent(int $agent_id, array $filters = [])
     {
         $agent = $this->userRepository->find($agent_id);
-        if ($agent->isEmpty()) {
-            throw new Exception('Agent not found');
-        }
-        if ($agent->role !== 'agent') {
-            throw new Exception('User is not an agent');
-        }
+        Contracts::requireEntityFound($agent, 'Agent');
+        Contracts::requires($agent->role === 'agent', 'User is not an agent');
 
         $filters['agent_id'] = $agent_id;
         return $this->snappyOrderRepository->query($filters);
@@ -235,9 +214,7 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     public function getMyOrdersAsCustomer(int $customer_id, array $filters = [])
     {
         $customer = $this->userRepository->find($customer_id);
-        if ($customer->isEmpty()) {
-            throw new Exception('Customer not found');
-        }
+        Contracts::requireEntityFound($customer, 'Customer');
 
         $filters['user_id'] = $customer_id;
         return $this->snappyOrderRepository->query($filters);
@@ -251,107 +228,81 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     public function getMyOrderAsAdmin(int $admin_id, array $filters = [])
     {
         $admin = $this->userRepository->find($admin_id);
-        if ($admin->isEmpty()) {
-            throw new Exception('Admin not found');
-        }
-        if (!$admin->isAdmin()) {
-            throw new Exception('User is not an admin');
-        }
+        Contracts::requireEntityFound($admin, 'Admin');
+        Contracts::requires($admin->isAdmin(), 'User is not an admin');
 
         return $this->snappyOrderRepository->query($filters);
     }
 
     /**
-     * Publish the settings to the database
      * @return void
      */
     public function publishSettings()
     {
-        $this->platformConfigService->set('SERVICE_CHARGE', $this->getServiceCharge());
-        $this->platformConfigService->set('SHIPPING_COST', $this->getShippingCost());
-        $this->platformConfigService->set('DOLLAR_TO_NAIRA_RATE', $this->getDollarToNairaRate());
+        $this->platformConfigService->set(new SetDto('SERVICE_CHARGE', (string) $this->getServiceCharge()));
+        $this->platformConfigService->set(new SetDto('SHIPPING_COST', (string) $this->getShippingCost()));
+        $this->platformConfigService->set(new SetDto('DOLLAR_TO_NAIRA_RATE', (string) $this->getDollarToNairaRate()));
     }
 
     /**
-     * @param int $order_id
-     * @param float $price
+     * @param ChangePriceDto $changePriceDto
      * @return SnappyOrderEntity
      */
-    public function changePrice(int $order_id, float $price)
+    public function changePrice(ChangePriceDto $changePriceDto)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($price)) {
-            throw new Exception('Price is required');
-        }
+        $order = $this->snappyOrderRepository->find($changePriceDto->order_id);
+        Contracts::requireEntityFound($order, 'Order');
+        Contracts::requires($order->status === 'pending', 'Price can only be changed when order status is pending');
 
-        $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
-        if ($order->status !== 'pending') {
-            throw new Exception('Price can only be changed when order status is pending');
-        }
+        $previousPrice = (string) $order->total_amount_usd;
+        $order->total_amount_usd = (string) $changePriceDto->price;
+        $order->service_charge_usd = (float) $this->getServiceCharge();
+        $order->shipping_cost_usd = (float) $this->getShippingCost();
+        $order->dollar_to_naira_rate = (float) $this->getDollarToNairaRate();
+        $order->grand_total_naira = (string) $this->getTotalAmountNaira($changePriceDto->price);
+        $order->price_adjustment_sent = 1;
+        $order = $this->snappyOrderRepository->save($order);
 
-        $order = $this->snappyOrderRepository->save($order->id, [
-            'total_amount_usd' => $price,
-            'service_charge_usd' => $this->getServiceCharge(),
-            'shipping_cost_usd' => $this->getShippingCost(),
-            'dollar_to_naira_rate' => $this->getDollarToNairaRate(),
-            'grand_total_naira' => $this->getTotalAmountNaira($price),
-            'price_adjustment_sent' => 1,
-        ]);
+        $this->proxyOrderChangeLogService->log(new ProxyOrderChangeLogDto(
+            $order->id,
+            'total_amount_usd',
+            $previousPrice,
+            (string) $changePriceDto->price
+        ));
 
-        $this->proxyOrderChangeLogService->log($order->id, 'total_amount_usd', $order->total_amount_usd, $price);
-
-        $this->snappyOrderMailService->notifyCustomerOfPriceChange($order->id, $price);
+        $this->snappyOrderMailService->notifyCustomerOfPriceChange($order->id, $changePriceDto->price);
 
         return $order;
     }
 
     /**
-     * @param int $order_id
-     * @param int $user_id
+     * @param PayOrderFromWalletDto $payOrderFromWalletDto
      * @return SnappyOrderEntity
      */
-    public function payOrderFromWallet(int $order_id, int $user_id)
+    public function payOrderFromWallet(PayOrderFromWalletDto $payOrderFromWalletDto)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($user_id)) {
-            throw new Exception('User ID is required');
-        }
-
-        $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
-        if ((int) $order->price_adjustment_sent !== 1) {
-            throw new Exception('Price adjustment not sent');
-        }
-        if ((int) $order->user_id !== $user_id) {
-            throw new Exception('You are not authorized to pay for this order');
-        }
-        if ($order->status !== 'pending') {
-            throw new Exception('Order can only be paid when status is pending');
-        }
+        $order = $this->snappyOrderRepository->find($payOrderFromWalletDto->order_id);
+        Contracts::requireEntityFound($order, 'Order');
+        Contracts::requires((int) $order->price_adjustment_sent === 1, 'Price adjustment not sent');
+        Contracts::requires(
+            (int) $order->user_id === $payOrderFromWalletDto->user_id,
+            'You are not authorized to pay for this order'
+        );
+        Contracts::requires($order->status === 'pending', 'Order can only be paid when status is pending');
 
         $amount = (float) $order->grand_total_naira;
-        $this->userService->withdrawWallet($user_id, $amount);
-        $this->walletService->log(
-            $user_id,
+        $this->userService->withdrawWallet(new WithdrawWalletDto($payOrderFromWalletDto->user_id, $amount));
+        $this->walletService->log(new WalletLogDto(
+            $payOrderFromWalletDto->user_id,
             $amount,
             uniqid('WALLET_WITHDRAWAL_'),
             'withdrawal',
             'Withdrawal from wallet for snappy order #' . $order->id,
             'approved'
-        );
+        ));
 
-        $order = $this->snappyOrderRepository->save($order->id, [
-            'status' => 'paid',
-        ]);
+        $order->status = 'paid';
+        $order = $this->snappyOrderRepository->save($order);
 
         $this->snappyOrderMailService->notifyCustomerOfOrderPayment($order->id);
 
@@ -359,41 +310,27 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
     }
 
     /**
-     * @param int $order_id
-     * @param int $batch_id
+     * @param AssignToBatchDto $assignToBatchDto
      * @return SnappyOrderEntity
      */
-    public function assignToBatch(int $order_id, int $batch_id)
+    public function assignToBatch(AssignToBatchDto $assignToBatchDto)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
-        if (empty($batch_id)) {
-            throw new Exception('Batch ID is required');
-        }
+        $batch = $this->batchRepository->find($assignToBatchDto->batch_id);
+        Contracts::requireEntityFound($batch, 'Batch');
 
-        $batch = $this->batchRepository->find($batch_id);
-        if ($batch->isEmpty()) {
-            throw new Exception('Batch not found');
-        }
-
-        $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
+        $order = $this->snappyOrderRepository->find($assignToBatchDto->order_id);
+        Contracts::requireEntityFound($order, 'Order');
 
         $old_batch_id = (string) $order->batch_id;
+        $order->batch_id = $assignToBatchDto->batch_id;
+        $order = $this->snappyOrderRepository->save($order);
 
-        $order = $this->snappyOrderRepository->save($order->id, [
-            'batch_id' => $batch_id,
-        ]);
-
-        $this->proxyOrderChangeLogService->log(
+        $this->proxyOrderChangeLogService->log(new ProxyOrderChangeLogDto(
             $order->id,
             'batch_id',
             $old_batch_id,
-            (string) $batch_id
-        );
+            (string) $assignToBatchDto->batch_id
+        ));
 
         return $order;
     }
@@ -404,31 +341,22 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
      */
     public function unassignFromBatch(int $order_id)
     {
-        if (empty($order_id)) {
-            throw new Exception('Order ID is required');
-        }
+        Contracts::requires($order_id > 0, 'Order ID is required');
 
         $order = $this->snappyOrderRepository->find($order_id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
-
-        if (empty($order->batch_id)) {
-            throw new Exception('Order is not assigned to a batch');
-        }
+        Contracts::requireEntityFound($order, 'Order');
+        Contracts::requires(!empty($order->batch_id), 'Order is not assigned to a batch');
 
         $old_batch_id = (string) $order->batch_id;
+        $order->batch_id = 0;
+        $order = $this->snappyOrderRepository->save($order);
 
-        $order = $this->snappyOrderRepository->save($order->id, [
-            'batch_id' => null,
-        ]);
-
-        $this->proxyOrderChangeLogService->log(
+        $this->proxyOrderChangeLogService->log(new ProxyOrderChangeLogDto(
             $order->id,
             'batch_id',
             $old_batch_id,
             ''
-        );
+        ));
 
         return $order;
     }
@@ -439,14 +367,10 @@ class SnappyOrderService extends AbstractBaseService implements SnappyOrderServi
      */
     public function getById(int $id)
     {
-        if (empty($id)) {
-            throw new Exception('Order ID is required');
-        }
+        Contracts::requires($id > 0, 'Order ID is required');
 
         $order = $this->snappyOrderRepository->find($id);
-        if ($order->isEmpty()) {
-            throw new Exception('Order not found');
-        }
+        Contracts::requireEntityFound($order, 'Order');
 
         return $order;
     }

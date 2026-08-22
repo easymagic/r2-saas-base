@@ -3,6 +3,12 @@
 namespace SnappyOrder\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use SnappyOrder\Business\Dtos\AssignToAgentDto;
+use SnappyOrder\Business\Dtos\AssignToBatchDto;
+use SnappyOrder\Business\Dtos\ChangePriceDto;
+use SnappyOrder\Business\Dtos\ChangeStatusDto;
+use SnappyOrder\Business\Dtos\CreateDto;
+use SnappyOrder\Business\Dtos\PayOrderFromWalletDto;
 use SnappyOrder\Data\SnappyOrderEntity;
 use Shared\Query\QueryObject;
 
@@ -11,45 +17,13 @@ use Shared\Query\QueryObject;
  */
 interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
 {
-    /**
-     * Migrate the orders from the old system to the new system
-     * @return void
-     */
     public function migrate();
 
-    /**
-     * @param int $user_id
-     * @param string $link
-     * @param string $description
-     * @param array $screen_shot1
-     * @param array $screen_shot2
-     * @param array $screen_shot3
-     * @param float $total_amount_usd
-     * @return SnappyOrderEntity
-     */
-    public function create(
-        int $user_id,
-        string $link,
-        string $description,
-        array $screen_shot1,
-        array $screen_shot2,
-        array $screen_shot3,
-        float $total_amount_usd
-    );
+    public function create(CreateDto $createDto);
 
-    /**
-     * @param int $order_id
-     * @param string $status Valid statuses are defined in SnappyOrderRepositoryInterface::ALLOWED_STATUSES
-     * @return SnappyOrderEntity 
-     */
-    public function changeStatus(int $order_id, string $status, string $pickup_otp_code = "");
+    public function changeStatus(ChangeStatusDto $changeStatusDto);
 
-    /**
-     * @param int $order_id
-     * @param int $agent_id
-     * @return SnappyOrderEntity
-     */
-    public function assignToAgent(int $order_id, int $agent_id);
+    public function assignToAgent(AssignToAgentDto $assignToAgentDto);
 
     /**
      * @param int $agent_id
@@ -72,46 +46,15 @@ interface SnappyOrderServiceInterface extends AbstractBaseServiceInterface
      */
     public function getMyOrderAsAdmin(int $admin_id, array $filters = []);
 
-    /**
-     * Publish the settings to the database
-     * @return void
-     */
     public function publishSettings();
 
-    /**
-     * @param int $order_id
-     * @param float $price
-     * @return SnappyOrderEntity
-     */
-    public function changePrice(int $order_id, float $price);
+    public function changePrice(ChangePriceDto $changePriceDto);
 
+    public function payOrderFromWallet(PayOrderFromWalletDto $payOrderFromWalletDto);
 
-    /**
-     * @param int $order_id
-     * @param int $user_id
-     * @return SnappyOrderEntity
-     */
-    public function payOrderFromWallet(int $order_id, int $user_id);
+    public function assignToBatch(AssignToBatchDto $assignToBatchDto);
 
-
-    /**
-     * @param int $order_id
-     * @param int $batch_id
-     * @return SnappyOrderEntity
-     */
-    public function assignToBatch(int $order_id, int $batch_id);
-
-    /**
-     * @param int $order_id
-     * @return SnappyOrderEntity
-     */
     public function unassignFromBatch(int $order_id);
 
-
-    /**
-     * @param int $id
-     * @return SnappyOrderEntity
-     */
     public function getById(int $id);
-
 }

@@ -2,6 +2,8 @@
 
 namespace Category\Presentation;
 
+use Category\Business\Dtos\CreateDto;
+use Category\Business\Dtos\UpdateDto;
 use Category\Business\CategoryServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
@@ -33,13 +35,13 @@ class CategoryController
 
     function create()
     {
-        $category = $this->categoryService->create(
+        $category = $this->categoryService->create(new CreateDto(
             (string) $this->request->get('name', ''),
             (int) $this->request->get('parent_id', 0),
             (string) $this->request->get('description', ''),
-            $this->request->get('image', []),
+            (array) $this->request->get('image', []),
             (string) $this->request->get('slug', '')
-        );
+        ));
         $this->jsonResponseService->success([
             'category' => $category,
             'message' => 'Category created successfully',
@@ -48,15 +50,15 @@ class CategoryController
 
     function update()
     {
-        $category = $this->categoryService->update(
+        $category = $this->categoryService->update(new UpdateDto(
             (int) $this->request->get('category_id'),
             (string) $this->request->get('name', ''),
             (int) $this->request->get('parent_id', 0),
             (string) $this->request->get('description', ''),
-            $this->request->get('image', []),
+            (array) $this->request->get('image', []),
             (string) $this->request->get('slug', ''),
             (int) $this->request->get('active', 0)
-        );
+        ));
         $this->jsonResponseService->success([
             'category' => $category,
             'message' => 'Category updated successfully',

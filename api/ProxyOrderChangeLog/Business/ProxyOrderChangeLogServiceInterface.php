@@ -3,6 +3,7 @@
 namespace ProxyOrderChangeLog\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use ProxyOrderChangeLog\Business\Dtos\LogDto;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogEntity;
 
 /**
@@ -11,5 +12,10 @@ use ProxyOrderChangeLog\Data\ProxyOrderChangeLogEntity;
 interface ProxyOrderChangeLogServiceInterface extends AbstractBaseServiceInterface
 {
     public function migrate();
-    public function log(int $order_id, string $field_name, string $old_value, string $new_value);
+
+    /**
+     * @param LogDto $logDto
+     * @return ProxyOrderChangeLogEntity
+     */
+    public function log(LogDto $logDto);
 }

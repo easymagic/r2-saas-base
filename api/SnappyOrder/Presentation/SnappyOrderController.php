@@ -5,6 +5,12 @@ namespace SnappyOrder\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use SnappyOrder\Business\Dtos\AssignToAgentDto;
+use SnappyOrder\Business\Dtos\AssignToBatchDto;
+use SnappyOrder\Business\Dtos\ChangePriceDto;
+use SnappyOrder\Business\Dtos\ChangeStatusDto;
+use SnappyOrder\Business\Dtos\CreateDto;
+use SnappyOrder\Business\Dtos\PayOrderFromWalletDto;
 use SnappyOrder\Business\SnappyOrderServiceInterface;
 
 class SnappyOrderController
@@ -38,15 +44,15 @@ class SnappyOrderController
     function create()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $order = $this->snappyOrderService->create(
-            $user->id,
-            $this->request->get('link'),
-            $this->request->get('description'),
-            $this->request->get('screen_shot1', []),
-            $this->request->get('screen_shot2', []),
-            $this->request->get('screen_shot3', []),
+        $order = $this->snappyOrderService->create(new CreateDto(
+            (int) $user->id,
+            (string) $this->request->get('link'),
+            (string) $this->request->get('description'),
+            (array) $this->request->get('screen_shot1', []),
+            (array) $this->request->get('screen_shot2', []),
+            (array) $this->request->get('screen_shot3', []),
             (float) $this->request->get('total_amount_usd')
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order created successfully',
@@ -55,10 +61,11 @@ class SnappyOrderController
 
     function changeStatus()
     {
-        $order = $this->snappyOrderService->changeStatus(
+        $order = $this->snappyOrderService->changeStatus(new ChangeStatusDto(
             (int) $this->request->get('order_id'),
-            $this->request->get('status')
-        );
+            (string) $this->request->get('status'),
+            (string) $this->request->get('pickup_otp_code', '')
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order status updated successfully',
@@ -71,10 +78,10 @@ class SnappyOrderController
         if ($price === null || $price === '') {
             $price = $this->request->get('total_amount_usd');
         }
-        $order = $this->snappyOrderService->changePrice(
+        $order = $this->snappyOrderService->changePrice(new ChangePriceDto(
             (int) $this->request->get('order_id'),
             (float) $price
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order price updated successfully',
@@ -83,10 +90,10 @@ class SnappyOrderController
 
     function assignToAgent()
     {
-        $order = $this->snappyOrderService->assignToAgent(
+        $order = $this->snappyOrderService->assignToAgent(new AssignToAgentDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('agent_id')
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order assigned to agent successfully',
@@ -95,10 +102,10 @@ class SnappyOrderController
 
     function assignToBatch()
     {
-        $order = $this->snappyOrderService->assignToBatch(
+        $order = $this->snappyOrderService->assignToBatch(new AssignToBatchDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('batch_id')
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order assigned to batch successfully',
@@ -190,10 +197,10 @@ class SnappyOrderController
     function payOrderFromWallet()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $order = $this->snappyOrderService->payOrderFromWallet(
+        $order = $this->snappyOrderService->payOrderFromWallet(new PayOrderFromWalletDto(
             (int) $this->request->get('order_id'),
-            $user->id
-        );
+            (int) $user->id
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order paid from wallet successfully',

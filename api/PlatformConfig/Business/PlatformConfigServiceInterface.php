@@ -1,42 +1,36 @@
-<?php 
+<?php
+
 namespace PlatformConfig\Business;
 
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Data\PlatformConfigEntity;
 use Shared\AbstractBaseServiceInterface;
-
 
 /**
  * Platform Config Service Interface
  * @extends AbstractBaseServiceInterface<PlatformConfigEntity>
  */
-interface PlatformConfigServiceInterface extends AbstractBaseServiceInterface {
-
+interface PlatformConfigServiceInterface extends AbstractBaseServiceInterface
+{
     /**
-     * Get a platform config setting
      * @param string $setting
-     * @return string
+     * @return mixed
      */
     function get(string $setting, mixed $default = null);
 
     /**
-     * Set a platform config setting
-     * @param string $setting
-     * @param string $value
+     * @param SetDto $setDto
      * @return PlatformConfigEntity
      */
-    function set(string $setting, string $value);
+    function set(SetDto $setDto);
 
     /**
-     * Get all platform config settings
      * @return array
      */
     function getAll();
 
     /**
-     * Migrate the platform config settings
      * @return mixed
      */
     function migrate();
-
-    
 }

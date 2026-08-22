@@ -3,6 +3,10 @@
 namespace EcomOrder\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use EcomOrder\Business\Dtos\AssignToAgentDto;
+use EcomOrder\Business\Dtos\CheckoutDto;
+use EcomOrder\Business\Dtos\PaymentFeedbackDto;
+use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
 use EcomOrder\Data\EcomOrderEntity;
 use Shared\Query\QueryObject;
 
@@ -20,63 +24,34 @@ interface EcomOrderServiceInterface extends AbstractBaseServiceInterface
      */
     public function fetchForUser(int $user_id, array $filters = []);
 
-
     /**
      * @param array $filters
      * @return QueryObject
      */
     public function fetchForAdmin(array $filters = []): QueryObject;
 
-
     /**
      * @param int $agent_id
      * @param array $filters
      * @return QueryObject
      */
-    public function fetchForAgent(int $agent_id,array $filters = []);
+    public function fetchForAgent(int $agent_id, array $filters = []);
 
+    public function checkout(CheckoutDto $checkoutDto);
 
-    /**
-     * @param int $user_id
-     * @param string $type
-     * @param int $number_of_installment
-     * @param string $customer_name
-     * @param string $customer_address
-     * @param string $customer_email
-     * @param string $reference
-     * @param string $cart_uuid
-     * @return EcomOrderEntity
-     */
-    public function checkout(
-        int $user_id,
-        string $type,
-        int $number_of_installment,
-        string $customer_name,
-        string $customer_address,
-        string $customer_email,
-        string $reference,
-        string $cart_uuid
-    );
-
-
-    public function updateDeliveryStatus(int $order_id, string $delivery_status);
-
+    public function updateDeliveryStatus(UpdateDeliveryStatusDto $updateDeliveryStatusDto);
 
     public function updatePaymentStatusAsPaid(int $order_id);
 
-
     public function updatePaymentStatusAsPartiallyPaid(int $order_id);
-
 
     public function updatePaymentStatusAsFailed(int $order_id);
 
+    public function assignToAgent(AssignToAgentDto $assignToAgentDto);
 
-    public function assignToAgent(int $order_id, int $agent_id);
-
-    public function paymentFeedback(int $order_id, string $reference);
+    public function paymentFeedback(PaymentFeedbackDto $paymentFeedbackDto);
 
     /**
-     * Pending card/BNPL orders awaiting Paystack confirmation for a user.
      * @param int $user_id
      * @return EcomOrderEntity[]
      */
@@ -85,6 +60,4 @@ interface EcomOrderServiceInterface extends AbstractBaseServiceInterface
     public function getPendingPayments();
 
     public function publishSettings();
-
-
 }

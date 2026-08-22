@@ -2,18 +2,17 @@
 
 namespace PlatformConfig\Business;
 
+use PlatformConfig\Business\Dtos\SetDto;
 use PlatformConfig\Data\PlatformConfigMigrationRepositoryInterface;
 use PlatformConfig\Data\PlatformConfigRepositoryInterface;
 use Shared\AbstractBaseService;
 use PlatformConfig\Data\PlatformConfigEntity;
 
 /**
- * Platform Config Service
  * @extends AbstractBaseService<PlatformConfigEntity,PlatformConfigRepositoryInterface>
  */
 class PlatformConfigService extends AbstractBaseService implements PlatformConfigServiceInterface
 {
-
     private PlatformConfigRepositoryInterface $platformConfigRepository;
     private PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository;
 
@@ -26,11 +25,6 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
         $this->platformConfigMigrationRepository = $platformConfigMigrationRepository;
     }
 
-    /**
-     * Get a platform config setting
-     * @param string $setting
-     * @return mixed
-     */
     function get(string $setting, mixed $default = null)
     {
         $platformConfig = $this->platformConfigRepository->query([
@@ -44,15 +38,9 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
         return $platformConfig->setting_value;
     }
 
-    /**
-     * Set a platform config setting
-     * @param string $setting
-     * @param string $value
-     * @return PlatformConfigEntity
-     */
-    function set(string $setting, string $value)
+    function set(SetDto $setDto)
     {
-        $key = strtoupper($setting);
+        $key = strtoupper($setDto->setting);
         $platformConfig = $this->platformConfigRepository->query([
             'setting_key' => $key,
         ])->fetchOne();
@@ -60,30 +48,22 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
         if ($platformConfig->isEmpty()) {
             return $this->platformConfigRepository->save(new PlatformConfigEntity([
                 'setting_key' => $key,
-                'setting_value' => $value,
+                'setting_value' => $setDto->value,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]));
         }
 
-        $platformConfig->setting_value = $value;
+        $platformConfig->setting_value = $setDto->value;
         $platformConfig->updated_at = date('Y-m-d H:i:s');
         return $this->platformConfigRepository->save($platformConfig);
     }
 
-    /**
-     * Get all platform config settings
-     * @return array
-     */
     function getAll()
     {
         return $this->platformConfigRepository->query([])->fetchAll();
     }
 
-    /**
-     * Migrate the platform config settings
-     * @return mixed
-     */
     function migrate()
     {
         return $this->platformConfigMigrationRepository->migrate();

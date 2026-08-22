@@ -4,6 +4,7 @@ namespace Log\Business;
 
 use Shared\AbstractBaseServiceInterface;
 use Shared\Query\QueryObject;
+use Log\Business\Dtos\CreateLogDto;
 use Log\Data\LogEntity;
 
 /**
@@ -19,5 +20,9 @@ interface LogServiceInterface extends AbstractBaseServiceInterface
      */
     public function fetchLogs(array $filters = []);
 
-    public function createLog(string $title, string $payload, string $response, string $type);
+    /**
+     * @param CreateLogDto $createLogDto
+     * @return LogEntity
+     */
+    public function createLog(CreateLogDto $createLogDto);
 }

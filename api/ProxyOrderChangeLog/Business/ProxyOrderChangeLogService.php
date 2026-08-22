@@ -3,6 +3,7 @@
 namespace ProxyOrderChangeLog\Business;
 
 use Shared\AbstractBaseService;
+use ProxyOrderChangeLog\Business\Dtos\LogDto;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogRepositoryInterface;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogEntity;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogMigrationRepositoryInterface;
@@ -29,13 +30,13 @@ class ProxyOrderChangeLogService extends AbstractBaseService implements ProxyOrd
         return $this->proxyOrderChangeLogMigrationRepositoryInterface->migrate();
     }
 
-    public function log(int $order_id, string $field_name, string $old_value, string $new_value)
+    public function log(LogDto $logDto)
     {
-        return $this->proxyOrderChangeLogRepository->save(0, [
-            'snappy_order_id' => $order_id,
-            'field_name' => $field_name,
-            'old_value' => $old_value,
-            'new_value' => $new_value,
-        ]);
+        return $this->proxyOrderChangeLogRepository->save(new ProxyOrderChangeLogEntity([
+            'snappy_order_id' => $logDto->order_id,
+            'field_name' => $logDto->field_name,
+            'old_value' => $logDto->old_value,
+            'new_value' => $logDto->new_value,
+        ]));
     }
 }

@@ -3,6 +3,10 @@
 namespace UserKyc\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use UserKyc\Business\Dtos\ApproveDto;
+use UserKyc\Business\Dtos\CreateDto;
+use UserKyc\Business\Dtos\RejectDto;
+use UserKyc\Business\Dtos\UpdateDto;
 use UserKyc\Data\UserKycEntity;
 use Shared\Query\QueryObject;
 
@@ -13,55 +17,34 @@ interface UserKycServiceInterface extends AbstractBaseServiceInterface
 {
     public function migrate();
 
-    public function create(
-        int $user_id,
-        string $nin,
-        string $store_name,
-        string $description,
-        array $document1, // optional
-        array $document2, // optional
-        array $document3, // optional
-        array $document4, // optional
-        array $document5 // optional
-    );
+    public function create(CreateDto $createDto);
 
-    public function update(
-        int $id,
-        int $user_id,
-        string $nin,
-        string $store_name,
-        string $description,
-        array $document1, // optional
-        array $document2, // optional
-        array $document3, // optional
-        array $document4, // optional
-        array $document5, // optional
-    );
-    
-    public function approve(int $id, int $approved_by);
-    public function reject(int $id, int $rejected_by, string $reject_reason);
+    public function update(UpdateDto $updateDto);
 
-    
+    public function approve(ApproveDto $approveDto);
+
+    public function reject(RejectDto $rejectDto);
+
     /**
      * @return QueryObject<UserKycEntity>
      */
-    public function fetchForApproval(); // approved = -1
-    
+    public function fetchForApproval();
+
     /**
      * @return QueryObject<UserKycEntity>
      */
-    public function fetchApproved(); // approved = 1
-    
+    public function fetchApproved();
+
     /**
      * @return QueryObject<UserKycEntity>
      */
-    public function fetchRejected(); // approved = 0
-    
+    public function fetchRejected();
+
     /**
      * @param int $user_id
      * @return QueryObject<UserKycEntity>
      */
-    public function fetchForUser(int $user_id); // user_id = $user_id
+    public function fetchForUser(int $user_id);
 
     public function isKycCompleted(int $user_id);
 }

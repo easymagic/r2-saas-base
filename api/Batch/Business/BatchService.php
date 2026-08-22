@@ -4,7 +4,9 @@ namespace Batch\Business;
 
 use Exception;
 use Shared\AbstractBaseService;
+use Shared\Contracts;
 use Shared\Query\QueryObject;
+use Batch\Business\Dtos\CreateDto;
 use Batch\Data\BatchRepositoryInterface;
 use Batch\Data\BatchEntity;
 use Batch\Data\BatchMigrationRepositoryInterface;
@@ -31,45 +33,24 @@ class BatchService extends AbstractBaseService implements BatchServiceInterface
         return $this->batchMigrationRepositoryInterface->migrate();
     }
 
-    public function create(string $name, string $description)
+    public function create(CreateDto $createDto)
     {
-        if (empty($name)) {
-            throw new Exception('Name is required');
-        }
-        if (empty($description)) {
-            throw new Exception('Description is required');
-        }
-
-        return $this->batchRepository->save(0, [
-            'name' => $name,
-            'description' => $description,
-        ]);
+        return $this->batchRepository->save(new BatchEntity([
+            'name' => $createDto->name,
+            'description' => $createDto->description,
+        ]));
     }
 
-    /**
-     * @param array $filters
-     * @return QueryObject
-     */
     public function getBatchList(array $filters = [])
     {
         return $this->batchRepository->query($filters);
     }
 
-    /**
-     * @param int $id
-     * @return bool
-     */
     public function remove(int $id)
     {
-        if (empty($id)) {
-            throw new Exception('Batch ID is required');
-        }
-
+        Contracts::requires($id > 0, 'Batch ID is required');
         $batch = $this->batchRepository->find($id);
-        if ($batch->isEmpty()) {
-            throw new Exception('Batch not found');
-        }
-
+        Contracts::requireEntityFound($batch, 'Batch');
         $this->batchRepository->delete($id);
         return true;
     }

@@ -5,6 +5,7 @@ namespace Thread\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use Thread\Business\Dtos\CreateThreadDto;
 use Thread\Business\ThreadServiceInterface;
 
 class ThreadController
@@ -38,12 +39,12 @@ class ThreadController
     function createThread()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $thread = $this->threadService->createThread(
+        $thread = $this->threadService->createThread(new CreateThreadDto(
             (int) $this->request->get('order_id'),
-            $user->id,
-            $this->request->get('message'),
-            $this->request->get('attachment_url', [])
-        );
+            (int) $user->id,
+            (string) $this->request->get('message'),
+            (array) $this->request->get('attachment_url', [])
+        ));
         $this->jsonResponseService->success([
             'thread' => $thread,
             'message' => 'Thread created successfully',

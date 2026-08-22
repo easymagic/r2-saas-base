@@ -3,63 +3,47 @@
 namespace Wallet\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use Wallet\Business\Dtos\ApproveManualTopUpDto;
+use Wallet\Business\Dtos\LogDto;
+use Wallet\Business\Dtos\RejectManualTopUpDto;
+use Wallet\Business\Dtos\TopUpManualDto;
+use Wallet\Business\Dtos\TopUpOnlineDto;
 use Wallet\Data\WalletEntity;
 
 /**
- * Wallet Service Interface
  * @extends AbstractBaseServiceInterface<WalletEntity>
  */
 interface WalletServiceInterface extends AbstractBaseServiceInterface
 {
-
     /**
-     * Top up online
-     * @param int $user_id
-     * @param float $amount
-     * @param string $reference
-     * @param string $description
-     * @param string $status
+     * @param TopUpOnlineDto $topUpOnlineDto
      * @return WalletEntity
      */
-    public function topUpOnline(
-        int $user_id,
-        float $amount,
-        string $reference,
-        string $description,
-        string $status,
-        // string $payment_url
-    );
+    public function topUpOnline(TopUpOnlineDto $topUpOnlineDto);
 
-    public function log(
-        int $user_id,
-        float $amount,
-        string $reference,
-        string $type,
-        string $description,
-        string $status
-    );
+    /**
+     * @param LogDto $logDto
+     * @return WalletEntity
+     */
+    public function log(LogDto $logDto);
 
-    public function topUpManual(
-        int $user_id,
-        float $amount,
-        string $reference,
-        string $description,
-        string $status,
-        array $proof_of_payment_screenshot1,
-        mixed $proof_of_payment_screenshot2,
-        mixed $proof_of_payment_screenshot3
-    );
+    /**
+     * @param TopUpManualDto $topUpManualDto
+     * @return WalletEntity
+     */
+    public function topUpManual(TopUpManualDto $topUpManualDto);
 
-    public function approveManualTopUp(
-        int $wallet_id,
-        string $status
-    );
+    /**
+     * @param ApproveManualTopUpDto $approveManualTopUpDto
+     * @return WalletEntity
+     */
+    public function approveManualTopUp(ApproveManualTopUpDto $approveManualTopUpDto);
 
-    public function rejectManualTopUp(
-        int $wallet_id,
-        string $status,
-        string $reason
-    );
+    /**
+     * @param RejectManualTopUpDto $rejectManualTopUpDto
+     * @return WalletEntity
+     */
+    public function rejectManualTopUp(RejectManualTopUpDto $rejectManualTopUpDto);
 
     public function migrate();
 

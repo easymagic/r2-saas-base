@@ -5,6 +5,9 @@ namespace EcomOrder\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use EcomOrder\Business\Dtos\AssignToAgentDto;
+use EcomOrder\Business\Dtos\CheckoutDto;
+use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
 use EcomOrder\Business\EcomOrderServiceInterface;
 
 class EcomOrderController
@@ -47,17 +50,16 @@ class EcomOrderController
             $isGuest = 0;
         }
 
-        $order = $this->ecomOrderService->checkout(
+        $order = $this->ecomOrderService->checkout(new CheckoutDto(
             $userId,
             (string) $this->request->get('type', ''),
             (int) $this->request->get('number_of_installment', 0),
-            $isGuest,
             (string) $this->request->get('customer_name', ''),
             (string) $this->request->get('customer_address', ''),
             (string) $this->request->get('customer_email', ''),
             (string) $this->request->get('reference', ''),
             (string) $this->request->get('uuid', $this->request->get('cart_uuid', ''))
-        );
+        ));
 
         $payload = [
             'order' => $order,
@@ -123,10 +125,10 @@ class EcomOrderController
 
     function updateDeliveryStatus()
     {
-        $order = $this->ecomOrderService->updateDeliveryStatus(
+        $order = $this->ecomOrderService->updateDeliveryStatus(new UpdateDeliveryStatusDto(
             (int) $this->request->get('order_id'),
             (string) $this->request->get('delivery_status', '')
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Delivery status updated successfully',
@@ -135,10 +137,10 @@ class EcomOrderController
 
     function assignToAgent()
     {
-        $order = $this->ecomOrderService->assignToAgent(
+        $order = $this->ecomOrderService->assignToAgent(new AssignToAgentDto(
             (int) $this->request->get('order_id'),
             (int) $this->request->get('agent_id')
-        );
+        ));
         $this->jsonResponseService->success([
             'order' => $order,
             'message' => 'Order assigned to agent successfully',

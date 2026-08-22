@@ -3,6 +3,8 @@
 namespace Product\Presentation;
 
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
+use Product\Business\Dtos\CreateDto;
+use Product\Business\Dtos\UpdateDto;
 use Product\Business\ProductServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
@@ -43,7 +45,7 @@ class ProductController
             $userId = (int) $user->id;
         }
 
-        $product = $this->productService->create(
+        $product = $this->productService->create(new CreateDto(
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
             (float) $this->request->get('price', 0),
@@ -52,14 +54,14 @@ class ProductController
             (int) $this->request->get('category_id', 0),
             $userId,
             (string) $this->request->get('slug', ''),
-            $this->request->get('image_1', []),
-            $this->request->get('image_2', []),
-            $this->request->get('image_3', []),
-            $this->request->get('image_4', []),
-            $this->request->get('image_5', []),
-            $this->request->get('image_6', []),
-            $this->request->get('image_7', [])
-        );
+            (array) $this->request->get('image_1', []),
+            (array) $this->request->get('image_2', []),
+            (array) $this->request->get('image_3', []),
+            (array) $this->request->get('image_4', []),
+            (array) $this->request->get('image_5', []),
+            (array) $this->request->get('image_6', []),
+            (array) $this->request->get('image_7', [])
+        ));
         $this->jsonResponseService->success([
             'product' => $product,
             'message' => 'Product created successfully',
@@ -74,7 +76,7 @@ class ProductController
             $userId = (int) $user->id;
         }
 
-        $product = $this->productService->update(
+        $product = $this->productService->update(new UpdateDto(
             (int) $this->request->get('product_id'),
             (string) $this->request->get('name', ''),
             (string) $this->request->get('description', ''),
@@ -85,14 +87,14 @@ class ProductController
             $userId,
             (string) $this->request->get('slug', ''),
             (int) $this->request->get('active', 0),
-            $this->request->get('image_1', []),
-            $this->request->get('image_2', []),
-            $this->request->get('image_3', []),
-            $this->request->get('image_4', []),
-            $this->request->get('image_5', []),
-            $this->request->get('image_6', []),
-            $this->request->get('image_7', [])
-        );
+            (array) $this->request->get('image_1', []),
+            (array) $this->request->get('image_2', []),
+            (array) $this->request->get('image_3', []),
+            (array) $this->request->get('image_4', []),
+            (array) $this->request->get('image_5', []),
+            (array) $this->request->get('image_6', []),
+            (array) $this->request->get('image_7', [])
+        ));
         $this->jsonResponseService->success([
             'product' => $product,
             'message' => 'Product updated successfully',

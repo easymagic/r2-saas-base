@@ -3,6 +3,8 @@
 namespace Category\Business;
 
 use Shared\AbstractBaseServiceInterface;
+use Category\Business\Dtos\CreateDto;
+use Category\Business\Dtos\UpdateDto;
 use Category\Data\CategoryEntity;
 use Shared\Query\QueryObject;
 
@@ -14,25 +16,16 @@ interface CategoryServiceInterface extends AbstractBaseServiceInterface
     public function migrate();
 
     /**
-     * @param string $name
-     * @param int $parent_id
-     * @param string $description
-     * @param array $image Uploaded file array (same shape as SnappyOrder screenshots)
-     * @param string $slug
+     * @param CreateDto $createDto
      * @return CategoryEntity
      */
-    public function create(string $name, int $parent_id, string $description, array $image, string $slug);
+    public function create(CreateDto $createDto);
 
     /**
-     * @param int $id
-     * @param string $name
-     * @param int $parent_id
-     * @param string $description
-     * @param array $image Uploaded file array; empty keeps existing image
-     * @param string $slug
+     * @param UpdateDto $updateDto
      * @return CategoryEntity
      */
-    public function update(int $id, string $name, int $parent_id, string $description, array $image, string $slug, int $active);
+    public function update(UpdateDto $updateDto);
 
     public function remove(int $id);
 

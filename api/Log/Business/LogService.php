@@ -2,8 +2,8 @@
 
 namespace Log\Business;
 
-use Exception;
 use Shared\AbstractBaseService;
+use Log\Business\Dtos\CreateLogDto;
 use Log\Data\LogRepositoryInterface;
 use Log\Data\LogEntity;
 use Log\Data\LogMigrationRepositoryInterface;
@@ -30,38 +30,18 @@ class LogService extends AbstractBaseService implements LogServiceInterface
         return $this->logMigrationRepositoryInterface->migrate();
     }
 
-    /**
-     * @param array $filters
-     * @return \Shared\Query\QueryObject<LogEntity>
-     */
     public function fetchLogs(array $filters = [])
     {
         return $this->logRepository->query($filters);
     }
 
-    /**
-     * @param string $title
-     * @param string $payload
-     * @param string $response
-     * @param string $type success|error
-     * @return LogEntity
-     */
-    public function createLog(string $title, string $payload, string $response, string $type)
+    public function createLog(CreateLogDto $createLogDto)
     {
-        if ($title === '') {
-            throw new Exception('Title is required');
-        }
-
-        $type = strtolower(trim($type));
-        if ($type !== 'success' && $type !== 'error' && $type !== 'info') {
-            throw new Exception('Type must be success or error or info');
-        }
-
-        return $this->logRepository->save(0, [
-            'title' => $title,
-            'payload' => $payload,
-            'response' => $response,
-            'type' => $type,
-        ]);
+        return $this->logRepository->save(new LogEntity([
+            'title' => $createLogDto->title,
+            'payload' => $createLogDto->payload,
+            'response' => $createLogDto->response,
+            'type' => $createLogDto->type,
+        ]));
     }
 }

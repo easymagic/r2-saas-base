@@ -5,6 +5,10 @@ namespace UserKyc\Presentation;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use UserKyc\Business\Dtos\ApproveDto;
+use UserKyc\Business\Dtos\CreateDto;
+use UserKyc\Business\Dtos\RejectDto;
+use UserKyc\Business\Dtos\UpdateDto;
 use UserKyc\Business\UserKycServiceInterface;
 
 class UserKycController
@@ -38,17 +42,17 @@ class UserKycController
     function create()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $kyc = $this->userKycService->create(
+        $kyc = $this->userKycService->create(new CreateDto(
             (int) $user->id,
             (string) $this->request->get('nin', ''),
             (string) $this->request->get('store_name', ''),
             (string) $this->request->get('description', ''),
-            $this->request->get('document1', []),
-            $this->request->get('document2', []),
-            $this->request->get('document3', []),
-            $this->request->get('document4', []),
-            $this->request->get('document5', [])
-        );
+            (array) $this->request->get('document1', []),
+            (array) $this->request->get('document2', []),
+            (array) $this->request->get('document3', []),
+            (array) $this->request->get('document4', []),
+            (array) $this->request->get('document5', [])
+        ));
         $this->jsonResponseService->success([
             'kyc' => $kyc,
             'message' => 'KYC submitted successfully',
@@ -58,18 +62,18 @@ class UserKycController
     function update()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $kyc = $this->userKycService->update(
+        $kyc = $this->userKycService->update(new UpdateDto(
             (int) $this->request->get('kyc_id'),
             (int) $user->id,
             (string) $this->request->get('nin', ''),
             (string) $this->request->get('store_name', ''),
             (string) $this->request->get('description', ''),
-            $this->request->get('document1', []),
-            $this->request->get('document2', []),
-            $this->request->get('document3', []),
-            $this->request->get('document4', []),
-            $this->request->get('document5', [])
-        );
+            (array) $this->request->get('document1', []),
+            (array) $this->request->get('document2', []),
+            (array) $this->request->get('document3', []),
+            (array) $this->request->get('document4', []),
+            (array) $this->request->get('document5', [])
+        ));
         $this->jsonResponseService->success([
             'kyc' => $kyc,
             'message' => 'KYC updated successfully',
@@ -79,10 +83,10 @@ class UserKycController
     function approve()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $kyc = $this->userKycService->approve(
+        $kyc = $this->userKycService->approve(new ApproveDto(
             (int) $this->request->get('kyc_id'),
             (int) $user->id
-        );
+        ));
         $this->jsonResponseService->success([
             'kyc' => $kyc,
             'message' => 'KYC approved successfully',
@@ -92,11 +96,11 @@ class UserKycController
     function reject()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $kyc = $this->userKycService->reject(
+        $kyc = $this->userKycService->reject(new RejectDto(
             (int) $this->request->get('kyc_id'),
             (int) $user->id,
             (string) $this->request->get('reject_reason', '')
-        );
+        ));
         $this->jsonResponseService->success([
             'kyc' => $kyc,
             'message' => 'KYC rejected successfully',
