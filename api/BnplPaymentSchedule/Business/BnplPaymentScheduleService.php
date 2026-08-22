@@ -2,7 +2,7 @@
 
 namespace BnplPaymentSchedule\Business;
 
-use App\Shared\Contracts\Contracts;
+use Shared\Contracts;
 use BnplPaymentSchedule\Business\Dtos\CreateSchedulesDto;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleEntity;
 use BnplPaymentSchedule\Data\BnplPaymentScheduleMigrationRepositoryInterface;
