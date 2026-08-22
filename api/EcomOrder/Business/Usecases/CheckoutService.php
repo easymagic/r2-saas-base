@@ -2,8 +2,13 @@
 
 namespace EcomOrder\Business\Usecases;
 
+use BnplPaymentSchedule\Business\Dtos\CreateSchedulesDto;
+use BnplPaymentSchedule\Business\Usecases\CreateSchedulesService;
+use Cart\Business\Usecases\ClearCartService;
 use Cart\Business\Usecases\GetCartTotalService;
 use EcomOrder\Business\Dtos\CheckoutDto;
+use EcomOrder\Data\EcomOrderEntity;
+use EcomOrder\Data\EcomOrderRepositoryInterface;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
 use Shared\Contracts;
 use User\Business\Dtos\WithdrawWalletDto;
@@ -25,13 +30,22 @@ class CheckoutService
 
     private WithdrawWalletService $withdrawWalletService;
 
+    private CreateSchedulesService $createSchedulesService;
+
+    private EcomOrderRepositoryInterface $ecomOrderRepository;
+
+    private ClearCartService $clearCartService;
+
     public function __construct(
         PaymentServiceInterface $paymentService,
         GetCartTotalService $getCartTotalService,
         EcomOrderSupport $ecomOrderSupport,
         GetWalletBalanceService $getWalletBalanceService,
         UpdatePaymentStatusAsPaidService $updatePaymentStatusAsPaidService,
-        WithdrawWalletService $withdrawWalletService
+        WithdrawWalletService $withdrawWalletService,
+        CreateSchedulesService $createSchedulesService,
+        EcomOrderRepositoryInterface $ecomOrderRepository,
+        ClearCartService $clearCartService
     ) {
         $this->paymentService = $paymentService;
         $this->getCartTotalService = $getCartTotalService;
@@ -39,6 +53,9 @@ class CheckoutService
         $this->getWalletBalanceService = $getWalletBalanceService;
         $this->updatePaymentStatusAsPaidService = $updatePaymentStatusAsPaidService;
         $this->withdrawWalletService = $withdrawWalletService;
+        $this->createSchedulesService = $createSchedulesService;
+        $this->ecomOrderRepository = $ecomOrderRepository;
+        $this->clearCartService = $clearCartService;
     }
 
     private function getCartTotal(string $uuid)
@@ -61,13 +78,15 @@ class CheckoutService
 
         $this->handleWalletCheckout(($type === 'wallet'), $checkoutDto);
 
-        $this->createOrder($checkoutDto);
+        $order = $this->createOrder($checkoutDto);
 
         $this->deductWalletBalance(($type === 'wallet'), $checkoutDto);
 
         $this->createPaymentSchedule(($type === 'bnpl'), $checkoutDto);
 
-        return null;
+        $this->clearCartService->execute($checkoutDto->cart_uuid);
+
+        return $order;
     }
 
 
@@ -116,8 +135,30 @@ class CheckoutService
     private function createPaymentSchedule(bool $condition, CheckoutDto $checkoutDto)
     {
         if ($condition) {
+            $this->createSchedulesService->execute(new CreateSchedulesDto(
+                $checkoutDto->order_id,
+                $checkoutDto->number_of_installment,
+                round($this->getCartTotal($checkoutDto->cart_uuid) / $checkoutDto->number_of_installment, 2),
+                $checkoutDto->reference,
+                ""
+            ));
         }
     }
 
-    private function createOrder(CheckoutDto $checkoutDto) {}
+    private function createOrder(CheckoutDto $checkoutDto) {
+        $order = $this->ecomOrderRepository->save(new EcomOrderEntity([
+            'user_id' => $checkoutDto->user_id,
+            'type' => $checkoutDto->type,
+            'number_of_installment' => $checkoutDto->number_of_installment,
+            'customer_name' => $checkoutDto->customer_name,
+            'customer_address' => $checkoutDto->customer_address,
+            'customer_email' => $checkoutDto->customer_email,
+            'reference' => $checkoutDto->reference,
+            'payment_status' => 'pending',
+            'payment_url' => $checkoutDto->payment_url,
+            'is_guest' => $checkoutDto->is_guest
+        ]));
+        $checkoutDto->order_id = $order->id; // update the order ID in the checkout DTO
+        return $order;
+    }
 }

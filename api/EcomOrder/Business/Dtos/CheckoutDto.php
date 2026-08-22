@@ -47,7 +47,7 @@ class CheckoutDto
         $this->customer_name = $customer_name;
         $this->customer_address = $customer_address;
         $this->customer_email = $customer_email;
-        $this->reference = $reference;
+        // $this->reference = $reference;
         $this->cart_uuid = $cart_uuid;
     }
 }
