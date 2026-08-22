@@ -3,6 +3,7 @@
 namespace Thread\Business;
 
 use Exception;
+use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
 use Notification\Business\NotificationServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\File\FileUploadServiceInterface;
 use Shared\AbstractBaseService;
@@ -102,7 +103,11 @@ class ThreadService extends AbstractBaseService implements ThreadServiceInterfac
             $this->threadNotificationService->sendNotificationToUser($thread->id);
         }
 
-        $this->notificationService->create($order->user_id, 'New Message', 'You have a new message from ' . $sender->name);
+        $this->notificationService->create(new NotificationCreateDto(
+            (int) $order->user_id,
+            'New Message',
+            'You have a new message from ' . $sender->name
+        ));
 
         return $thread;
     }

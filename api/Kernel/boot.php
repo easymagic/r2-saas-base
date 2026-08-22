@@ -49,8 +49,6 @@ use User\Business\AccountMailNotificationService;
 use User\Business\AccountMailNotificationServiceInterface;
 use User\Business\UserService;
 use User\Business\UserServiceInterface;
-use User\Business\UserValidationService;
-use User\Business\UserValidationServiceInterface;
 use User\Data\UserMigrationRepository;
 use User\Data\UserMigrationRepositoryInterface;
 use User\Data\UserRepository;
@@ -189,8 +187,6 @@ use UserKyc\Data\UserKycRepositoryInterface;
 $appServiceContainer->container()->map(UserServiceInterface::class, UserService::class);
 
 $appServiceContainer->container()->map(UserMigrationRepositoryInterface::class, UserMigrationRepository::class);
-
-$appServiceContainer->container()->map(UserValidationServiceInterface::class, UserValidationService::class);
 
 $appServiceContainer->container()->map(UserRepositoryInterface::class, UserRepository::class);
 

@@ -1,9 +1,15 @@
-<?php 
+<?php
+
 namespace Notification\Business;
 
 use Shared\AbstractBaseServiceInterface;
 use Notification\Data\NotificationEntity;
 use Shared\Query\QueryObject;
+use Notification\Business\Dtos\CreateDto;
+use Notification\Business\Dtos\MarkAsReadDto;
+use Notification\Business\Dtos\MarkAsUnreadDto;
+use Notification\Business\Dtos\MyNotificationsDto;
+use Notification\Business\Dtos\RemoveDto;
 
 /**
  * Notification Service Interface
@@ -15,44 +21,36 @@ interface NotificationServiceInterface extends AbstractBaseServiceInterface
 
     /**
      * Create a new notification
-     * @param int $userId
-     * @param string $title
-     * @param string $message
+     * @param CreateDto $createDto
      * @return NotificationEntity
      */
-    public function create(int $userId, string $title, string $message);
+    public function create(CreateDto $createDto);
 
     /**
      * Get all notifications for a user
-     * @param int $userId
+     * @param MyNotificationsDto $myNotificationsDto
      * @return QueryObject
      */
-    public function myNotifications(int $userId);
+    public function myNotifications(MyNotificationsDto $myNotificationsDto);
 
     /**
      * Mark a notification as read
-     * @param int $notificationId
-     * @param int $userId
+     * @param MarkAsReadDto $markAsReadDto
      * @return NotificationEntity
      */
-    public function markAsRead(int $notificationId, int $userId);
+    public function markAsRead(MarkAsReadDto $markAsReadDto);
 
-    
     /**
      * Mark a notification as unread
-     * @param int $notificationId
-     * @param int $userId
+     * @param MarkAsUnreadDto $markAsUnreadDto
      * @return NotificationEntity
      */
-    public function markAsUnread(int $notificationId, int $userId);
-
+    public function markAsUnread(MarkAsUnreadDto $markAsUnreadDto);
 
     /**
      * Remove a notification
-     * @param int $notificationId
-     * @param int $userId
+     * @param RemoveDto $removeDto
      * @return NotificationEntity
      */
-    public function remove(int $notificationId, int $userId);
-
+    public function remove(RemoveDto $removeDto);
 }

@@ -3,6 +3,7 @@
 namespace UserKyc\Business;
 
 use Exception;
+use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
 use Notification\Business\NotificationServiceInterface;
 use R2Packages\Framework\Application\Mail\MailServiceInterface;
 use Shared\AbstractBaseService;
@@ -53,7 +54,7 @@ class UserKycNotificationService extends AbstractBaseService implements UserKycN
         $title = 'KYC Approved';
         $message = 'Your store KYC for "' . $kyc->store_name . '" has been approved.';
 
-        $this->notificationService->create((int) $user->id, $title, $message);
+        $this->notificationService->create(new NotificationCreateDto((int) $user->id, $title, $message));
 
         $body = 'Hello ' . htmlspecialchars($user->name, ENT_QUOTES, 'UTF-8') . ',<br><br>'
             . 'Your store KYC for <strong>' . htmlspecialchars($kyc->store_name, ENT_QUOTES, 'UTF-8') . '</strong> has been approved.<br><br>'
@@ -83,7 +84,7 @@ class UserKycNotificationService extends AbstractBaseService implements UserKycN
         $message = 'Your store KYC for "' . $kyc->store_name . '" was rejected.'
             . ($reason !== '' ? ' Reason: ' . $reason : '');
 
-        $this->notificationService->create((int) $user->id, $title, $message);
+        $this->notificationService->create(new NotificationCreateDto((int) $user->id, $title, $message));
 
         $body = 'Hello ' . htmlspecialchars($user->name, ENT_QUOTES, 'UTF-8') . ',<br><br>'
             . 'Your store KYC for <strong>' . htmlspecialchars($kyc->store_name, ENT_QUOTES, 'UTF-8') . '</strong> was rejected.<br><br>'

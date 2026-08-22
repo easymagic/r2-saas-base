@@ -2,27 +2,23 @@
 namespace PlatformConfig\Presentation;
 
 use PlatformConfig\Business\PlatformConfigServiceInterface;
-use PlatformConfig\Data\PlatformConfigRepositoryInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
 
 class PlatformConfigController
 {
-    private PlatformConfigRepositoryInterface $platformConfigRepository;
     private JsonResponseServiceInterface $jsonResponseService;
     private PlatformConfigServiceInterface $platformConfigService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
-        PlatformConfigRepositoryInterface $platformConfigRepository,
         JsonResponseServiceInterface $jsonResponseService,
         Request $request,
         PlatformConfigServiceInterface $platformConfigService,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
-        $this->platformConfigRepository = $platformConfigRepository;
         $this->jsonResponseService = $jsonResponseService;
         $this->request = $request;
         $this->platformConfigService = $platformConfigService;
@@ -30,7 +26,7 @@ class PlatformConfigController
     }
 
     function all() {
-        $platformConfigs = $this->platformConfigRepository->fetchAll();
+        $platformConfigs = $this->platformConfigService->getAll();
         return $this->jsonResponseService->success([
             'platform_configs' => $platformConfigs
         ]);
@@ -47,9 +43,7 @@ class PlatformConfigController
     }
 
     function delete(){
-      $user = $this->apiCredentialService->getAuthUser();
-      $userId = $user->id;
-      $id =  $this->request->get('platform_config_id');
+      $id =  (int) $this->request->get('platform_config_id');
       $result = $this->platformConfigService->delete($id);
       return $this->jsonResponseService->success([
         'message' => 'Platform config deleted successfully',

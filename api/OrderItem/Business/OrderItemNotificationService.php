@@ -4,6 +4,7 @@ namespace OrderItem\Business;
 
 use Business\MailTheme\BaseMailThemeInterface;
 use Exception;
+use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
 use Notification\Business\NotificationServiceInterface;
 use OrderItem\Data\OrderItemEntity;
 use OrderItem\Data\OrderItemRepositoryInterface;
@@ -51,7 +52,7 @@ class OrderItemNotificationService implements OrderItemNotificationServiceInterf
             . ' for order #' . (int) $orderItem->order_id
             . ' has been settled. Merchant share: ' . number_format($merchantShare, 2) . '.';
 
-        $this->notificationService->create((int) $merchant->id, $title, $message);
+        $this->notificationService->create(new NotificationCreateDto((int) $merchant->id, $title, $message));
 
         $body = $this->baseMailTheme->wrapTemplate(
             '<p style="margin:0 0 16px 0;font-size:18px;font-weight:bold;color:#0f172a;">Hello '

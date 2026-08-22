@@ -75,7 +75,11 @@ class QueryObject
      * @return T
      */
     function fetchOne(){
-        return $this->dbService->fetchOne($this->query, $this->params);
-    }    
+        $row = $this->dbService->fetchOne($this->query, $this->params);
+        if (empty($row) || !is_array($row)) {
+            return $this->hydrate([]);
+        }
+        return $this->hydrate($row);
+    }
     
 }

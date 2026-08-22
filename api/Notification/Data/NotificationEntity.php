@@ -14,4 +14,12 @@ class NotificationEntity extends AbstractBaseEntity
     public string $created_at = '';
     public string $updated_at = '';
 
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+        if (empty($this->read_at)){
+            $this->read_at = date('Y-m-d H:i:s');
+        }
+    }
+
 }

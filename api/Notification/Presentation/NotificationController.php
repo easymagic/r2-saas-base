@@ -2,10 +2,15 @@
 
 namespace Notification\Presentation;
 
+use Notification\Business\Dtos\MarkAsReadDto;
+use Notification\Business\Dtos\MarkAsUnreadDto;
+use Notification\Business\Dtos\MyNotificationsDto;
+use Notification\Business\Dtos\RemoveDto;
 use Notification\Business\NotificationServiceInterface;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+
 /**
  * Notification Controller
  */
@@ -31,49 +36,53 @@ class NotificationController
     public function myNotifications()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $userId = $user->id;
-        $notifications = $this->notificationService->myNotifications($userId);
+        $notifications = $this->notificationService->myNotifications(new MyNotificationsDto(
+            (int) $user->id
+        ));
         $count = $notifications->count();
         $notifications = $notifications->fetch();
         return $this->jsonResponseService->success([
-            "notifications" => $notifications,
-            "count" => $count
+            'notifications' => $notifications,
+            'count' => $count
         ]);
     }
 
     public function markAsRead()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $userId = $user->id;
-        $notificationId = $this->request->get('notification_id');
-        $notification = $this->notificationService->markAsRead($notificationId, $userId);
+        $notification = $this->notificationService->markAsRead(new MarkAsReadDto(
+            (int) $this->request->get('notification_id'),
+            (int) $user->id
+        ));
         return $this->jsonResponseService->success([
-            "notification" => $notification,
-            "message" => "Notification marked as read"
+            'notification' => $notification,
+            'message' => 'Notification marked as read'
         ]);
     }
 
     public function markAsUnread()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $userId = $user->id;
-        $notificationId = $this->request->get('notification_id');
-        $notification = $this->notificationService->markAsUnread($notificationId, $userId);
+        $notification = $this->notificationService->markAsUnread(new MarkAsUnreadDto(
+            (int) $this->request->get('notification_id'),
+            (int) $user->id
+        ));
         return $this->jsonResponseService->success([
-            "notification" => $notification,
-            "message" => "Notification marked as unread"
+            'notification' => $notification,
+            'message' => 'Notification marked as unread'
         ]);
     }
 
     public function delete()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $userId = $user->id;
-        $notificationId = (int) $this->request->get('notification_id');
-        $notification = $this->notificationService->remove($notificationId, $userId);
+        $notification = $this->notificationService->remove(new RemoveDto(
+            (int) $this->request->get('notification_id'),
+            (int) $user->id
+        ));
         return $this->jsonResponseService->success([
-            "notification" => $notification,
-            "message" => "Notification deleted successfully"
+            'notification' => $notification,
+            'message' => 'Notification deleted successfully'
         ]);
     }
 
@@ -81,9 +90,8 @@ class NotificationController
     {
         $result = $this->notificationService->migrate();
         return $this->jsonResponseService->success([
-            "result" => $result,
-            "message" => "Notifications migrated successfully"
+            'result' => $result,
+            'message' => 'Notifications migrated successfully'
         ]);
     }
-
 }

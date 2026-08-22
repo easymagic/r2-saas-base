@@ -1,6 +1,8 @@
-<?php 
+<?php
 
 namespace Shared;
+
+use Shared\Query\QueryObject;
 
 /**
  * Abstract base repository interface
@@ -31,64 +33,13 @@ interface AbstractBaseRepositoryInterface
      */
     public function filter(array $filters);
 
-    /**
-     * Count the number of rows
-     * @return int
-     */
-    function count();
-
-    /**
-     * Sum a column
-     * @param string $column
-     * @return float
-     */
-    function sum(string $column);
-
-    /**
-     * Find a row by id
-     * @param int $id
-     * @return T
-     */
-    function find(int $id);
-
-    /**
-     * Fetch all rows from the database
-     * @return T[]
-     */
-    function fetchAll();
-
-    /**
-     * Find a row by a field
-     * @param string $field
-     * @param string $value
-     * @return T
-     */
-    function findBy(string $field,string $value);
-
-    /**
-     * Filter by a field
-     * @param string $field
-     * @param string $value
-     * @param string $operator
-     * @param string $comparison
-     * @return $this
-     */
-    function filterBy(string $field,string $value, string $operator = "AND", string $comparison = "=");
-
-    /**
-     * Fetch data from the database
-     * @return T[]
-     */
-    function fetch();
-
 
     /**
      * Save an entity
-     * @param int $id
-     * @param array $data
+     * @param T $data
      * @return T
      */
-    function save(int $id, array $data);
+    function save(object $data);
 
     /**
      * Delete an entity
@@ -104,4 +55,18 @@ interface AbstractBaseRepositoryInterface
      */
     function hydrate(array $row);
 
+
+    /**
+     * Find an entity by id
+     * @param int $id
+     * @return T
+     */
+    function find(int $id);
+
+    /**
+     * Query the users
+     * @param array $filters
+     * @return QueryObject<T>
+     */
+    public function query(array $filters);
 }

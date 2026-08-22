@@ -2,30 +2,90 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "R2 SaaS Base API",
-    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` — API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` — user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**Recent routes**\n- `GET /v2/snappy-orders/{orderId}` — get order by id\n- `POST /v2/snappy-orders/{orderId}/unassign-from-batch` — admin clear order batch\n- `GET /v2/logs/migrate` — migrate logs table\n- `GET /v2/logs` — admin list logs (`type`, `search`, `id`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
+    "description": "Postman collection generated from `api/Presentation/Http/Routes/web.php`.\n\n**Auth**\n- `x-token` \u2014 API credential (env `X_TOKEN`), required by GlobalApiMiddleware\n- `x-user-token` \u2014 user session token (`user.token` from login/register), required by GlobalApiAuthMiddleware\n- Admin routes also require an authenticated user whose `role` contains `admin`\n\n**User auth bodies** \u2014 validated by DTOs in `User\\Business\\Dtos`:\n- Register: email, password (\u22658), name, phone, delivery_address, social_security_number required; `role` is forced to `customer`\n- Create: email, password, name, phone, role \u2208 customer|agent|staff|super-admin|admin, status, country_code\n- Update user / profile / passwords: see request descriptions\n\n**Recent routes**\n- `GET /v2/snappy-orders/{orderId}` \u2014 get order by id\n- `POST /v2/snappy-orders/{orderId}/unassign-from-batch` \u2014 admin clear order batch\n- `GET /v2/logs/migrate` \u2014 migrate logs table\n- `GET /v2/logs` \u2014 admin list logs (`type`, `search`, `id`)\n\nSet collection variables `baseUrl`, `xToken`, and `xUserToken` after login.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:2020" },
-    { "key": "xToken", "value": "" },
-    { "key": "xUserToken", "value": "" },
-    { "key": "userId", "value": "1" },
-    { "key": "walletId", "value": "1" },
-    { "key": "notificationId", "value": "1" },
-    { "key": "orderId", "value": "1" },
-    { "key": "batchId", "value": "1" },
-    { "key": "threadId", "value": "1" },
-    { "key": "agentId", "value": "1" },
-    { "key": "platformConfigId", "value": "1" },
-    { "key": "categoryId", "value": "1" },
-    { "key": "categorySlug", "value": "electronics" },
-    { "key": "productId", "value": "1" },
-    { "key": "productSlug", "value": "sample-product" },
-    { "key": "productUuid", "value": "" },
-    { "key": "cartSessUuid", "value": "cart_sess_demo" },
-    { "key": "kycId", "value": "1" },
-    { "key": "ecomOrderId", "value": "1" },
-    { "key": "bnplScheduleId", "value": "1" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:2020"
+    },
+    {
+      "key": "xToken",
+      "value": ""
+    },
+    {
+      "key": "xUserToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "walletId",
+      "value": "1"
+    },
+    {
+      "key": "notificationId",
+      "value": "1"
+    },
+    {
+      "key": "orderId",
+      "value": "1"
+    },
+    {
+      "key": "batchId",
+      "value": "1"
+    },
+    {
+      "key": "threadId",
+      "value": "1"
+    },
+    {
+      "key": "agentId",
+      "value": "1"
+    },
+    {
+      "key": "platformConfigId",
+      "value": "1"
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "categorySlug",
+      "value": "electronics"
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "productSlug",
+      "value": "sample-product"
+    },
+    {
+      "key": "productUuid",
+      "value": ""
+    },
+    {
+      "key": "cartSessUuid",
+      "value": "cart_sess_demo"
+    },
+    {
+      "key": "kycId",
+      "value": "1"
+    },
+    {
+      "key": "ecomOrderId",
+      "value": "1"
+    },
+    {
+      "key": "bnplScheduleId",
+      "value": "1"
+    }
   ],
   "auth": {
     "type": "noauth"
@@ -48,7 +108,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/test",
             "description": "Requires x-token (GlobalApiMiddleware)."
@@ -85,15 +148,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/v2/auth/login",
-            "description": "Saves `user.token` → `xUserToken` on success."
+            "description": "LoginDto: `email`, `password` required (non-empty).\n\nSaves `user.token` \u2192 `xUserToken` and `user.id` \u2192 `userId` on success."
           }
         },
         {
@@ -121,14 +195,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\",\n  \"social_security_number\": \"\",\n  \"country_code\": \"NG\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password1\",\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\",\n  \"social_security_number\": \"1234567890\",\n  \"country_code\": \"NG\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/register"
+            "url": "{{baseUrl}}/v2/auth/register",
+            "description": "RegisterDto: email (valid), password (\u22658 chars), name, phone, delivery_address, social_security_number required.\n\nController forces `role=customer` and default `status=inactive`. Optional: set `country_code` on the DTO after construct."
           }
         },
         {
@@ -136,14 +222,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/user/forgot-password"
+            "url": "{{baseUrl}}/v2/auth/user/forgot-password",
+            "description": "RequestForgotPasswordDto: valid `email` required."
           }
         },
         {
@@ -151,14 +249,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword\",\n  \"confirm_password\": \"newpassword\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword1\",\n  \"confirm_password\": \"newpassword1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/user/reset-password"
+            "url": "{{baseUrl}}/v2/auth/user/reset-password",
+            "description": "ResetPasswordDto: `email`, `otp`, `password`, `confirm_password` required; password must match confirm. Service also verifies OTP."
           }
         },
         {
@@ -166,14 +276,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/user/verify-email"
+            "url": "{{baseUrl}}/v2/auth/user/verify-email",
+            "description": "VerifyEmailDto: `email`, `otp` required. Service verifies OTP then sets status to `active`."
           }
         }
       ]
@@ -187,15 +309,30 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"password\",\n  \"name\": \"Agent User\",\n  \"phone\": \"+2348000000001\",\n  \"delivery_address\": \"456 Side St\",\n  \"social_security_number\": \"\",\n  \"role\": \"agent\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}"
+              "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"password1\",\n  \"name\": \"Agent User\",\n  \"phone\": \"+2348000000001\",\n  \"delivery_address\": \"456 Side St\",\n  \"social_security_number\": \"1234567890\",\n  \"role\": \"agent\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/create"
+            "url": "{{baseUrl}}/v2/auth/create",
+            "description": "CreateDto: email, password, name, phone, role \u2208 customer|agent|staff|super-admin|admin, status, country_code. delivery_address / social_security_number optional at DTO level."
           }
         },
         {
@@ -203,15 +340,30 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+2348000000002\",\n  \"delivery_address\": \"789 New Ave\",\n  \"social_security_number\": \"\",\n  \"role\": \"customer\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}"
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+2348000000002\",\n  \"delivery_address\": \"789 New Ave\",\n  \"social_security_number\": \"1234567890\",\n  \"role\": \"customer\",\n  \"status\": \"active\",\n  \"country_code\": \"NG\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
+            "url": "{{baseUrl}}/v2/auth/user/{{userId}}",
+            "description": "UpdateUserDto: path `user_id` + name, phone, delivery_address, role, status, country_code required. If role is `agent`, social_security_number is required."
           }
         },
         {
@@ -219,8 +371,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
           }
@@ -230,8 +388,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/auth/user/{{userId}}"
           }
@@ -241,8 +405,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/auth/me",
             "description": "GET /v2/auth/me\n\nRuns `WalletFeedbackMiddleware` first: verifies pending online top-ups via Paystack, approves/rejects them, and writes `wallet_feedback` rows to `GET /v2/logs`."
@@ -253,15 +423,30 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\"\n}"
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"phone\": \"+2348000000000\",\n  \"delivery_address\": \"123 Main St\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/me"
+            "url": "{{baseUrl}}/v2/auth/me",
+            "description": "UpdateProfileDto: auth user id + `name`, `phone`, `delivery_address` required."
           }
         },
         {
@@ -269,15 +454,30 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"old_password\": \"password\",\n  \"new_password\": \"newpassword\",\n  \"confirm_password\": \"newpassword\"\n}"
+              "raw": "{\n  \"old_password\": \"password1\",\n  \"new_password\": \"newpassword1\",\n  \"confirm_password\": \"newpassword1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": "{{baseUrl}}/v2/auth/me/change-password"
+            "url": "{{baseUrl}}/v2/auth/me/change-password",
+            "description": "ChangePasswordDto: `old_password`, `new_password`, `confirm_password` required; new must match confirm. Service verifies old password."
           }
         },
         {
@@ -285,8 +485,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/auth/me/wallet-balance"
           }
@@ -296,8 +502,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/auth/login"
           }
@@ -330,19 +542,46 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
-              "raw": "{{baseUrl}}/v2/auth/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "auth", "users"],
+              "raw": "{{baseUrl}}/v2/auth/users?search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "auth",
+                "users"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true, "description": "Matches name, email, phone, or role (LIKE)" },
-                { "key": "email", "value": "", "disabled": true, "description": "Exact email match" }
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Optional name/email/phone/role LIKE filter"
+                },
+                {
+                  "key": "email",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Exact email filter"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Exact user id filter"
+                }
               ]
             },
-            "description": "GET /v2/auth/users\n\nAdmin only (`UserController::fetch` → `fetchUsersAsAdmin`).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"users\": [/* UserEntity[] */],\n    \"count\": 0,\n    \"message\": \"Users fetched successfully\"\n  }\n}\n```\n\nOptional query filters: `search`, `email`.\nOn success, sets `userId` from the first returned user."
+            "description": "GET /v2/auth/users\n\nAdmin only (`UserController::fetch` \u2192 `fetchUsersAsAdmin`).\n\nOptional query filters supported by UserRepository: `search`, `email`, `id`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"users\": [/* UserEntity[] */],\n    \"count\": 0,\n    \"message\": \"Users fetched successfully\"\n  }\n}\n```"
           }
         }
       ]
@@ -356,16 +595,25 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"amount\": 100\n}"
             },
             "url": "{{baseUrl}}/v2/wallet/top-up-online",
-            "description": "Creates a pending online top-up and returns a Paystack `payment_url` on the wallet.\n\nRequest JSON: `{ \"amount\": 100 }`\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"wallet\": {\n      \"id\": 5,\n      \"user_id\": 31,\n      \"reference\": \"TOPUP-…\",\n      \"type\": \"online\",\n      \"amount\": 100,\n      \"balance\": 0,\n      \"description\": \"Top up online\",\n      \"payment_url\": \"https://checkout.paystack.com/…\",\n      \"status\": \"pending\",\n      \"created_at\": \"2026-08-09 03:43:35\"\n    },\n    \"message\": \"Top up online successful\"\n  }\n}\n```\n\nOpen `data.wallet.payment_url` to complete payment. Balance stays `0` / status `pending` until Paystack confirms."
+            "description": "Creates a pending online top-up and returns a Paystack `payment_url` on the wallet.\n\nRequest JSON: `{ \"amount\": 100 }`\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"wallet\": {\n      \"id\": 5,\n      \"user_id\": 31,\n      \"reference\": \"TOPUP-\u2026\",\n      \"type\": \"online\",\n      \"amount\": 100,\n      \"balance\": 0,\n      \"description\": \"Top up online\",\n      \"payment_url\": \"https://checkout.paystack.com/\u2026\",\n      \"status\": \"pending\",\n      \"created_at\": \"2026-08-09 03:43:35\"\n    },\n    \"message\": \"Top up online successful\"\n  }\n}\n```\n\nOpen `data.wallet.payment_url` to complete payment. Balance stays `0` / status `pending` until Paystack confirms."
           }
         },
         {
@@ -373,9 +621,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -389,8 +646,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/{{walletId}}/approve-manual-top-up"
           }
@@ -400,9 +663,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -416,8 +688,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/my-pending-wallet-transactions"
           }
@@ -427,8 +705,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/my-approved-wallet-transactions"
           }
@@ -438,8 +722,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/manual-pending-wallet-transactions"
           }
@@ -449,8 +739,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/manual-approved-wallet-transactions"
           }
@@ -460,8 +756,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/manual-rejected-wallet-transactions"
           }
@@ -477,8 +779,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/notifications/my-notifications"
           }
@@ -488,8 +796,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/mark-as-read"
           }
@@ -499,8 +813,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/mark-as-unread"
           }
@@ -510,8 +830,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/notifications/{{notificationId}}/delete",
             "description": "DELETE /v2/notifications/{{notificationId}}/delete\n\nCalls `NotificationService::remove`. Only the owning user can delete.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"notification\": {},\n    \"message\": \"Notification deleted successfully\"\n  }\n}\n```"
@@ -528,8 +854,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/platform-configs",
             "description": "GET /v2/platform-configs\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"platform_configs\": [\n      {\n        \"id\": 1,\n        \"setting_key\": \"SERVICE_CHARGE\",\n        \"setting_value\": \"100\",\n        \"created_at\": \"2026-08-09 12:00:00\",\n        \"updated_at\": \"2026-08-09 12:00:00\"\n      }\n    ]\n  }\n}\n```"
@@ -540,9 +872,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -557,8 +898,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/platform-configs/{{platformConfigId}}/delete",
             "description": "DELETE /v2/platform-configs/{{platformConfigId}}/delete\n\nDeletes by row `id` from List Platform Configs."
@@ -592,16 +939,25 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Batch 1\",\n  \"description\": \"First order batch\"\n}"
             },
             "url": "{{baseUrl}}/v2/batches",
-            "description": "Saves `batch.id` → `batchId` on success."
+            "description": "Saves `batch.id` \u2192 `batchId` on success."
           }
         },
         {
@@ -609,15 +965,30 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/batches",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "batches"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "batches"
+              ],
               "query": [
-                { "key": "id", "value": "", "disabled": true }
+                {
+                  "key": "id",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -627,8 +998,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/batches/{{batchId}}"
           }
@@ -664,19 +1041,37 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "order_id", "value": "{{orderId}}", "type": "text" },
-                { "key": "message", "value": "Hello, checking on my order.", "type": "text" },
-                { "key": "attachment_url", "type": "file", "src": "" }
+                {
+                  "key": "order_id",
+                  "value": "{{orderId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "message",
+                  "value": "Hello, checking on my order.",
+                  "type": "text"
+                },
+                {
+                  "key": "attachment_url",
+                  "type": "file",
+                  "src": ""
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/threads",
-            "description": "POST /v2/threads\n\nBody (form-data): `order_id`, `message`, optional `attachment_url` file.\n`sender_id` = authenticated user.\n\nSide effects: in-app notification to order owner; email to customer when sender ≠ order owner.\nSaves `thread.id` → `threadId` on success."
+            "description": "POST /v2/threads\n\nBody (form-data): `order_id`, `message`, optional `attachment_url` file.\n`sender_id` = authenticated user.\n\nSide effects: in-app notification to order owner; email to customer when sender \u2260 order owner.\nSaves `thread.id` \u2192 `threadId` on success."
           }
         },
         {
@@ -684,8 +1079,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/threads/{{orderId}}",
             "description": "GET /v2/threads/{order_id}\n\nReturns all thread messages for the order (ordered by `created_at` ASC) plus `count`."
@@ -719,22 +1120,52 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "link", "value": "https://store.example.com/item/1", "type": "text" },
-                { "key": "description", "value": "Snappy order request", "type": "text" },
-                { "key": "total_amount_usd", "value": "50", "type": "text" },
-                { "key": "screen_shot1", "type": "file", "src": "" },
-                { "key": "screen_shot2", "type": "file", "src": "" },
-                { "key": "screen_shot3", "type": "file", "src": "" }
+                {
+                  "key": "link",
+                  "value": "https://store.example.com/item/1",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Snappy order request",
+                  "type": "text"
+                },
+                {
+                  "key": "total_amount_usd",
+                  "value": "50",
+                  "type": "text"
+                },
+                {
+                  "key": "screen_shot1",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "screen_shot2",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "screen_shot3",
+                  "type": "file",
+                  "src": ""
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/snappy-orders",
-            "description": "Saves `order.id` → `orderId` on success. Attach screenshot files in form-data."
+            "description": "Saves `order.id` \u2192 `orderId` on success. Attach screenshot files in form-data."
           }
         },
         {
@@ -742,16 +1173,36 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/snappy-orders/my-orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "snappy-orders", "my-orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "snappy-orders",
+                "my-orders"
+              ],
               "query": [
-                { "key": "status", "value": "", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -761,16 +1212,36 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/snappy-orders/agent-orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "snappy-orders", "agent-orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "snappy-orders",
+                "agent-orders"
+              ],
               "query": [
-                { "key": "status", "value": "", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -780,11 +1251,17 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}",
-            "description": "GET /v2/snappy-orders/{{orderId}}\n\nCalls `SnappyOrderController::getById` → `SnappyOrderService::getById`.\n\nAccess:\n- Admin: any order\n- Customer: own orders (`user_id`)\n- Agent: assigned orders (`agent_id`)\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order fetched successfully\"\n  }\n}\n```"
+            "description": "GET /v2/snappy-orders/{{orderId}}\n\nCalls `SnappyOrderController::getById` \u2192 `SnappyOrderService::getById`.\n\nAccess:\n- Admin: any order\n- Customer: own orders (`user_id`)\n- Agent: assigned orders (`agent_id`)\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order fetched successfully\"\n  }\n}\n```"
           }
         },
         {
@@ -792,8 +1269,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/pay-from-wallet"
           }
@@ -809,18 +1292,46 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/snappy-orders/admin-orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "snappy-orders", "admin-orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "snappy-orders",
+                "admin-orders"
+              ],
               "query": [
-                { "key": "status", "value": "", "disabled": true },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "user_id", "value": "", "disabled": true },
-                { "key": "agent_id", "value": "", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "user_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "agent_id",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -830,9 +1341,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -847,16 +1367,25 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"price\": 55.5\n}"
             },
             "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/change-price",
-            "description": "Admin only. `SnappyOrderController::changePrice` → `SnappyOrderService::changePrice`.\n\nBody JSON (either key):\n- `{ \"price\": 55.5 }`\n- `{ \"total_amount_usd\": 55.5 }`\n\nRules:\n- Order status must be `pending`\n- Recalculates service charge, shipping, FX, and `grand_total_naira`\n- Sets `price_adjustment_sent` = 1 and emails the customer\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order price updated successfully\"\n  }\n}\n```"
+            "description": "Admin only. `SnappyOrderController::changePrice` \u2192 `SnappyOrderService::changePrice`.\n\nBody JSON (either key):\n- `{ \"price\": 55.5 }`\n- `{ \"total_amount_usd\": 55.5 }`\n\nRules:\n- Order status must be `pending`\n- Recalculates service charge, shipping, FX, and `grand_total_naira`\n- Sets `price_adjustment_sent` = 1 and emails the customer\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order price updated successfully\"\n  }\n}\n```"
           }
         },
         {
@@ -864,9 +1393,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -880,9 +1418,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -897,8 +1444,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/{{orderId}}/unassign-from-batch",
             "description": "Admin only. Clears `batch_id` on the order.\n\nPOST /v2/snappy-orders/{{orderId}}/unassign-from-batch\n\nFails if the order is not assigned to a batch.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"order\": {},\n    \"message\": \"Order unassigned from batch successfully\"\n  }\n}\n```"
@@ -909,11 +1462,17 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/publish-settings",
-            "description": "Admin only. `SnappyOrderController::publishSettings`.\n\nWrites current snappy-order defaults into platform config keys:\n- SERVICE_CHARGE\n- SHIPPING_COST\n- DOLLAR_TO_NAIRA_RATE\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Settings published successfully\"\n  }\n}\n```\n\nFrontend: Admin → Migrations (`/admin/migrations`)."
+            "description": "Admin only. `SnappyOrderController::publishSettings`.\n\nWrites current snappy-order defaults into platform config keys:\n- SERVICE_CHARGE\n- SHIPPING_COST\n- DOLLAR_TO_NAIRA_RATE\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Settings published successfully\"\n  }\n}\n```\n\nFrontend: Admin \u2192 Migrations (`/admin/migrations`)."
           }
         }
       ]
@@ -927,7 +1486,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/migrate",
             "description": "x-token only (GlobalApiMiddleware)."
@@ -938,7 +1500,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/wallet/migrate",
             "description": "x-token only."
@@ -949,7 +1514,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/notifications/migrate",
             "description": "x-token only."
@@ -960,7 +1528,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/platform-configs/migrate",
             "description": "x-token only."
@@ -971,7 +1542,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/snappy-orders/migrate",
             "description": "x-token only."
@@ -982,7 +1556,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/batches/migrate",
             "description": "x-token only."
@@ -993,7 +1570,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/threads/migrate",
             "description": "x-token only."
@@ -1004,7 +1584,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/proxy-order-change-logs/migrate",
             "description": "GET /v2/proxy-order-change-logs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `ProxyOrderChangeLogController::migrate`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Migration completed successfully\",\n    \"result\": {}\n  }\n}\n```"
@@ -1015,7 +1598,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/logs/migrate",
             "description": "GET /v2/logs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `LogController::migrate`."
@@ -1026,7 +1612,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/categories/migrate",
             "description": "GET /v2/categories/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `CategoryController::migrate`."
@@ -1037,7 +1626,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/products/migrate",
             "description": "GET /v2/products/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `ProductController::migrate`."
@@ -1048,7 +1640,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/carts/migrate",
             "description": "GET /v2/carts/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `CartController::migrate`."
@@ -1059,7 +1654,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/migrate",
             "description": "GET /v2/user-kycs/migrate\n\nx-token only (`GlobalApiMiddleware`).\n\nCalls `UserKycController::migrate`.\n\n`approved`: `-1` pending, `1` approved, `0` rejected."
@@ -1076,17 +1674,40 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/categories?search=&parent_id=",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "categories"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "categories"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "parent_id", "value": "", "disabled": true },
-                { "key": "slug", "value": "", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "parent_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "slug",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/categories\n\nActive categories only (`fetchForFrontend`).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"categories\": [],\n    \"count\": 0,\n    \"message\": \"Categories fetched successfully\"\n  }\n}\n```"
@@ -1097,18 +1718,47 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/categories/admin?search=&parent_id=&active=",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "categories", "admin"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "categories",
+                "admin"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "parent_id", "value": "", "disabled": true },
-                { "key": "active", "value": "", "description": "0 | 1", "disabled": true },
-                { "key": "slug", "value": "", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "parent_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "active",
+                  "value": "",
+                  "description": "0 | 1",
+                  "disabled": true
+                },
+                {
+                  "key": "slug",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/categories/admin\n\nAdmin only. Includes inactive categories."
@@ -1119,8 +1769,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
             "description": "GET /v2/categories/{{categoryId}}\n\nCalls `CategoryService::findById`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"category\": {},\n    \"message\": \"Category fetched successfully\"\n  }\n}\n```"
@@ -1131,8 +1787,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/categories/slug/{{categorySlug}}",
             "description": "GET /v2/categories/slug/{{categorySlug}}\n\nCalls `CategoryService::findBySlug`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"category\": {},\n    \"message\": \"Category fetched successfully\"\n  }\n}\n```"
@@ -1143,17 +1805,43 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Electronics", "type": "text" },
-                { "key": "parent_id", "value": "0", "type": "text" },
-                { "key": "description", "value": "Electronic goods", "type": "text" },
-                { "key": "slug", "value": "electronics", "type": "text" },
-                { "key": "image", "type": "file", "src": "" }
+                {
+                  "key": "name",
+                  "value": "Electronics",
+                  "type": "text"
+                },
+                {
+                  "key": "parent_id",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Electronic goods",
+                  "type": "text"
+                },
+                {
+                  "key": "slug",
+                  "value": "electronics",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/categories",
@@ -1165,17 +1853,44 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Electronics", "type": "text" },
-                { "key": "parent_id", "value": "0", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" },
-                { "key": "slug", "value": "electronics", "type": "text" },
-                { "key": "image", "type": "file", "src": "", "disabled": true }
+                {
+                  "key": "name",
+                  "value": "Electronics",
+                  "type": "text"
+                },
+                {
+                  "key": "parent_id",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "slug",
+                  "value": "electronics",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
@@ -1187,8 +1902,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/categories/{{categoryId}}",
             "description": "Admin only. Fails if the category has child categories."
@@ -1205,21 +1926,60 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/products?search=&category_id=&price_min=&sort_a_z=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "products"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "products"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "category_id", "value": "", "disabled": true },
-                { "key": "price_min", "value": "", "disabled": true },
-                { "key": "sort_a_z", "value": "1", "disabled": true },
-                { "key": "sort_z_a", "value": "1", "disabled": true },
-                { "key": "sort_price_asc", "value": "1", "disabled": true },
-                { "key": "sort_price_desc", "value": "1", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "price_min",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_a_z",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_z_a",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_price_asc",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_price_desc",
+                  "value": "1",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/products\n\nActive products only (`fetchForFrontend`).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"products\": [],\n    \"count\": 0,\n    \"message\": \"Products fetched successfully\"\n  }\n}\n```"
@@ -1230,18 +1990,47 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/products/admin?search=&category_id=&active=&user_id=",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "products", "admin"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "products",
+                "admin"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "category_id", "value": "", "disabled": true },
-                { "key": "active", "value": "", "description": "0 | 1", "disabled": true },
-                { "key": "user_id", "value": "", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "active",
+                  "value": "",
+                  "description": "0 | 1",
+                  "disabled": true
+                },
+                {
+                  "key": "user_id",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/products/admin\n\nAdmin only. Includes inactive products."
@@ -1252,17 +2041,42 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/products/merchant?search=&category_id=&active=",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "products", "merchant"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "products",
+                "merchant"
+              ],
               "query": [
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "category_id", "value": "", "disabled": true },
-                { "key": "active", "value": "", "description": "0 | 1", "disabled": true }
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "active",
+                  "value": "",
+                  "description": "0 | 1",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/products/merchant\n\nCalls `ProductService::fetchForMerchant` for the authenticated user (`user_id` = auth user).\n\nIncludes inactive products owned by the merchant."
@@ -1273,8 +2087,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/products/{{productId}}",
             "description": "GET /v2/products/{{productId}}\n\nCalls `ProductService::findById`."
@@ -1285,8 +2105,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/products/slug/{{productSlug}}",
             "description": "GET /v2/products/slug/{{productSlug}}\n\nCalls `ProductService::findBySlug`."
@@ -1297,8 +2123,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/products/uuid/{{productUuid}}",
             "description": "GET /v2/products/uuid/{{productUuid}}\n\nCalls `ProductService::findByUuid`."
@@ -1309,31 +2141,104 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Sample Product", "type": "text" },
-                { "key": "description", "value": "Product description", "type": "text" },
-                { "key": "price", "value": "19.99", "type": "text" },
-                { "key": "old_price", "value": "24.99", "type": "text" },
-                { "key": "stock_qty", "value": "10", "type": "text" },
-                { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
-                { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
-                { "key": "slug", "value": "sample-product", "type": "text" },
-                { "key": "image_1", "type": "file", "src": "" },
-                { "key": "image_2", "type": "file", "src": "", "disabled": true },
-                { "key": "image_3", "type": "file", "src": "", "disabled": true },
-                { "key": "image_4", "type": "file", "src": "", "disabled": true },
-                { "key": "image_5", "type": "file", "src": "", "disabled": true },
-                { "key": "image_6", "type": "file", "src": "", "disabled": true },
-                { "key": "image_7", "type": "file", "src": "", "disabled": true }
+                {
+                  "key": "name",
+                  "value": "Sample Product",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Product description",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "19.99",
+                  "type": "text"
+                },
+                {
+                  "key": "old_price",
+                  "value": "24.99",
+                  "type": "text"
+                },
+                {
+                  "key": "stock_qty",
+                  "value": "10",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "{{categoryId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "slug",
+                  "value": "sample-product",
+                  "type": "text"
+                },
+                {
+                  "key": "image_1",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "image_2",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_3",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_4",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_5",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_6",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_7",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/products",
-            "description": "Admin only. Form-data: `name`, `description`, `price`, `old_price`, `stock_qty`, `category_id`, optional `slug`, optional `user_id` (defaults to auth user), required `image_1`, optional `image_2`…`image_7`.\n\nUploads via `FileUploadServiceInterface` into `/uploads/products`. `image` is set from `image_1`. UUID is generated server-side. New products start with `active=0`."
+            "description": "Admin only. Form-data: `name`, `description`, `price`, `old_price`, `stock_qty`, `category_id`, optional `slug`, optional `user_id` (defaults to auth user), required `image_1`, optional `image_2`\u2026`image_7`.\n\nUploads via `FileUploadServiceInterface` into `/uploads/products`. `image` is set from `image_1`. UUID is generated server-side. New products start with `active=0`."
           }
         },
         {
@@ -1341,28 +2246,106 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Sample Product", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" },
-                { "key": "price", "value": "18.99", "type": "text" },
-                { "key": "old_price", "value": "24.99", "type": "text" },
-                { "key": "stock_qty", "value": "8", "type": "text" },
-                { "key": "category_id", "value": "{{categoryId}}", "type": "text" },
-                { "key": "user_id", "value": "{{userId}}", "type": "text", "disabled": true },
-                { "key": "slug", "value": "sample-product", "type": "text" },
-                { "key": "active", "value": "1", "type": "text" },
-                { "key": "image_1", "type": "file", "src": "", "disabled": true },
-                { "key": "image_2", "type": "file", "src": "", "disabled": true },
-                { "key": "image_3", "type": "file", "src": "", "disabled": true },
-                { "key": "image_4", "type": "file", "src": "", "disabled": true },
-                { "key": "image_5", "type": "file", "src": "", "disabled": true },
-                { "key": "image_6", "type": "file", "src": "", "disabled": true },
-                { "key": "image_7", "type": "file", "src": "", "disabled": true }
+                {
+                  "key": "name",
+                  "value": "Sample Product",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "18.99",
+                  "type": "text"
+                },
+                {
+                  "key": "old_price",
+                  "value": "24.99",
+                  "type": "text"
+                },
+                {
+                  "key": "stock_qty",
+                  "value": "8",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "{{categoryId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "slug",
+                  "value": "sample-product",
+                  "type": "text"
+                },
+                {
+                  "key": "active",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image_1",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_2",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_3",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_4",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_5",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_6",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "image_7",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/products/{{productId}}",
@@ -1374,8 +2357,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/products/{{productId}}",
             "description": "Admin only. Calls `ProductService::remove`."
@@ -1409,7 +2398,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/carts/uuid",
             "description": "GET /v2/carts/uuid\n\nCalls `CartService::generateCartUuid`.\n\nSaves `uuid` into collection variable `cartSessUuid`."
@@ -1420,8 +2412,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1436,7 +2434,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}",
             "description": "GET /v2/carts/{{cartSessUuid}}\n\nCalls `CartService::getCart`.\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"cart\": [],\n    \"count\": 0,\n    \"price_total\": 0,\n    \"message\": \"Cart fetched successfully\"\n  }\n}\n```"
@@ -1447,7 +2448,10 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}/products/{{productId}}",
             "description": "DELETE /v2/carts/{{cartSessUuid}}/products/{{productId}}\n\nCalls `CartService::removeFromCart`."
@@ -1458,7 +2462,10 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/carts/{{cartSessUuid}}",
             "description": "DELETE /v2/carts/{{cartSessUuid}}\n\nCalls `CartService::clearCart`."
@@ -1492,9 +2499,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1509,9 +2525,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1526,9 +2551,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1543,8 +2577,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/my",
             "description": "GET /v2/ecom-orders/my\n\nOptional query: `payment_status`, `delivery_status`, `type`, `search`.\n\nRuns `EcomOrderFeedbackMiddleware` first: pending card/BNPL orders for the user are verified via `paymentFeedback`."
@@ -1555,8 +2595,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/agent",
             "description": "GET /v2/ecom-orders/agent\n\nAuth user must have role `agent`."
@@ -1567,8 +2613,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/{{ecomOrderId}}"
           }
@@ -1578,8 +2630,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/admin"
           }
@@ -1589,8 +2647,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/pending-payments",
             "description": "Charges due BNPL schedules (Paystack authorization) then lists remaining pending/part-paid orders. Also available as CLI: `charge-bnpl`."
@@ -1601,8 +2665,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/ecom-orders/publish-settings",
             "description": "Admin only. Seeds/updates platform config keys used at checkout:\n- ECOM_SHIPPING_FEE (default 100)\n- ECOM_SERVICE_CHARGE (default 100)\n- ECOM_PERCENTAGE_TO_PLATFORM (default 10)\n\nChange values later via POST /v2/platform-configs/update."
@@ -1613,9 +2683,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1630,9 +2709,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -1652,8 +2740,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/bnpl-payment-schedules/order/{{ecomOrderId}}/first"
           }
@@ -1663,8 +2757,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/bnpl-payment-schedules/order/{{ecomOrderId}}/next"
           }
@@ -1674,8 +2774,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/bnpl-payment-schedules/{{bnplScheduleId}}/charge"
           }
@@ -1691,8 +2797,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/my",
             "description": "GET /v2/user-kycs/my\n\nCalls `UserKycService::fetchForUser` for the authenticated user."
@@ -1703,20 +2815,63 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "nin", "value": "12345678901", "type": "text" },
-                { "key": "store_name", "value": "My Store", "type": "text" },
-                { "key": "description", "value": "Store KYC description", "type": "text" },
-                { "key": "document1", "type": "file", "src": "", "disabled": true },
-                { "key": "document2", "type": "file", "src": "", "disabled": true },
-                { "key": "document3", "type": "file", "src": "", "disabled": true },
-                { "key": "document4", "type": "file", "src": "", "disabled": true },
-                { "key": "document5", "type": "file", "src": "", "disabled": true }
+                {
+                  "key": "nin",
+                  "value": "12345678901",
+                  "type": "text"
+                },
+                {
+                  "key": "store_name",
+                  "value": "My Store",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Store KYC description",
+                  "type": "text"
+                },
+                {
+                  "key": "document1",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document2",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document3",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document4",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document5",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/user-kycs",
@@ -1728,20 +2883,63 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "nin", "value": "12345678901", "type": "text" },
-                { "key": "store_name", "value": "My Store", "type": "text" },
-                { "key": "description", "value": "Updated KYC description", "type": "text" },
-                { "key": "document1", "type": "file", "src": "", "disabled": true },
-                { "key": "document2", "type": "file", "src": "", "disabled": true },
-                { "key": "document3", "type": "file", "src": "", "disabled": true },
-                { "key": "document4", "type": "file", "src": "", "disabled": true },
-                { "key": "document5", "type": "file", "src": "", "disabled": true }
+                {
+                  "key": "nin",
+                  "value": "12345678901",
+                  "type": "text"
+                },
+                {
+                  "key": "store_name",
+                  "value": "My Store",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated KYC description",
+                  "type": "text"
+                },
+                {
+                  "key": "document1",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document2",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document3",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document4",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                },
+                {
+                  "key": "document5",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}",
@@ -1753,8 +2951,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/pending",
             "description": "GET /v2/user-kycs/pending\n\nAdmin only. `fetchForApproval` (`approved=-1`)."
@@ -1765,8 +2969,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/approved",
             "description": "GET /v2/user-kycs/approved\n\nAdmin only. `fetchApproved` (`approved=1`)."
@@ -1777,8 +2987,14 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/rejected",
             "description": "GET /v2/user-kycs/rejected\n\nAdmin only. `fetchRejected` (`approved=0`)."
@@ -1789,8 +3005,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}/approve",
             "description": "POST /v2/user-kycs/{{kycId}}/approve\n\nAdmin only. Sets `approved=1`, `approved_by` = auth admin. Sends in-app + email via `UserKycNotificationService`."
@@ -1801,13 +3023,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "body": {
               "mode": "urlencoded",
               "urlencoded": [
-                { "key": "reject_reason", "value": "Documents are unclear", "type": "text" }
+                {
+                  "key": "reject_reason",
+                  "value": "Documents are unclear",
+                  "type": "text"
+                }
               ]
             },
             "url": "{{baseUrl}}/v2/user-kycs/{{kycId}}/reject",
@@ -1825,17 +3057,43 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-token", "value": "{{xToken}}" },
-              { "key": "x-user-token", "value": "{{xUserToken}}" }
+              {
+                "key": "x-token",
+                "value": "{{xToken}}"
+              },
+              {
+                "key": "x-user-token",
+                "value": "{{xUserToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/v2/logs?type=&search=",
-              "host": ["{{baseUrl}}"],
-              "path": ["v2", "logs"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v2",
+                "logs"
+              ],
               "query": [
-                { "key": "type", "value": "", "description": "success | error", "disabled": true },
-                { "key": "search", "value": "", "description": "Matches title, payload, or response", "disabled": true },
-                { "key": "id", "value": "", "description": "Exact log id", "disabled": true }
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "success | error",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Matches title, payload, or response",
+                  "disabled": true
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Exact log id",
+                  "disabled": true
+                }
               ]
             },
             "description": "GET /v2/logs\n\nAdmin only. Filters: `type` (`success`|`error`), `search`, `id`.\n\nCommon titles include `wallet_feedback` (written by `WalletFeedbackMiddleware` when online top-ups are verified).\n\nSuccess shape:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"logs\": [\n      {\n        \"id\": 1,\n        \"title\": \"wallet_feedback\",\n        \"payload\": \"{...wallet...}\",\n        \"response\": \"{\\\"status\\\":\\\"success\\\"}\",\n        \"type\": \"success\",\n        \"created_at\": \"2026-08-09 17:00:00\",\n        \"updated_at\": \"2026-08-09 17:00:00\"\n      }\n    ],\n    \"count\": 1,\n    \"message\": \"Logs fetched successfully\"\n  }\n}\n```"

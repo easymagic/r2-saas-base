@@ -2,11 +2,18 @@
 
 namespace User\Presentation;
 
-
-
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
+use User\Business\Dtos\ChangePasswordDto;
+use User\Business\Dtos\CreateDto;
+use User\Business\Dtos\LoginDto;
+use User\Business\Dtos\RegisterDto;
+use User\Business\Dtos\RequestForgotPasswordDto;
+use User\Business\Dtos\ResetPasswordDto;
+use User\Business\Dtos\UpdateProfileDto;
+use User\Business\Dtos\UpdateUserDto;
+use User\Business\Dtos\VerifyEmailDto;
 use User\Business\UserServiceInterface;
 use User\Data\UserRepositoryInterface;
 
@@ -35,9 +42,10 @@ class UserController
 
     public function login()
     {
-        $email = $this->request->get('email');
-        $password = $this->request->get('password');
-        $user = $this->userService->login($email, $password);
+        $user = $this->userService->login(new LoginDto(
+            (string) $this->request->get('email'),
+            (string) $this->request->get('password')
+        ));
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "Login successful",
@@ -46,26 +54,18 @@ class UserController
 
     function register()
     {
-        $email = $this->request->get('email');
-        $password = $this->request->get('password');
-        $name = $this->request->get('name');
-        $phone = $this->request->get('phone');
-        $delivery_address = $this->request->get('delivery_address');
-        $social_security_number = $this->request->get('social_security_number');
-        $role = "customer"; 
-        $status = "inactive";
-        $country_code = $this->request->get('country_code');
-        $user = $this->userService->register(
-            $email,
-            $password,
-            $name,
-            $phone,
-            $delivery_address,
-            $social_security_number,
-            $role,
-            $status,
-            $country_code
+        $registerDto = new RegisterDto(
+            (string) $this->request->get('email'),
+            (string) $this->request->get('password'),
+            (string) $this->request->get('name'),
+            (string) $this->request->get('phone'),
+            (string) $this->request->get('delivery_address'),
+            (string) $this->request->get('social_security_number'),
+            'customer'
         );
+        $registerDto->country_code = (string) $this->request->get('country_code');
+
+        $user = $this->userService->register($registerDto);
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User registered successfully , please check your email for verification"
@@ -74,27 +74,17 @@ class UserController
 
     function create()
     {
-        $email = $this->request->get('email');
-        $password = $this->request->get('password');
-        $name = $this->request->get('name');
-        $phone = $this->request->get('phone');
-        $delivery_address = $this->request->get('delivery_address');
-        $social_security_number = $this->request->get('social_security_number');
-        $role = $this->request->get('role');
-        $status = $this->request->get('status');
-        $country_code = $this->request->get('country_code');
-
-        $user = $this->userService->create(
-            $email,
-            $password,
-            $name,
-            $phone,
-            $delivery_address,
-            $social_security_number,
-            $role,
-            $status,
-            $country_code
-        );
+        $user = $this->userService->create(new CreateDto(
+            (string) $this->request->get('email'),
+            (string) $this->request->get('password'),
+            (string) $this->request->get('name'),
+            (string) $this->request->get('phone'),
+            (string) $this->request->get('delivery_address'),
+            (string) $this->request->get('social_security_number'),
+            (string) $this->request->get('role'),
+            (string) $this->request->get('status'),
+            (string) $this->request->get('country_code')
+        ));
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User created successfully"
@@ -103,25 +93,16 @@ class UserController
 
     function updateUser()
     {
-        $id = $this->request->get('user_id');
-        $name = $this->request->get('name');
-        $phone = $this->request->get('phone');
-        $delivery_address = $this->request->get('delivery_address');
-        $social_security_number = $this->request->get('social_security_number');
-        $role = $this->request->get('role');
-        $status = $this->request->get('status');
-        $country_code = $this->request->get('country_code');
-
-        $user = $this->userService->updateUser(
-            $id,
-            $name,
-            $phone,
-            $delivery_address,
-            $social_security_number,
-            $role,
-            $status,
-            $country_code
-        );
+        $user = $this->userService->updateUser(new UpdateUserDto(
+            (int) $this->request->get('user_id'),
+            (string) $this->request->get('name'),
+            (string) $this->request->get('phone'),
+            (string) $this->request->get('delivery_address'),
+            (string) $this->request->get('social_security_number'),
+            (string) $this->request->get('role'),
+            (string) $this->request->get('status'),
+            (string) $this->request->get('country_code')
+        ));
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User updated successfully"
@@ -130,7 +111,7 @@ class UserController
 
     function delete()
     {
-        $id = $this->request->get('user_id');
+        $id = (int) $this->request->get('user_id');
         $user = $this->userService->delete($id);
         $this->jsonResponseService->success([
             'user' => $user,
@@ -140,18 +121,13 @@ class UserController
 
     function updateProfile()
     {
-        $user = $this->apiCredentialService->getAuthUser();
-        $id = $user->id;
-        $name = $this->request->get('name');
-        $phone = $this->request->get('phone');
-        $delivery_address = $this->request->get('delivery_address');
-
-        $user = $this->userService->updateProfile(
-            $id,
-            $name,
-            $phone,
-            $delivery_address
-        );
+        $authUser = $this->apiCredentialService->getAuthUser();
+        $user = $this->userService->updateProfile(new UpdateProfileDto(
+            (int) $authUser->id,
+            (string) $this->request->get('name'),
+            (string) $this->request->get('phone'),
+            (string) $this->request->get('delivery_address')
+        ));
 
         $this->jsonResponseService->success([
             'user' => $user,
@@ -161,18 +137,13 @@ class UserController
 
     function changePassword()
     {
-        $user = $this->apiCredentialService->getAuthUser();
-        $id = $user->id;
-        $old_password = $this->request->get('old_password');
-        $new_password = $this->request->get('new_password');
-        $confirm_password = $this->request->get('confirm_password');
-
-        $user = $this->userService->changePassword(
-            $id,
-            $old_password,
-            $new_password,
-            $confirm_password
-        );
+        $authUser = $this->apiCredentialService->getAuthUser();
+        $user = $this->userService->changePassword(new ChangePasswordDto(
+            (int) $authUser->id,
+            (string) $this->request->get('old_password'),
+            (string) $this->request->get('new_password'),
+            (string) $this->request->get('confirm_password')
+        ));
 
         $this->jsonResponseService->success([
             'user' => $user,
@@ -182,7 +153,7 @@ class UserController
 
     function find()
     {
-        $id = $this->request->get('user_id');
+        $id = (int) $this->request->get('user_id');
         $user = $this->userService->find($id);
         $this->jsonResponseService->success([
             'user' => $user,
@@ -192,9 +163,8 @@ class UserController
 
     function getWalletBalance()
     {
-        $user = $this->apiCredentialService->getAuthUser();
-        $id = $user->id;
-        $balance = $this->userService->getWalletBalance($id);
+        $authUser = $this->apiCredentialService->getAuthUser();
+        $balance = $this->userService->getWalletBalance((int) $authUser->id);
         $this->jsonResponseService->success([
             'balance' => $balance,
             "message" => "Wallet balance fetched successfully"
@@ -203,9 +173,8 @@ class UserController
 
     function logout()
     {
-        $user = $this->apiCredentialService->getAuthUser();
-        $id = $user->id;
-        $this->userService->logout($id);
+        $authUser = $this->apiCredentialService->getAuthUser();
+        $this->userService->logout((int) $authUser->id);
         $this->jsonResponseService->success([
             'message' => 'Logged out successfully',
             "status" => "success",
@@ -214,8 +183,9 @@ class UserController
 
     function requestForgotPassword()
     {
-        $email = $this->request->get('email');
-        $user = $this->userService->requestForgotPassword($email);
+        $user = $this->userService->requestForgotPassword(new RequestForgotPasswordDto(
+            (string) $this->request->get('email')
+        ));
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "Forgot password request sent successfully to your email",
@@ -224,17 +194,12 @@ class UserController
 
     function resetPassword()
     {
-        $email = $this->request->get('email');
-        $otp = $this->request->get('otp');
-        $password = $this->request->get('password');
-        $confirm_password = $this->request->get('confirm_password');
-
-        $user = $this->userService->resetPassword(
-            $email,
-            $otp,
-            $password,
-            $confirm_password
-        );
+        $user = $this->userService->resetPassword(new ResetPasswordDto(
+            (string) $this->request->get('email'),
+            (string) $this->request->get('otp'),
+            (string) $this->request->get('password'),
+            (string) $this->request->get('confirm_password')
+        ));
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "Password reset successfully",
@@ -243,10 +208,10 @@ class UserController
 
     function verifyEmail()
     {
-        $email = $this->request->get('email');
-        $otp = $this->request->get('otp');
-
-        $user = $this->userService->verifyEmail($email, $otp);
+        $user = $this->userService->verifyEmail(new VerifyEmailDto(
+            (string) $this->request->get('email'),
+            (string) $this->request->get('otp')
+        ));
 
         $this->jsonResponseService->success([
             'user' => $user,
@@ -274,10 +239,10 @@ class UserController
         ]);
     }
 
-    function me(){
-        $user = $this->apiCredentialService->getAuthUser();
-        $id = $user->id;
-        $user = $this->userRepository->find($id);
+    function me()
+    {
+        $authUser = $this->apiCredentialService->getAuthUser();
+        $user = $this->userRepository->find((int) $authUser->id);
         $this->jsonResponseService->success([
             'user' => $user,
             "message" => "User fetched successfully",

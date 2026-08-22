@@ -22,6 +22,14 @@ class UserEntity extends AbstractBaseEntity
     public string $delivery_address = '';
     public string $email_verified_at = '';
 
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+        if (empty($this->email_verified_at)){
+            $this->email_verified_at = date('Y-m-d H:i:s');
+        }
+    }
+
 
     function isAdmin(){
         return strpos($this->role, 'admin') !== false;

@@ -4,10 +4,7 @@ namespace PlatformConfig\Business;
 
 use PlatformConfig\Data\PlatformConfigMigrationRepositoryInterface;
 use PlatformConfig\Data\PlatformConfigRepositoryInterface;
-
-use Exception;
 use Shared\AbstractBaseService;
-use User\Data\UserRepositoryInterface;
 use PlatformConfig\Data\PlatformConfigEntity;
 
 /**
@@ -19,28 +16,26 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
 
     private PlatformConfigRepositoryInterface $platformConfigRepository;
     private PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository;
-    private UserRepositoryInterface $userRepository;
 
     public function __construct(
         PlatformConfigRepositoryInterface $platformConfigRepository,
-        PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository,
-        UserRepositoryInterface $userRepository
+        PlatformConfigMigrationRepositoryInterface $platformConfigMigrationRepository
     ) {
+        parent::__construct($platformConfigRepository);
         $this->platformConfigRepository = $platformConfigRepository;
         $this->platformConfigMigrationRepository = $platformConfigMigrationRepository;
-        $this->userRepository = $userRepository;
     }
 
     /**
      * Get a platform config setting
      * @param string $setting
-     * @return string
+     * @return mixed
      */
     function get(string $setting, mixed $default = null)
     {
-        $setting = strtoupper($setting);
-
-        $platformConfig = $this->platformConfigRepository->findBy("setting_key", $setting);
+        $platformConfig = $this->platformConfigRepository->query([
+            'setting_key' => strtoupper($setting),
+        ])->fetchOne();
 
         if ($platformConfig->isEmpty()) {
             return $default;
@@ -53,24 +48,27 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
      * Set a platform config setting
      * @param string $setting
      * @param string $value
-     * @return void
+     * @return PlatformConfigEntity
      */
     function set(string $setting, string $value)
     {
-        $platformConfig = $this->platformConfigRepository->findBy("setting_key", $setting);
+        $key = strtoupper($setting);
+        $platformConfig = $this->platformConfigRepository->query([
+            'setting_key' => $key,
+        ])->fetchOne();
 
         if ($platformConfig->isEmpty()) {
-            $platformConfig = $this->platformConfigRepository->save(0, [
-                'setting_key' => strtoupper($setting),
+            return $this->platformConfigRepository->save(new PlatformConfigEntity([
+                'setting_key' => $key,
                 'setting_value' => $value,
-            ]);
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]));
         }
 
-        $platformConfig = $this->platformConfigRepository->save($platformConfig->id, [
-            'setting_value' => $value,
-        ]);
-
-        return $platformConfig;
+        $platformConfig->setting_value = $value;
+        $platformConfig->updated_at = date('Y-m-d H:i:s');
+        return $this->platformConfigRepository->save($platformConfig);
     }
 
     /**
@@ -79,17 +77,15 @@ class PlatformConfigService extends AbstractBaseService implements PlatformConfi
      */
     function getAll()
     {
-        return $this->platformConfigRepository->fetchAll();
+        return $this->platformConfigRepository->query([])->fetchAll();
     }
 
     /**
      * Migrate the platform config settings
-     * @return void
+     * @return mixed
      */
     function migrate()
     {
         return $this->platformConfigMigrationRepository->migrate();
     }
-
-
 }

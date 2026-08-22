@@ -10,10 +10,4 @@ use Shared\Query\QueryObject;
  */
 interface UserRepositoryInterface extends AbstractBaseRepositoryInterface
 {
-    /**
-     * Query the users
-     * @param array $filters
-     * @return QueryObject
-     */
-    public function query(array $filters = []);
 }

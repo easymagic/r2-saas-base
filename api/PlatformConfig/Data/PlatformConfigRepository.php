@@ -6,6 +6,7 @@ use Shared\AbstractBaseRepository;
 use PlatformConfig\Data\PlatformConfigEntity;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Db\QueryBuilderServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * Platform Config Repository
@@ -22,6 +23,22 @@ class PlatformConfigRepository extends AbstractBaseRepository implements Platfor
         DbServiceInterface $dbService
     ) {
         parent::__construct($dbService);
+        $this->addFilter('setting_key', function ($value, string &$sql, array &$params) {
+            $sql .= " AND setting_key = :setting_key";
+            $params['setting_key'] = $value;
+        });
     }
 
+    public function query(array $filters)
+    {
+        $this->sql = "SELECT * FROM platform_configs WHERE 1=1 ";
+        $this->params = [];
+        $this->filter($filters);
+        return new QueryObject(
+            $this->sql,
+            $this->params,
+            $this->db,
+            $this->hydrateClass
+        );
+    }
 }

@@ -6,6 +6,7 @@ use Business\MailTheme\BaseMailThemeInterface;
 use EcomOrder\Data\EcomOrderEntity;
 use EcomOrder\Data\EcomOrderRepositoryInterface;
 use Exception;
+use Notification\Business\Dtos\CreateDto as NotificationCreateDto;
 use Notification\Business\NotificationServiceInterface;
 use OrderItem\Data\OrderItemRepositoryInterface;
 use Product\Data\ProductRepositoryInterface;
@@ -327,7 +328,7 @@ class EcomOrderNotificationService implements EcomOrderNotificationServiceInterf
         if ($user_id <= 0) {
             return;
         }
-        $this->notificationService->create($user_id, $title, $message);
+        $this->notificationService->create(new NotificationCreateDto($user_id, $title, $message));
     }
 
     private function e($value)

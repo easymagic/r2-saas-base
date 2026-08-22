@@ -5,104 +5,55 @@ namespace User\Business;
 use Shared\AbstractBaseServiceInterface;
 use User\Data\UserEntity;
 use Shared\Query\QueryObject;
+use User\Business\Dtos\ChangePasswordDto;
+use User\Business\Dtos\CreateDto;
+use User\Business\Dtos\LoginDto;
+use User\Business\Dtos\RegisterDto;
+use User\Business\Dtos\RequestForgotPasswordDto;
+use User\Business\Dtos\ResetPasswordDto;
+use User\Business\Dtos\TopUpWalletDto;
+use User\Business\Dtos\UpdatePasswordDto;
+use User\Business\Dtos\UpdateProfileDto;
+use User\Business\Dtos\UpdateUserDto;
+use User\Business\Dtos\VerifyEmailDto;
+use User\Business\Dtos\WithdrawWalletDto;
 
 interface UserServiceInterface extends AbstractBaseServiceInterface
 {
     /**
      * Login a user
-     * @param string $email
-     * @param string $password
+     * @param LoginDto $loginDto
      * @return UserEntity
      */
-    public function login(string $email, string $password);
-    
+    public function login(LoginDto $loginDto);
+
     /**
      * Register a new user
-     * @param string $email
-     * @param string $password
-     * @param string $name
-     * @param string $phone
-     * @param string $delivery_address
-     * @param string $social_security_number
-     * @param string $role
-     * @param string $status
-     * @param string $country_code
+     * @param RegisterDto $registerDto
      * @return UserEntity
      */
-    public function register(
-        string $email,
-        string $password,
-        string $name,
-        string $phone,
-        string $delivery_address,
-        string $social_security_number,
-        string $role,
-        string $status,
-        string $country_code,
-    );
+    public function register(RegisterDto $registerDto);
 
     /**
      * Create a new user
-     * @param string $email
-     * @param string $password
-     * @param string $name
-     * @param string $phone
-     * @param string $delivery_address
-     * @param string $social_security_number
-     * @param string $role
-     * @param string $status
-     * @param string $country_code
+     * @param CreateDto $createDto
      * @return UserEntity
      */
-    public function create(
-        string $email,
-        string $password,
-        string $name,
-        string $phone,
-        string $delivery_address,
-        string $social_security_number,
-        string $role,
-        string $status,
-        string $country_code,
-    );
+    public function create(CreateDto $createDto);
 
     /**
      * Update a user's profile
-     * @param int $id
-     * @param string $name
-     * @param string $phone
-     * @param string $delivery_address
+     * @param UpdateProfileDto $updateProfileDto
      * @return UserEntity
      */
-    public function updateProfile(
-        int $id,
-        string $name,
-        string $phone,
-        string $delivery_address
-    );
+    public function updateProfile(UpdateProfileDto $updateProfileDto);
 
     /**
      * Update a user
-     * @param int $id
-     * @param string $name
-     * @param string $phone
-     * @param string $delivery_address
-     * @param string $social_security_number
-     * @param string $role
-     * @param string $status
-     * @param string $country_code
+     * @param UpdateUserDto $updateUserDto
      * @return UserEntity
      */
-    public function updateUser(
-        int $id,
-        string $name,
-        string $phone,
-        string $delivery_address,
-        string $social_security_number,
-        string $role,
-        string $status,
-        string $country_code
-    );
+    public function updateUser(UpdateUserDto $updateUserDto);
 
     /**
      * Delete a user
@@ -113,21 +64,17 @@ interface UserServiceInterface extends AbstractBaseServiceInterface
 
     /**
      * Update a user's password
-     * @param int $id
-     * @param string $password
+     * @param UpdatePasswordDto $updatePasswordDto
      * @return bool
      */
-    public function updatePassword(int $id, string $password);
+    public function updatePassword(UpdatePasswordDto $updatePasswordDto);
 
     /**
      * Change a user's password
-     * @param int $id
-     * @param string $old_password
-     * @param string $new_password
-     * @param string $confirm_password
+     * @param ChangePasswordDto $changePasswordDto
      * @return bool
      */
-    public function changePassword(int $id, string $old_password, string $new_password, string $confirm_password);
+    public function changePassword(ChangePasswordDto $changePasswordDto);
 
     /**
      * Find a user by id
@@ -149,41 +96,50 @@ interface UserServiceInterface extends AbstractBaseServiceInterface
      * @return bool
      */
     public function logout(int $userId);
+
     /**
-     * @param string $email
-     * @email string
+     * @param RequestForgotPasswordDto $requestForgotPasswordDto
      * @return mixed
      */
-    public function requestForgotPassword(string $email);
+    public function requestForgotPassword(RequestForgotPasswordDto $requestForgotPasswordDto);
+
     /**
-     * @param string $email
-     * @param string $otp
-     * @param string $password
-     * @param string $confirm_password
+     * @param ResetPasswordDto $resetPasswordDto
      * @return mixed
      */
-    public function resetPassword(string $email, string $otp, string $password, string $confirm_password);
+    public function resetPassword(ResetPasswordDto $resetPasswordDto);
+
     /**
-     * @param string $email
-     * @param string $otp
+     * @param VerifyEmailDto $verifyEmailDto
      * @return mixed
      */
-    public function verifyEmail(string $email, string $otp);
+    public function verifyEmail(VerifyEmailDto $verifyEmailDto);
+
     public function migrate();
-    public function topUpWallet(int $id, float $amount);
-    public function withdrawWallet(int $id, float $amount);
+
+    /**
+     * @param TopUpWalletDto $topUpWalletDto
+     * @return UserEntity
+     */
+    public function topUpWallet(TopUpWalletDto $topUpWalletDto);
+
+    /**
+     * @param WithdrawWalletDto $withdrawWalletDto
+     * @return UserEntity
+     */
+    public function withdrawWallet(WithdrawWalletDto $withdrawWalletDto);
 
     /**
      * @param int $userId
      * @return UserEntity
      */
     public function refreshToken(int $userId);
+
     /**
      * @param int $userId
      * @return UserEntity
      */
     public function refreshOtp(int $userId);
-
 
     /**
      * @param array $filters
