@@ -14,5 +14,5 @@ interface CategoryRepositoryInterface extends AbstractBaseRepositoryInterface
     /**
      * @return QueryObject<CategoryEntity>
      */
-    public function query(array $filters = []);
+    public function query(array $filters);
 }

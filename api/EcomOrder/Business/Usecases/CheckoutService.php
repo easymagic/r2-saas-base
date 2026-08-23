@@ -60,9 +60,9 @@ class CheckoutService
 
     private function getCartTotal(string $uuid)
     {
-        return $this->getCartTotalService->query($uuid)
+        return round($this->getCartTotalService->query($uuid)
             + $this->ecomOrderSupport->getShippingFee()
-            + $this->ecomOrderSupport->getServiceCharge();
+            + $this->ecomOrderSupport->getServiceCharge(), 2);
     }
 
 
@@ -101,6 +101,7 @@ class CheckoutService
     private function handleCardCheckout(bool $condition, CheckoutDto $checkoutDto)
     {
         if ($condition) {
+            // die("Total: " . $this->getCartTotal($checkoutDto->cart_uuid));
             $this->paymentService->initiate(
                 $checkoutDto->customer_email,
                 $this->getCartTotal($checkoutDto->cart_uuid),
@@ -155,6 +156,7 @@ class CheckoutService
             'customer_email' => $checkoutDto->customer_email,
             'reference' => $checkoutDto->reference,
             'payment_status' => 'pending',
+            'delivery_status' => 'pending',
             'payment_url' => $checkoutDto->payment_url,
             'is_guest' => $checkoutDto->is_guest
         ]));

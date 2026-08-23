@@ -1,5 +1,6 @@
 <?php
 
+use Presentation\Http\Middlewares\EcomOrderFeedbackMiddleware;
 use User\Presentation\UserController;
 use Presentation\Http\Middlewares\GlobalApiAuthAdminMiddleware;
 use Presentation\Http\Middlewares\GlobalApiAuthMiddleware;
@@ -42,7 +43,8 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
                     $route->get("user/{user_id}", [UserController::class, "find"]);
 
                     $route->middleware([
-                        WalletFeedbackMiddleware::class
+                        WalletFeedbackMiddleware::class,
+                        EcomOrderFeedbackMiddleware::class
                     ], function (RouteServiceInterface $route) {
                         $route->get("me", [UserController::class, "me"]);
                     });
