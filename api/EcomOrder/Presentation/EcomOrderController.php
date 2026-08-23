@@ -76,22 +76,14 @@ class EcomOrderController
 
     function checkout()
     {
-        $userId = 0;
-        $xUserToken = (string) $this->request->get('x-user-token', '');
-        if ($xUserToken !== '') {
-            $this->apiCredentialService->validateUserToken($xUserToken);
-            $user = $this->apiCredentialService->getAuthUser();
-            $userId = (int) $user->id;
-        }
 
         $order = $this->checkoutService->execute(new CheckoutDto(
-            $userId,
+            (int) $this->request->get('user_id', 0),
             (string) $this->request->get('type', ''),
             (int) $this->request->get('number_of_installment', 0),
             (string) $this->request->get('customer_name', ''),
             (string) $this->request->get('customer_address', ''),
             (string) $this->request->get('customer_email', ''),
-            (string) $this->request->get('reference', ''),
             (string) $this->request->get('uuid', $this->request->get('cart_uuid', ''))
         ));
 

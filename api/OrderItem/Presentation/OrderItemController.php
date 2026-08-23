@@ -2,26 +2,38 @@
 
 namespace OrderItem\Presentation;
 
+use OrderItem\Business\Dtos\FetchForMerchantDto;
+use OrderItem\Business\Usecases\FetchForMerchantService;
+use OrderItem\Business\Usecases\FetchForOrderService;
+use OrderItem\Business\Usecases\MigrateService;
+use OrderItem\Business\Usecases\SettleService;
 use Presentation\ApiCredential\ApiCredentialServiceInterface;
 use R2Packages\Framework\Infrastructure\Framework\Container\Request;
 use R2Packages\Framework\Infrastructure\Framework\Json\JsonResponseServiceInterface;
-use OrderItem\Business\Dtos\FetchForMerchantDto;
-use OrderItem\Business\OrderItemServiceInterface;
 
 class OrderItemController
 {
-    private OrderItemServiceInterface $orderItemService;
+    private MigrateService $migrateService;
+    private SettleService $settleService;
+    private FetchForOrderService $fetchForOrderService;
+    private FetchForMerchantService $fetchForMerchantService;
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
 
     public function __construct(
-        OrderItemServiceInterface $orderItemService,
+        MigrateService $migrateService,
+        SettleService $settleService,
+        FetchForOrderService $fetchForOrderService,
+        FetchForMerchantService $fetchForMerchantService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
         ApiCredentialServiceInterface $apiCredentialService
     ) {
-        $this->orderItemService = $orderItemService;
+        $this->migrateService = $migrateService;
+        $this->settleService = $settleService;
+        $this->fetchForOrderService = $fetchForOrderService;
+        $this->fetchForMerchantService = $fetchForMerchantService;
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
@@ -29,7 +41,7 @@ class OrderItemController
 
     function migrate()
     {
-        $result = $this->orderItemService->migrate();
+        $result = $this->migrateService->execute();
         $this->jsonResponseService->success([
             'message' => 'Migration completed successfully',
             'result' => $result,
@@ -38,7 +50,7 @@ class OrderItemController
 
     function settle()
     {
-        $result = $this->orderItemService->settle((int) $this->request->get('order_item_id'));
+        $result = $this->settleService->execute((int) $this->request->get('order_item_id'));
         $this->jsonResponseService->success([
             'result' => $result,
             'message' => 'Order item settled successfully',
@@ -47,7 +59,7 @@ class OrderItemController
 
     function fetchForOrder()
     {
-        $query = $this->orderItemService->fetchForOrder((int) $this->request->get('order_id'));
+        $query = $this->fetchForOrderService->query((int) $this->request->get('order_id'));
         $this->jsonResponseService->success([
             'order_items' => $query->fetch(),
             'count' => $query->count(),
@@ -58,7 +70,7 @@ class OrderItemController
     function fetchForMerchant()
     {
         $user = $this->apiCredentialService->getAuthUser();
-        $query = $this->orderItemService->fetchForMerchant(new FetchForMerchantDto(
+        $query = $this->fetchForMerchantService->query(new FetchForMerchantDto(
             (int) $user->id,
             (int) $this->request->get('settled', 0),
             (int) $this->request->get('product_id', 0),

@@ -13,7 +13,7 @@ interface CartRepositoryInterface extends AbstractBaseRepositoryInterface
     /**
      * Query the cart repository
      * @param array $filters
-     * @return QueryObject
+     * @return QueryObject<CartEntity>
      */
     public function query(array $filters = []);
 }
