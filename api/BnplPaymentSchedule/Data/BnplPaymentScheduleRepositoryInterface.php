@@ -12,7 +12,7 @@ interface BnplPaymentScheduleRepositoryInterface extends AbstractBaseRepositoryI
 {
     /**
      * @param array $filters
-     * @return QueryObject
+     * @return QueryObject<BnplPaymentScheduleEntity>
      */
     public function query(array $filters = []);
 }

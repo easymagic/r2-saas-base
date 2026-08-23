@@ -25,6 +25,10 @@ class EcomOrderEntity extends AbstractBaseEntity
     /** Transient Paystack checkout URL; not stored on ecom_orders. */
     public string $payment_url = '';
 
+    public array $items = [];
+
+    public array $schedules = [];
+
     public function __construct(array $data = [])
     {
         parent::__construct($data);

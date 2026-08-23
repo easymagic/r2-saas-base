@@ -12,7 +12,7 @@ interface EcomOrderRepositoryInterface extends AbstractBaseRepositoryInterface
 {
     /**
      * @param array $filters
-     * @return QueryObject
+     * @return QueryObject<EcomOrderEntity>
      */
     public function query(array $filters = []);
 }

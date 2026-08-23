@@ -11,7 +11,7 @@ interface OrderItemRepositoryInterface extends AbstractBaseRepositoryInterface
 {
    /**
     * @param array $params
-    * @return QueryObject
+    * @return QueryObject<OrderItemEntity>
     */ 
    public function query(array $params = []);
 }

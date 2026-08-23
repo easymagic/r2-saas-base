@@ -194,7 +194,10 @@ class CheckoutService
             'payment_status' => 'pending',
             'delivery_status' => 'pending',
             'payment_url' => $checkoutDto->payment_url,
-            'is_guest' => $checkoutDto->is_guest
+            'is_guest' => $checkoutDto->is_guest,
+            "shipping_fee" => $this->ecomOrderSupport->getShippingFee(),
+            "service_charge" => $this->ecomOrderSupport->getServiceCharge(),
+            "total_amount" => $this->getCartTotal($checkoutDto->cart_uuid)
         ]));
         $checkoutDto->order_id = $order->id; // update the order ID in the checkout DTO
         return $order;
