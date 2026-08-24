@@ -1,5 +1,4 @@
 /vendor/
-composer.lock
 .env
 .env.local
 ftp-config.md
@@ -9,3 +8,13 @@ ftp-config.md
 .vscode/
 *.swp
 *.swo
+
+# Runtime uploads (user content)
+api/uploads/*
+!api/uploads/.gitkeep
+
+# Legacy React frontend (removed)
+frontend/
+
+# OS / editor
+Thumbs.db

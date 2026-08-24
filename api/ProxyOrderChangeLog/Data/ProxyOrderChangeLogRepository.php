@@ -5,6 +5,7 @@ namespace ProxyOrderChangeLog\Data;
 use Shared\AbstractBaseRepository;
 use ProxyOrderChangeLog\Data\ProxyOrderChangeLogEntity;
 use R2Packages\Framework\Infrastructure\Framework\Db\DbServiceInterface;
+use Shared\Query\QueryObject;
 
 /**
  * @extends AbstractBaseRepository<ProxyOrderChangeLogEntity>
@@ -19,5 +20,13 @@ class ProxyOrderChangeLogRepository extends AbstractBaseRepository implements Pr
    public function __construct(DbServiceInterface $db)
    {
       parent::__construct($db);
+   }
+
+   public function query(array $params)
+   {
+      $sql = "SELECT * FROM proxy_order_change_log WHERE 1=1 ";
+      $params = [];
+      $this->filter($params);
+      return new QueryObject($sql, $params,$this->db,$this->hydrateClass);
    }
 }
