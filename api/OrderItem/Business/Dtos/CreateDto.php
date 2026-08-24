@@ -41,5 +41,6 @@ class CreateDto
         $this->total_line_amount = $total_line_amount;
         $this->settled = $settled;
         $this->percentage_to_platform = $percentage_to_platform;
+
     }
 }

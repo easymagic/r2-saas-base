@@ -17,6 +17,12 @@ if (!function_exists('web_base_path')) {
             return $base;
         }
         $script = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', $_SERVER['SCRIPT_NAME']) : '';
+        // PHP built-in server often sets SCRIPT_NAME to the request path (e.g. /cart/add),
+        // which must not be treated as the app base or redirects become /cart/shop.
+        if ($script === '' || substr($script, -4) !== '.php') {
+            $base = '';
+            return $base;
+        }
         $dir = dirname($script);
         if ($dir === '/' || $dir === '\\' || $dir === '.' || $dir === '') {
             $base = '';

@@ -95,6 +95,11 @@ class WebSession
 
     public static function redirect($path)
     {
+        $path = (string) $path;
+        // Reject open redirects / relative targets (relative "shop" from /cart/add → /cart/shop).
+        if ($path === '' || (isset($path[0]) && $path[0] !== '/') || strpos($path, '//') !== false) {
+            $path = '/';
+        }
         $base = web_base_path();
         $path = '/' . ltrim($path, '/');
         if ($path === '/') {

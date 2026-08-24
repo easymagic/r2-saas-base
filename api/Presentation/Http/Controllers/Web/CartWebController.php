@@ -139,7 +139,10 @@ class CartWebController
             WebSession::flash('error', $e->getMessage());
         }
         $redirect = trim((string) $this->request->get('redirect', '/cart'));
-        WebSession::redirect($redirect !== '' ? $redirect : '/cart');
+        if ($redirect === '' || $redirect[0] !== '/' || strpos($redirect, '//') !== false) {
+            $redirect = '/cart';
+        }
+        WebSession::redirect($redirect);
     }
 
     public function remove()
