@@ -33,7 +33,7 @@ class CreateService
         $order = $this->ecomOrderRepository->find($createDto->order_id);
         Contracts::requireEntityFound($order, 'Order');
 
-        $merchant = $this->userRepository->find($createDto->merchant_id);   
+        $merchant = $this->userRepository->find($createDto->merchant_id);
         Contracts::requireEntityFound($merchant, 'Merchant');
 
         $product = $this->productRepository->find($createDto->product_id);

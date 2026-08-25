@@ -2,7 +2,6 @@
 
 namespace EcomOrder\Business\Usecases;
 
-use BnplPaymentSchedule\Business\Usecases\MarkFirstSchedulePaymentAsPaidService;
 use BnplPaymentSchedule\Business\Usecases\UpdateAuthorizarionCodeService;
 use EcomOrder\Data\EcomOrderEntity;
 use R2Packages\Framework\Infrastructure\Framework\Payment\PaymentServiceInterface;
@@ -14,17 +13,13 @@ class CronProcessCardPaymentFeedback
     private UpdatePaymentStatusAsPaidService $updatePaymentStatusAsPaidService;
     private UpdatePaymentStatusAsFailedService $updatePaymentStatusAsFailedService;
     private UpdateAuthorizarionCodeService $updateAuthorizationCodeService;
-    private UpdatePaymentStatusAsPartiallyPaidService $updatePaymentStatusAsPartiallyPaidService;
-    private MarkFirstSchedulePaymentAsPaidService $markFirstSchedulePaymentAsPaidService;
 
     public function __construct(
         FetchPendingCardPayments $fetchPendingCardPayments,
         PaymentServiceInterface $paymentService,
         UpdatePaymentStatusAsPaidService $updatePaymentStatusAsPaidService,
         UpdatePaymentStatusAsFailedService $updatePaymentStatusAsFailedService,
-        UpdateAuthorizarionCodeService $updateAuthorizationCodeService,
-        UpdatePaymentStatusAsPartiallyPaidService $updatePaymentStatusAsPartiallyPaidService,
-        MarkFirstSchedulePaymentAsPaidService $markFirstSchedulePaymentAsPaidService
+        UpdateAuthorizarionCodeService $updateAuthorizationCodeService
     ) 
     {
         $this->fetchPendingCardPayments = $fetchPendingCardPayments;
@@ -32,8 +27,6 @@ class CronProcessCardPaymentFeedback
         $this->updatePaymentStatusAsPaidService = $updatePaymentStatusAsPaidService;
         $this->updatePaymentStatusAsFailedService = $updatePaymentStatusAsFailedService;
         $this->updateAuthorizationCodeService = $updateAuthorizationCodeService;
-        $this->updatePaymentStatusAsPartiallyPaidService = $updatePaymentStatusAsPartiallyPaidService;
-        $this->markFirstSchedulePaymentAsPaidService = $markFirstSchedulePaymentAsPaidService;
     }
 
     public function execute()
@@ -41,7 +34,6 @@ class CronProcessCardPaymentFeedback
         $pendingCardPayments = $this->fetchPendingCardPayments->query()->fetchAll();
         foreach ($pendingCardPayments as $pendingCardPayment) {
             $this->paymentService->verify($pendingCardPayment->reference);
-            $type = $pendingCardPayment->type;
             
             // abandoned
             $status = $this->paymentService->getStatus();
@@ -53,22 +45,12 @@ class CronProcessCardPaymentFeedback
             );
 
             $this->markAsPaid(
-                $status === 'success' && $type === 'card',
-                $pendingCardPayment
-            );
-
-            $this->markAsPartiallyPaid(
-                $status === 'success' && $type === 'bnpl',
+                $status === 'success',
                 $pendingCardPayment
             );
 
             $this->updateAuthorizationCode(
                 $status === 'success',
-                $pendingCardPayment
-            );
-
-            $this->markFirstSchedulePaymentAsPaid(
-                $status === 'success' && $type === 'bnpl',
                 $pendingCardPayment
             );
         }
@@ -88,14 +70,6 @@ class CronProcessCardPaymentFeedback
         }
     }
 
-
-    private function markAsPartiallyPaid(bool $condition, EcomOrderEntity $ecomOrderEntity)
-    {
-        if ($condition) {
-            $this->updatePaymentStatusAsPartiallyPaidService->execute($ecomOrderEntity->id);
-        }
-    }
-
     private function updateAuthorizationCode(bool $condition,EcomOrderEntity $ecomOrderEntity)
     {
         if ($condition) {
@@ -103,12 +77,5 @@ class CronProcessCardPaymentFeedback
             $this->updateAuthorizationCodeService->execute($ecomOrderEntity->id, $authorization_code);
         }
 
-    }
-
-    function markFirstSchedulePaymentAsPaid(bool $condition, EcomOrderEntity $ecomOrderEntity)
-    {
-        if ($condition) {
-            $this->markFirstSchedulePaymentAsPaidService->execute($ecomOrderEntity->id);
-        }
     }
 }
