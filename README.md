@@ -36,7 +36,7 @@ php api/scafold.php charge-bnpl
 |------|--------|
 | Auth | `/`, `/login`, `/register`, `/forgot-password`, `/reset-password` |
 | Customer | `/dashboard`, `/profile`, `/orders`, `/wallet`, `/notifications` |
-| Admin | `/admin`, `/admin/users`, `/admin/wallet/topups`, `/admin/batches`, `/admin/platform-config`, `/admin/logs`, … |
+| Admin | `/admin`, `/admin/users`, `/admin/wallet/topups`, `/admin/batches`, `/admin/categories`, `/admin/products`, `/admin/ecom-orders`, `/admin/kyc`, `/admin/platform-config`, `/admin/logs`, `/admin/proxy-order-change-logs`, `/admin/bnpl-schedules` |
 | Migrations | `GET /migrations` (unauthenticated — runs all module migrations) |
 
 Auth uses PHP sessions (`WebSession`) and calls domain usecases in-process.

@@ -3,6 +3,7 @@
 use Presentation\Http\Controllers\Web\AdminWebController;
 use Presentation\Http\Controllers\Web\AuthWebController;
 use Presentation\Http\Controllers\Web\BatchWebController;
+use Presentation\Http\Controllers\Web\BnplPaymentScheduleWebController;
 use Presentation\Http\Controllers\Web\CartWebController;
 use Presentation\Http\Controllers\Web\CategoryWebController;
 use Presentation\Http\Controllers\Web\DashboardWebController;
@@ -13,6 +14,7 @@ use Presentation\Http\Controllers\Web\NotificationWebController;
 use Presentation\Http\Controllers\Web\OrdersWebController;
 use Presentation\Http\Controllers\Web\PlatformConfigWebController;
 use Presentation\Http\Controllers\Web\ProductWebController;
+use Presentation\Http\Controllers\Web\ProxyOrderChangeLogWebController;
 use Presentation\Http\Controllers\Web\UserKycWebController;
 use Presentation\Http\Controllers\Web\UserWebController;
 use Presentation\Http\Controllers\Web\WalletWebController;
@@ -112,6 +114,11 @@ $appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
             $route->post('admin/batches/{batch_id}/delete', [BatchWebController::class, 'delete']);
 
             $route->get('admin/logs', [LogWebController::class, 'index']);
+            $route->get('admin/logs/{log_id}', [LogWebController::class, 'show']);
+
+            $route->get('admin/proxy-order-change-logs', [ProxyOrderChangeLogWebController::class, 'index']);
+            $route->get('admin/bnpl-schedules', [BnplPaymentScheduleWebController::class, 'index']);
+
             $route->get('admin/platform-config', [PlatformConfigWebController::class, 'index']);
             $route->post('admin/platform-config', [PlatformConfigWebController::class, 'update']);
             $route->post('admin/platform-config/{platform_config_id}/delete', [PlatformConfigWebController::class, 'delete']);

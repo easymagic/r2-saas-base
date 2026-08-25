@@ -21,6 +21,8 @@
     <a class="<?= e(nav_active($nav, 'admin-kyc')) ?>" href="<?= e(web_url('/admin/kyc')) ?>">Merchant KYC</a>
     <a class="<?= e(nav_active($nav, 'admin-platform')) ?>" href="<?= e(web_url('/admin/platform-config')) ?>">Platform config</a>
     <a class="<?= e(nav_active($nav, 'admin-logs')) ?>" href="<?= e(web_url('/admin/logs')) ?>">Logs</a>
+    <a class="<?= e(nav_active($nav, 'admin-proxy-logs')) ?>" href="<?= e(web_url('/admin/proxy-order-change-logs')) ?>">Order change logs</a>
+    <a class="<?= e(nav_active($nav, 'admin-bnpl')) ?>" href="<?= e(web_url('/admin/bnpl-schedules')) ?>">BNPL schedules</a>
   </nav>
   <div class="border-t border-gray-100 p-4 space-y-1">
     <a class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 hover:bg-gray-50" href="<?= e(web_url('/dashboard')) ?>">Customer view</a>
