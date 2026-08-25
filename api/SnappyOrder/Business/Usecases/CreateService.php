@@ -37,7 +37,8 @@ class CreateService
 
     public function execute(CreateDto $createDto)
     {
-        Contracts::requires($this->userRepository->idExists($createDto->user_id), 'user not found');
+        $user = $this->userRepository->find($createDto->user_id);
+        Contracts::requireEntityFound($user, 'user');
 
         $path = '/uploads/snappy_orders';
         $full_path = __DIR__ . '/../../../';
@@ -47,7 +48,7 @@ class CreateService
         $screen_shot3_path = $this->fileUploadService->uploadFile($createDto->screen_shot3, $path, $full_path);
 
         $order = $this->snappyOrderRepository->save(new SnappyOrderEntity([
-            'user_id' => $createDto->user_id,
+            'user_id' => $user->id,
             'type' => 'manual',
             'reference' => uniqid('MANUAL_'),
             'link' => $createDto->link,

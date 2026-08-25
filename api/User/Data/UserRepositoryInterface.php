@@ -10,10 +10,4 @@ use Shared\Query\QueryObject;
  */
 interface UserRepositoryInterface extends AbstractBaseRepositoryInterface
 {
-    /**
-     * Check if a user exists
-     * @param int $id
-     * @return bool
-     */
-    function idExists(int $id);
 }

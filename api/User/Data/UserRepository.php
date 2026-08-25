@@ -39,11 +39,4 @@ class UserRepository extends AbstractBaseRepository implements UserRepositoryInt
       return new QueryObject($this->sql, $this->params, $this->db, $this->hydrateClass);
    }
 
-   public function idExists(int $id)
-   {
-      $this->sql = "SELECT COUNT(*) FROM users WHERE id = :id";
-      $this->params['id'] = $id;
-      return $this->db->count($this->sql, $this->params) > 0;
-   }
-
 }
