@@ -25,6 +25,7 @@ class CheckoutDto
         string $customer_name,
         string $customer_address,
         string $customer_email,
+        string $reference,
         string $cart_uuid
     ) {
         // Guest checkout allowed when user_id is 0
@@ -35,7 +36,6 @@ class CheckoutDto
         Contracts::requiresNotNullOrEmpty($customer_email, 'Customer Email');
         // Contracts::requiresNotNullOrEmpty($reference, 'Reference');
         if (empty($user_id)){
-            // die("User ID is empty");
             $this->is_guest = 1;
         }
         $this->reference = uniqid("ref_");
