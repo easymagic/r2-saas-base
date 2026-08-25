@@ -73,16 +73,6 @@ class Contracts{
    }
 
 
-   public static function when(bool $condition, callable $callback)
-   {
-    if ($condition){
-        $callback();
-    }
-   }
-
-   
-
-
 
 
 }
