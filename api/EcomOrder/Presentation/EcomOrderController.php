@@ -5,7 +5,6 @@ namespace EcomOrder\Presentation;
 use EcomOrder\Business\Dtos\AssignToAgentDto;
 use EcomOrder\Business\Dtos\CheckoutDto;
 use EcomOrder\Business\Dtos\UpdateDeliveryStatusDto;
-use EcomOrder\Business\Usecases\AnnotateOrdersWithItemsService;
 use EcomOrder\Business\Usecases\AssignToAgentService;
 use EcomOrder\Business\Usecases\CheckoutService;
 use EcomOrder\Business\Usecases\FetchForAdminService;
@@ -35,7 +34,6 @@ class EcomOrderController
     private JsonResponseServiceInterface $jsonResponseService;
     private Request $request;
     private ApiCredentialServiceInterface $apiCredentialService;
-    private AnnotateOrdersWithItemsService $annotateOrdersWithItemsService;
 
     public function __construct(
         MigrateService $migrateService,
@@ -50,8 +48,7 @@ class EcomOrderController
         PublishSettingsService $publishSettingsService,
         Request $request,
         JsonResponseServiceInterface $jsonResponseService,
-        ApiCredentialServiceInterface $apiCredentialService,
-        AnnotateOrdersWithItemsService $annotateOrdersWithItemsService
+        ApiCredentialServiceInterface $apiCredentialService
     ) {
         $this->migrateService = $migrateService;
         $this->checkoutService = $checkoutService;
@@ -66,7 +63,6 @@ class EcomOrderController
         $this->request = $request;
         $this->jsonResponseService = $jsonResponseService;
         $this->apiCredentialService = $apiCredentialService;
-        $this->annotateOrdersWithItemsService = $annotateOrdersWithItemsService;
     }
 
     function migrate()
@@ -106,7 +102,7 @@ class EcomOrderController
         $user = $this->apiCredentialService->getAuthUser();
         $query = $this->fetchForUserService->query((int) $user->id, $this->request->all());
         $this->jsonResponseService->success([
-            'orders' => $this->annotateOrdersWithItemsService->execute($query->fetch()),
+            'orders' => $query->fetch(),
             'count' => $query->count(),
             'message' => 'Orders fetched successfully',
         ]);
@@ -116,7 +112,7 @@ class EcomOrderController
     {
         $query = $this->fetchForAdminService->query($this->request->all());
         $this->jsonResponseService->success([
-            'orders' => $this->annotateOrdersWithItemsService->execute($query->fetch()),
+            'orders' => $query->fetch(),
             'count' => $query->count(),
             'message' => 'Orders fetched successfully',
         ]);

@@ -52,7 +52,7 @@ class EcomOrderRepository extends AbstractBaseRepository implements EcomOrderRep
       //    $sql .= " AND payment_status IN ('pending','part-paid') ";
       // });
       $this->addFilter("card_payments", function ($value, string &$sql, array &$params) {
-         $sql .= " AND type IN ('card','bnpl') ";
+         $sql .= " AND type IN ('card') ";
       });
       $this->addFilter("search", function (string $value, string &$sql, array &$params) {
          $sql .= " AND (reference LIKE :search OR customer_name LIKE :search OR customer_email LIKE :search) ";

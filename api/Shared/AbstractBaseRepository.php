@@ -110,7 +110,7 @@ abstract class AbstractBaseRepository implements AbstractBaseRepositoryInterface
 
         $vars = get_object_vars($data);
         foreach($vars as $key => $value){
-            if($value !== null && !is_array($value) && !is_object($value)){
+            if($value !== null){
                 $payload[$key] = $value;
             }
         }
