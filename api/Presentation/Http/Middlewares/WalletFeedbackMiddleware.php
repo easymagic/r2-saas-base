@@ -45,15 +45,20 @@ class WalletFeedbackMiddleware implements MiddlewareServiceInterface
         $user = $this->apiCredentialService->getAuthUser();
         $user_id = $user->id;
         $wallets = $this->onlinePendingForUserService->query($user_id);
+        // print_r($wallets);
         /** @var WalletEntity $wallet */
         foreach ($wallets as $wallet) {
             $this->paymentService->verify($wallet->reference);
             $status = $this->paymentService->getStatus();
             $error = $this->paymentService->getError();
 
+            // echo $status;
+
+            // if (empty($status)){
             $this->logService->createLog(new CreateLogDto('wallet_feedback', json_encode($wallet), json_encode([
                 "status" => $status,
             ]), 'info'));
+            // }
 
             if ($status == 'success') {
                 $status = [

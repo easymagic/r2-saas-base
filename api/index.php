@@ -3,6 +3,7 @@
 define("MAIL_TEMPLATE_DIR", __DIR__ . '/mail_templates');
 
 use R2Packages\Framework\Infrastructure\Framework\Framework;
+use R2Packages\Framework\Infrastructure\Framework\Router\RouteServiceInterface;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -16,9 +17,20 @@ $appServiceContainer = $framework->boot();
 
 $framework->getEnvService()->loadEnv(__DIR__ . '/.env');
 
-// Web UI + CLI commands only (JSON API routes removed).
-include_once __DIR__ . '/Presentation/Http/Routes/web-routes.php';
-include_once __DIR__ . '/Presentation/Http/Routes/commands.php';
+$appServiceContainer->loadRoutes(function (RouteServiceInterface $route) {
+    $route->get('/', function () {
+        echo  'Hello World...';
+    });
+});
+
+// scan routes directory
+$routes = glob(__DIR__ . '/Presentation/Http/Routes/*.php');
+
+foreach ($routes as $route) {
+    include_once $route;
+}
+
+// include_once __DIR__ . '/Presentation/Http/Routes/web.php';
 
 /**
  * Boots

@@ -1,19 +1,25 @@
 {
     "name": "easymagic/r2-saas-base",
-    "description": "R2 SaaS base with classic PHP web UI",
+    "description": "R2 SaaS base with API and frontend",
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": ">=7.4",
+        "php": ">=5.6.0",
         "r2-packages/framework": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Api\\": "api/src/",
+            "Frontend\\": "frontend/src/"
+        }
     },
     "config": {
         "sort-packages": true,
         "optimize-autoloader": true
     },
     "scripts": {
-        "serve": "php -S localhost:8080 -t api api/router.php",
-        "serve-api": "php -S localhost:8080 -t api api/router.php"
+        "serve-api": "php -S localhost:8080 -t api/public",
+        "serve-frontend": "php -S localhost:8000 -t frontend/public"
     },
     "minimum-stability": "stable"
 }
