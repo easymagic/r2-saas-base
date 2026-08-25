@@ -45,9 +45,6 @@ class View
 
     private static function capture($view, array $data)
     {
-        global $ui_component_path;
-        $uiComponentData = require $ui_component_path . 'components.php';
-        extract($uiComponentData, EXTR_SKIP);
         $file = self::basePath() . '/' . str_replace('.', '/', $view) . '.php';
         if (!is_file($file)) {
             throw new \RuntimeException('View not found: ' . $view);
