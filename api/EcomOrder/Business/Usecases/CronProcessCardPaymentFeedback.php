@@ -63,7 +63,7 @@ class CronProcessCardPaymentFeedback
             );
 
             $this->updateAuthorizationCode(
-                $status === 'success' && $type === 'bnpl',
+                $status === 'success',
                 $pendingCardPayment
             );
 
